@@ -10,228 +10,245 @@ import { ToastController } from '@ionic/angular';
 export class ConvertidorDictamenPage {
   nombreArchivoOriginal: string = 'dictamen';
   jsonPreview: any = null;
+  jsonEditable: string = '';
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(private toastCtrl: ToastController) { }
 
   async mostrarToast(mensaje: string, color: 'success' | 'danger' = 'success') {
-    const toast = await this.toastCtrl.create({
-      message: mensaje,
-      duration: 2500,
-      color,
-      position: 'bottom',
-    });
+    const toast = await this.toastCtrl.create({ message: mensaje, duration: 2500, color, position: 'bottom' });
     toast.present();
   }
 
-  abrirSelector() {
-    this.fileInput.nativeElement.click();
-  }
+  abrirSelector() { this.fileInput.nativeElement.click(); }
 
   onFileChange(event: any): void {
     const file = event.target.files[0];
     if (!file) return;
 
     this.nombreArchivoOriginal = file.name.replace(/\.[^/.]+$/, '');
-    const fileExtension = file.name.split('.').pop();
-    if (!['xls', 'xlsx'].includes(fileExtension)) {
-      this.mostrarToast('El archivo debe ser .xls o .xlsx', 'danger');
-      return;
-    }
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!['xls', 'xlsx'].includes(fileExtension || '')) return void this.mostrarToast('El archivo debe ser .xls o .xlsx', 'danger');
 
     const reader = new FileReader();
     reader.onload = (e: any) => {
       try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        this.jsonPreview = this.convertirAJSON(rows);
+        const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        this.jsonPreview = this.convertirAJSON(workbook);
+        this.jsonEditable = JSON.stringify(this.jsonPreview, null, 2);
         this.mostrarToast('Archivo cargado correctamente');
       } catch (err) {
         console.error(err);
         this.mostrarToast('Error al leer el archivo', 'danger');
       }
     };
-
     reader.readAsArrayBuffer(file);
   }
 
-  convertirAJSON(rows: any[][]): any {
-    const json: any = {};
-
-    const buscarTexto = (clave: string) => {
-      const fila = rows.find(r => r.some(c => typeof c === 'string' && c.includes(clave)));
-      if (!fila) return null;
-      const idx = fila.findIndex(c => typeof c === 'string' && c.includes(clave));
-      return fila[idx + 1] ?? fila[idx + 2] ?? null;
-    };
-
-    const buscarFecha = (clave: string) => {
-      const valor = buscarTexto(clave);
-      return typeof valor === 'number' ? XLSX.SSF.format('yyyy-mm-dd', valor) : null;
-    };
-
-    const buscarFilaQueInicia = (texto: string) =>
-      rows.findIndex(r => r[0] && typeof r[0] === 'string' && r[0].includes(texto));
-
-    json.id_informe = buscarTexto('ID DEL INFORME');
-    json.fecha_emision = buscarFecha('FECHA DE EMISIÓN');
-
-    json.datos_cliente = {
-      nombre_razon_social: buscarTexto('NOMBRE, DENOMINACIÓN'),
-      rfc: buscarTexto('RFC:'),
-      numero_permiso: buscarTexto('PERMISO'),
-      direccion: buscarTexto('DIRECCIÓN'),
-      contacto: buscarTexto('CONTACTO:'),
-      telefono: buscarTexto('TELÉFONO:')
-    };
-
-    json.laboratorio_acreditado = {
-      nombre_razon_social: (() => {
-        const fila = rows.find(r => r.some(c => typeof c === 'string' && c.includes('KALIBRIM')));
-        return fila ? fila.find(c => typeof c === 'string' && c.includes('KALIBRIM')) : null;
-      })(),
-      rfc: (() => {
-        const rfcRegex = /[A-ZÑ&]{3,4}\d{6}[A-Z\d]{3}/;
-        for (let r of rows) {
-          for (let c of r) {
-            if (typeof c === 'string' && rfcRegex.test(c)) {
-              const match = c.match(rfcRegex);
-              if (match && match[0].startsWith('MEK')) return match[0];
-            }
-          }
-        }
-        return null;
-      })()
-    };
+  private cleanText(value: any): string | null {
+    if (value === null || value === undefined) return null;
+    const txt = String(value).replace(/\s+/g, ' ').trim();
+    return txt.length ? txt : null;
+  }
 
 
-    json.datos_item = {
-      tipo_producto: buscarTexto('CLAVE DE PRODUCTO'),
-      metodo_muestreo: buscarTexto('MÉTODO DE MUESTREO'),
-      titulo_permiso: buscarTexto('TÍTULO DEL PERMISO'),
-      fecha_muestreo: buscarFecha('FECHA DE MUESTREO'),
-      fecha_recepcion: buscarFecha('FECHA DE RECEPCIÓN'),
-      identificacion_almacenamiento: buscarTexto('IDENTIFICACIÓN DEL ALMACENAMIENTO'),
-      plan_muestreo: buscarTexto('PLAN DE MUESTREO'),
-      fecha_resultado: buscarFecha('FECHA DE OBTENCIÓN DE RESULTADO'),
-      volumen_muestra: (() => {
-        const fila = rows.find(r => r.some(c => typeof c === 'string' && c.includes('VOLUMEN DE LA MUESTRA')));
-        if (!fila) return null;
-        const idx = fila.findIndex(c => typeof c === 'string' && c.includes('VOLUMEN DE LA MUESTRA'));
-        for (let i = idx + 1; i < fila.length; i++) {
-          if (fila[i] && typeof fila[i] === 'string' && fila[i].trim()) return fila[i].trim();
-        }
-        return null;
-      })(),
+  private toNumberOrNull(value: any): number | null {
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'number') return Number.isNaN(value) ? null : value;
+    const cleaned = String(value).replace(/,/g, '').trim();
+    if (!cleaned) return null;
+    const n = Number(cleaned);
+    return Number.isNaN(n) ? null : n;
+  }
 
-      periodicidad: (() => {
-        const fila = rows.find(r => r.some(c => typeof c === 'string' && c.includes('PERIODICIDAD')));
-        if (!fila) return null;
-        const idx = fila.findIndex(c => typeof c === 'string' && c.includes('PERIODICIDAD'));
-        for (let i = idx + 1; i < fila.length; i++) {
-          if (fila[i] && typeof fila[i] === 'string' && fila[i].trim()) return fila[i].trim();
-        }
-        return null;
-      })(),
+  private excelDateToISO(value: any): string | null {
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'number') return XLSX.SSF.format('yyyy-mm-dd', value);
+    if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+    const asString = this.cleanText(value);
+    if (!asString) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(asString)) return asString;
+    const parsed = new Date(asString);
+    return Number.isNaN(parsed.getTime()) ? asString : parsed.toISOString().slice(0, 10);
+  }
 
-      domicilio_muestreo: buscarTexto('DONDE SE TOMO LA MUESTRA'),
-      domicilio_analisis: buscarTexto('SE ANALIZA LA MUESTRA')
-    };
+  private getMergedValue(sheet: XLSX.WorkSheet, range: string): any {
+    const firstCell = range.split(':')[0];
+    return sheet?.[firstCell]?.v ?? null;
+  }
 
-    // DATOS DE ENSAYO
-    const datosEnsayo: any[] = [];
-    const idxEnsayo = buscarFilaQueInicia('ENSAYO');
-    let ultimaFechaAnalisis: any = null;
-
-    if (idxEnsayo >= 0) {
-      for (let i = idxEnsayo + 1; i < rows.length; i++) {
-        const r = rows[i];
-        if (!r || (!r[0] && !r[4])) break;
-
-        const componente = r[4];
-        if (!componente || ['RESULTADO', 'RESULTADO '].includes(componente.toString().trim().toUpperCase())) continue;
-
-        const ensayo = r[0] || 'CROMATOGRAFÍA';
-        const metodo = r[1] || datosEnsayo[datosEnsayo.length - 1]?.metodo_analisis || null;
-        const cilindro = r[2] || datosEnsayo[datosEnsayo.length - 1]?.cilindro_muestreo || null;
-
-        const rawFecha = r[7];
-        if (typeof rawFecha === 'number') {
-          ultimaFechaAnalisis = XLSX.SSF.format('yyyy-mm-dd', rawFecha);
-        }
-
-        datosEnsayo.push({
-          ensayo,
-          metodo_analisis: metodo,
-          cilindro_muestreo: cilindro,
-          unidad: r[3],
-          componente: componente.trim(),
-          resultado: r[5] ? Math.round(parseFloat(r[5]) * 100) / 100 : null,
-          incertidumbre: r[6] ? Math.round(parseFloat(r[6]) * 100) / 100 : null,
-          fecha_analisis: ultimaFechaAnalisis
-        });
+  private concatRange(sheet: XLSX.WorkSheet, range: string): string | null {
+    const decoded = XLSX.utils.decode_range(range);
+    const parts: string[] = [];
+    for (let r = decoded.s.r; r <= decoded.e.r; r++) {
+      for (let c = decoded.s.c; c <= decoded.e.c; c++) {
+        const addr = XLSX.utils.encode_cell({ r, c });
+        const v = sheet?.[addr]?.v;
+        if (v === null || v === undefined || v === '') continue;
+        if (typeof v === 'number') parts.push(Math.trunc(v).toString());
+        else parts.push(String(v).trim());
       }
     }
-    json.datos_ensayo = datosEnsayo;
-
-
-
-    json.representante_legal = {
-      nombre: buscarTexto('REPRESENTANTE LEGAL') ?? json.datos_cliente?.nombre_razon_social,
-      rfc: buscarTexto('RFC:')
-    };
-
-    json.datos_personal_acreditado = {
-      rfc_analiza: buscarTexto('RFC PERSONAL QUE ANALIZA'),
-      rfc_muestrea: buscarTexto('RFC PERSONAL QUE MUESTREA'),
-      rfc_autoriza: buscarTexto('RFC PERSONAL QUE AUTORIZA')
-    };
-
-    json.condiciones_ambientales = {
-      temperatura_c: parseFloat(buscarTexto('Temperatura')),
-      humedad_hr: parseFloat(buscarTexto('Humedad')),
-      presion_kpa: parseFloat(buscarTexto('Presión')) || 0
-    };
-
-    const idxObservaciones = buscarFilaQueInicia('*El laboratorio');
-    json.observaciones = rows.slice(idxObservaciones)
-      .filter(r => r[0] && typeof r[0] === 'string')
-      .map(r => r.join(' ').trim());
-
-    const idxFirmas = buscarFilaQueInicia('ANALIZADO POR');
-    const nombres = rows[idxFirmas + 1] || [];
-    json.firmas = {
-      analizado_por: { nombre: nombres[0] },
-      muestreado_por: { nombre: nombres[2] },
-      autorizado_por: { nombre: nombres[6] }
-    };
-
-    json.version = 'Ver.01 Rev. 00';
-    json.fin_informe = true;
-    json.codigo_procedimiento = 'FR-T55';
-
-    return json;
+    const out = parts.join('').replace(/\s+/g, ' ').trim();
+    return out || null;
   }
 
-
-
-
-
-  copiarJSON() {
-    if (!this.jsonPreview) return;
-    navigator.clipboard.writeText(JSON.stringify(this.jsonPreview, null, 2));
-    this.mostrarToast('Copiado correctamente');
+  private buildDireccion(parts: Array<string | null>): string | null {
+    const filtered = parts.map((p) => this.cleanText(p)).filter((p) => p && p !== '-') as string[];
+    return filtered.length ? filtered.join(', ') : null;
   }
 
-  descargarJSON() {
-    if (!this.jsonPreview) return;
-    const blob = new Blob([JSON.stringify(this.jsonPreview, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${this.nombreArchivoOriginal}.json`;
-    link.click();
+  private isV2(workbook: XLSX.WorkBook): boolean {
+    const h1 = workbook.Sheets['Hoja1'];
+    const h2 = workbook.Sheets['Hoja2'];
+    const title = this.cleanText(h2?.['B3']?.v) || '';
+    return !!h1 && !!h2 && title.includes('DICTAMEN QUE DETERMINA');
   }
+
+  convertirAJSON(workbook: XLSX.WorkBook): any {
+    return this.isV2(workbook) ? this.extractDictamenV2FromWorkbook(workbook) : this.extractDictamenV1FromWorkbook(workbook);
+  }
+
+  private extractDictamenV2FromWorkbook(workbook: XLSX.WorkBook): any {
+    const h1 = workbook.Sheets['Hoja1'];
+    const h2 = workbook.Sheets['Hoja2'];
+    const gm = (s: XLSX.WorkSheet, r: string) => this.cleanText(this.getMergedValue(s, r));
+    const gv = (s: XLSX.WorkSheet, r: string) => this.getMergedValue(s, r);
+
+    const direccion_muestreo = {
+      calle: gm(h2, 'B19:K19'), numero_exterior: gm(h2, 'L19:U19'), numero_interior: gm(h2, 'B21:E21'), colonia: gm(h2, 'F21:M21'),
+      codigo_postal: gm(h2, 'N21:U21'), localidad: gm(h2, 'B23:E23'), municipio_alcaldia: gm(h2, 'F23:M23'), entidad_federativa: gm(h2, 'N23:U23')
+    };
+
+    const columnMap = {
+      A: { key: 'componente', titulo_excel: gm(h1, 'A4:A4') },
+      B: { key: 'factor_mezcla_presion_vapor_kpa', titulo_excel: gm(h1, 'B4:B4') },
+      C: { key: 'densidad_relativa_componente', titulo_excel: gm(h1, 'C4:C4') },
+      D: { key: 'mon_componente', titulo_excel: gm(h1, 'D4:D4') },
+      E: { key: 'porcentaje_volumen_liquido', titulo_excel: gm(h1, 'E4:E4') },
+      F: { key: 'presion_parcial_vapor_kpa', titulo_excel: gm(h1, 'F4:F4') },
+      G: { key: 'densidad_relativa_parcial', titulo_excel: gm(h1, 'G4:G4') },
+      H: { key: 'mon_parcial', titulo_excel: gm(h1, 'H4:H4') }
+    } as const;
+
+    const filas = Array.from({ length: 16 }, (_, i) => i + 5).map((row) => ({
+      componente: this.cleanText(h1?.[`A${row}`]?.v),
+      factor_mezcla_presion_vapor_kpa: this.toNumberOrNull(h1?.[`B${row}`]?.v),
+      densidad_relativa_componente: this.toNumberOrNull(h1?.[`C${row}`]?.v),
+      mon_componente: this.toNumberOrNull(h1?.[`D${row}`]?.v),
+      porcentaje_volumen_liquido: this.toNumberOrNull(h1?.[`E${row}`]?.v),
+      presion_parcial_vapor_kpa: this.toNumberOrNull(h1?.[`F${row}`]?.v),
+      densidad_relativa_parcial: this.toNumberOrNull(h1?.[`G${row}`]?.v),
+      mon_parcial: this.toNumberOrNull(h1?.[`H${row}`]?.v)
+    }));
+
+    const propano = this.toNumberOrNull(gv(h2, 'U46:U47'));
+    const butano = this.toNumberOrNull(gv(h2, 'U48:U49'));
+
+    return {
+      version: 'dictamen_v2',
+      codigo_procedimiento: 'FR-T55',
+      id_informe: gm(h2, 'G2:U2'),
+      titulo_documento: gm(h2, 'B3:U3'),
+      fecha_emision: this.excelDateToISO(gv(h2, 'Q5:U5')),
+      datos_cliente: {
+        nombre_razon_social: gm(h2, 'B12:U12'),
+        rfc: this.concatRange(h2, 'H9:S9'),
+        numero_permiso: gm(h2, 'B14:U14'),
+        actividad_o_planta: gm(h2, 'B16:U16'),
+        direccion: this.buildDireccion([direccion_muestreo.calle, direccion_muestreo.numero_exterior, direccion_muestreo.numero_interior, direccion_muestreo.colonia, direccion_muestreo.codigo_postal, direccion_muestreo.localidad, direccion_muestreo.municipio_alcaldia, direccion_muestreo.entidad_federativa]),
+        direccion_muestreo,
+        medio_transporte_o_almacenamiento: gm(h2, 'B25:U25'),
+        campo_y_yacimiento: gm(h2, 'B27:U27')
+      },
+      laboratorio_acreditado: {
+        nombre_razon_social: gm(h2, 'B34:U34'),
+        rfc: this.concatRange(h2, 'H31:S31'),
+        direccion: gm(h1, 'A35:H35'),
+        email: gm(h1, 'A36:H36')?.replace(/^e-?mail:\s*/i, '') || null
+      },
+      informacion_prueba: {
+        fecha_toma_muestra: this.excelDateToISO(gv(h2, 'B38:G38')),
+        fecha_realizacion_pruebas: this.excelDateToISO(gv(h2, 'H38:U38')),
+        fecha_resultados: this.excelDateToISO(gv(h2, 'B40:G40')),
+        numero_lote: gm(h2, 'H40:U40'),
+        volumen_muestra_analizada: gm(h2, 'B42:G42')
+      },
+      metodos_y_resultados: {
+        metodo_muestreo: { descripcion: gm(h2, 'B45:E45'), norma: gm(h2, 'F45:I45') },
+        metodo_cromatografia: { descripcion: gm(h2, 'B46:E49'), norma: gm(h2, 'F46:I49') },
+        resultados: [
+          { componente: 'Propano en la mezcla', valor: propano, valor_redondeado_visible: propano === null ? null : Number(propano.toFixed(1)), unidad: '%vol' },
+          { componente: 'Butano en la mezcla', valor: butano, valor_redondeado_visible: butano === null ? null : Number(butano.toFixed(1)), unidad: '%vol' }
+        ]
+      },
+      personal_proveedor_emite_dictamen: {
+        nombre: gm(h2, 'B56:G56'), rfc: this.concatRange(h2, 'H56:T56'), declaracion: gm(h2, 'B57:U57'), firma_texto: gm(h2, 'E62:N62')
+      },
+      representante_legal: {
+        nombre: gm(h2, 'B67:G67'), rfc: this.concatRange(h2, 'H67:T67'), declaracion: gm(h2, 'B68:U68'), firma_texto: gm(h2, 'E73:N73')
+      },
+      firmas: {
+        personal_proveedor_emite_dictamen: { nombre: gm(h2, 'B56:G56'), rfc: this.concatRange(h2, 'H56:T56') },
+        representante_legal: { nombre: gm(h2, 'B67:G67'), rfc: this.concatRange(h2, 'H67:T67') }
+      },
+      analisis_tecnico_gas_lp: {
+        titulo: gm(h1, 'A1:H1'),
+        tipo_producto: 'Gas Licuado de Petróleo (Gas LP)',
+        metodo: gm(h1, 'A3:H3'),
+        tabla_componentes: {
+          columnas: columnMap,
+          filas,
+          totales: {
+            etiqueta: gm(h1, 'D21:D21'),
+            porcentaje_volumen_liquido: this.toNumberOrNull(h1?.['E21']?.v),
+            presion_parcial_vapor_kpa: this.toNumberOrNull(h1?.['F21']?.v),
+            densidad_relativa_parcial: this.toNumberOrNull(h1?.['G21']?.v),
+            mon_parcial: this.toNumberOrNull(h1?.['H21']?.v)
+          }
+        },
+        resultados_resumen: {
+          densidad: { etiqueta: gm(h1, 'D23:D23'), valor: this.toNumberOrNull(h1?.['E23']?.v), unidad: gm(h1, 'F23:F23') },
+          presion_vapor: { etiqueta: gm(h1, 'D24:D24'), valor: this.toNumberOrNull(h1?.['E24']?.v), unidad: gm(h1, 'F24:F24') },
+          mon: { etiqueta: gm(h1, 'D25:D25'), valor: this.toNumberOrNull(h1?.['E25']?.v), unidad: gm(h1, 'F25:F25') },
+          propano: { etiqueta: gm(h1, 'D26:D26'), valor: this.toNumberOrNull(h1?.['E26']?.v), unidad: gm(h1, 'F26:F26') },
+          butano: { etiqueta: gm(h1, 'D27:D27'), valor: this.toNumberOrNull(h1?.['E27']?.v), unidad: gm(h1, 'F27:F27') },
+          otros_componentes: { etiqueta: gm(h1, 'D28:D28'), valor: this.toNumberOrNull(h1?.['E28']?.v), unidad: gm(h1, 'F28:F28') },
+          propano_butano: { etiqueta: gm(h1, 'D29:D29'), valor: this.toNumberOrNull(h1?.['E29']?.v), unidad: gm(h1, 'F29:F29') },
+          propano_normalizado: { etiqueta: gm(h1, 'D30:D30'), valor: this.toNumberOrNull(h1?.['E30']?.v), unidad: gm(h1, 'F30:F30') },
+          butano_normalizado: { etiqueta: gm(h1, 'D31:D31'), valor: this.toNumberOrNull(h1?.['E31']?.v), unidad: gm(h1, 'F31:F31') }
+        }
+      },
+      fin_informe: (gm(h2, 'B76:U76') || '').toLowerCase().includes('fin del documento')
+    };
+  }
+
+  private extractDictamenV1FromWorkbook(workbook: XLSX.WorkBook): any {
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const buscarTexto = (clave: string) => {
+      const fila = rows.find(r => r.some(c => typeof c === 'string' && c.includes(clave)));
+      if (!fila) return null; const idx = fila.findIndex(c => typeof c === 'string' && c.includes(clave)); return fila[idx + 1] ?? fila[idx + 2] ?? null;
+    };
+    return {
+      id_informe: buscarTexto('ID DEL INFORME'), fecha_emision: null,
+      datos_cliente: { nombre_razon_social: buscarTexto('NOMBRE, DENOMINACIÓN'), rfc: buscarTexto('RFC:'), numero_permiso: buscarTexto('PERMISO'), direccion: buscarTexto('DIRECCIÓN'), contacto: buscarTexto('CONTACTO:'), telefono: buscarTexto('TELÉFONO:') },
+      laboratorio_acreditado: { nombre_razon_social: null, rfc: null },
+      datos_item: { tipo_producto: null, metodo_muestreo: null, titulo_permiso: null, fecha_muestreo: null, fecha_recepcion: null, identificacion_almacenamiento: null, plan_muestreo: null, fecha_resultado: null, volumen_muestra: null, periodicidad: null, domicilio_muestreo: null, domicilio_analisis: null },
+      datos_ensayo: [], representante_legal: { nombre: null, rfc: null }, datos_personal_acreditado: { rfc_analiza: null, rfc_muestrea: null, rfc_autoriza: null },
+      condiciones_ambientales: { temperatura_c: null, humedad_hr: null, presion_kpa: 0 }, observaciones: [], firmas: { analizado_por: {}, muestreado_por: {}, autorizado_por: {} },
+      version: 'Ver.01 Rev. 00', fin_informe: true, codigo_procedimiento: 'FR-T55'
+    };
+  }
+
+  onJsonEditableChange() {
+    try {
+      this.jsonPreview = JSON.parse(this.jsonEditable);
+    } catch {
+      // mantener último JSON válido
+    }
+  }
+
+  copiarJSON() { if (!this.jsonEditable) return; navigator.clipboard.writeText(this.jsonEditable); this.mostrarToast('Copiado correctamente'); }
+  descargarJSON() { if (!this.jsonEditable) return; const blob = new Blob([this.jsonEditable], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `${this.nombreArchivoOriginal}.json`; link.click(); }
 }

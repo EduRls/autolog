@@ -51,6 +51,16 @@ export class ConvertidorDictamenPage {
     return txt.length ? txt : null;
   }
 
+
+  private toNumberOrNull(value: any): number | null {
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'number') return Number.isNaN(value) ? null : value;
+    const cleaned = String(value).replace(/,/g, '').trim();
+    if (!cleaned) return null;
+    const n = Number(cleaned);
+    return Number.isNaN(n) ? null : n;
+  }
+
   private excelDateToISO(value: any): string | null {
     if (value === null || value === undefined || value === '') return null;
     if (typeof value === 'number') return XLSX.SSF.format('yyyy-mm-dd', value);
@@ -103,68 +113,114 @@ export class ConvertidorDictamenPage {
     const h1 = workbook.Sheets['Hoja1'];
     const h2 = workbook.Sheets['Hoja2'];
     const gm = (s: XLSX.WorkSheet, r: string) => this.cleanText(this.getMergedValue(s, r));
-    const rfc = (r: string) => this.concatRange(h2, r);
-    const direccion = {
+    const gv = (s: XLSX.WorkSheet, r: string) => this.getMergedValue(s, r);
+
+    const direccion_muestreo = {
       calle: gm(h2, 'B19:K19'), numero_exterior: gm(h2, 'L19:U19'), numero_interior: gm(h2, 'B21:E21'), colonia: gm(h2, 'F21:M21'),
       codigo_postal: gm(h2, 'N21:U21'), localidad: gm(h2, 'B23:E23'), municipio_alcaldia: gm(h2, 'F23:M23'), entidad_federativa: gm(h2, 'N23:U23')
     };
 
-    const base = {
+    const columnMap = {
+      A: { key: 'componente', titulo_excel: gm(h1, 'A4:A4') },
+      B: { key: 'factor_mezcla_presion_vapor_kpa', titulo_excel: gm(h1, 'B4:B4') },
+      C: { key: 'densidad_relativa_componente', titulo_excel: gm(h1, 'C4:C4') },
+      D: { key: 'mon_componente', titulo_excel: gm(h1, 'D4:D4') },
+      E: { key: 'porcentaje_volumen_liquido', titulo_excel: gm(h1, 'E4:E4') },
+      F: { key: 'presion_parcial_vapor_kpa', titulo_excel: gm(h1, 'F4:F4') },
+      G: { key: 'densidad_relativa_parcial', titulo_excel: gm(h1, 'G4:G4') },
+      H: { key: 'mon_parcial', titulo_excel: gm(h1, 'H4:H4') }
+    } as const;
+
+    const filas = Array.from({ length: 16 }, (_, i) => i + 5).map((row) => ({
+      componente: this.cleanText(h1?.[`A${row}`]?.v),
+      factor_mezcla_presion_vapor_kpa: this.toNumberOrNull(h1?.[`B${row}`]?.v),
+      densidad_relativa_componente: this.toNumberOrNull(h1?.[`C${row}`]?.v),
+      mon_componente: this.toNumberOrNull(h1?.[`D${row}`]?.v),
+      porcentaje_volumen_liquido: this.toNumberOrNull(h1?.[`E${row}`]?.v),
+      presion_parcial_vapor_kpa: this.toNumberOrNull(h1?.[`F${row}`]?.v),
+      densidad_relativa_parcial: this.toNumberOrNull(h1?.[`G${row}`]?.v),
+      mon_parcial: this.toNumberOrNull(h1?.[`H${row}`]?.v)
+    }));
+
+    const propano = this.toNumberOrNull(gv(h2, 'U46:U47'));
+    const butano = this.toNumberOrNull(gv(h2, 'U48:U49'));
+
+    return {
+      version: 'dictamen_v2',
+      codigo_procedimiento: 'FR-T55',
       id_informe: gm(h2, 'G2:U2'),
-      fecha_emision: this.excelDateToISO(this.getMergedValue(h2, 'Q5:U5')),
+      titulo_documento: gm(h2, 'B3:U3'),
+      fecha_emision: this.excelDateToISO(gv(h2, 'Q5:U5')),
       datos_cliente: {
-        nombre_razon_social: gm(h2, 'B12:U12'), rfc: rfc('H9:S9'), numero_permiso: gm(h2, 'B14:U14'),
-        direccion: this.buildDireccion([direccion.calle, direccion.localidad, direccion.municipio_alcaldia, direccion.entidad_federativa]),
-        contacto: null, telefono: null,
-        actividad_o_planta: gm(h2, 'B16:U16'), direccion_muestreo: direccion, campo_y_yacimiento: gm(h2, 'B27:U27')
+        nombre_razon_social: gm(h2, 'B12:U12'),
+        rfc: this.concatRange(h2, 'H9:S9'),
+        numero_permiso: gm(h2, 'B14:U14'),
+        actividad_o_planta: gm(h2, 'B16:U16'),
+        direccion: this.buildDireccion([direccion_muestreo.calle, direccion_muestreo.numero_exterior, direccion_muestreo.numero_interior, direccion_muestreo.colonia, direccion_muestreo.codigo_postal, direccion_muestreo.localidad, direccion_muestreo.municipio_alcaldia, direccion_muestreo.entidad_federativa]),
+        direccion_muestreo,
+        medio_transporte_o_almacenamiento: gm(h2, 'B25:U25'),
+        campo_y_yacimiento: gm(h2, 'B27:U27')
       },
       laboratorio_acreditado: {
-        nombre_razon_social: gm(h2, 'B34:U34'), rfc: rfc('H31:S31'), direccion: gm(h1, 'A35:H35'), email: gm(h1, 'A36:H36')?.replace(/^e-?mail:\s*/i, '') || null
+        nombre_razon_social: gm(h2, 'B34:U34'),
+        rfc: this.concatRange(h2, 'H31:S31'),
+        direccion: gm(h1, 'A35:H35'),
+        email: gm(h1, 'A36:H36')?.replace(/^e-?mail:\s*/i, '') || null
       },
-      datos_item: {
-        tipo_producto: gm(h1, 'A1:H1'), metodo_muestreo: { descripcion: gm(h2, 'B45:E45'), norma: gm(h2, 'F45:I45') },
-        titulo_permiso: gm(h2, 'B16:U16'), fecha_muestreo: this.excelDateToISO(this.getMergedValue(h2, 'B38:G38')), fecha_recepcion: null,
-        identificacion_almacenamiento: gm(h2, 'B25:U25'), plan_muestreo: null, fecha_resultado: this.excelDateToISO(this.getMergedValue(h2, 'B40:G40')),
-        volumen_muestra: gm(h2, 'B42:G42'), periodicidad: null, domicilio_muestreo: this.buildDireccion([direccion.calle, direccion.localidad, direccion.municipio_alcaldia, direccion.entidad_federativa]),
-        domicilio_analisis: gm(h1, 'A35:H35'), fecha_realizacion_pruebas: this.excelDateToISO(this.getMergedValue(h2, 'H38:U38')), numero_lote: gm(h2, 'H40:U40')
+      informacion_prueba: {
+        fecha_toma_muestra: this.excelDateToISO(gv(h2, 'B38:G38')),
+        fecha_realizacion_pruebas: this.excelDateToISO(gv(h2, 'H38:U38')),
+        fecha_resultados: this.excelDateToISO(gv(h2, 'B40:G40')),
+        numero_lote: gm(h2, 'H40:U40'),
+        volumen_muestra_analizada: gm(h2, 'B42:G42')
       },
-      datos_ensayo: [
-        { ensayo: gm(h2, 'B45:E45'), metodo: gm(h2, 'F45:I45'), resultado: null, unidad: null },
-        {
-          ensayo: gm(h2, 'B46:E49'), metodo: gm(h2, 'F46:I49'), resultados: [
-            { componente: 'Propano en la mezcla', valor: this.getMergedValue(h2, 'U46:U47'), valor_redondeado_visible: Number((Number(this.getMergedValue(h2, 'U46:U47')) || 0).toFixed(1)), unidad: '%vol' },
-            { componente: 'Butano en la mezcla', valor: this.getMergedValue(h2, 'U48:U49'), valor_redondeado_visible: Number((Number(this.getMergedValue(h2, 'U48:U49')) || 0).toFixed(1)), unidad: '%vol' }
-          ]
-        }
-      ],
-      representante_legal: { nombre: gm(h2, 'B67:G67'), rfc: this.concatRange(h2, 'H67:T67'), declaracion: gm(h2, 'B68:U68'), firma_texto: gm(h2, 'E73:N73') },
-      datos_personal_acreditado: { rfc_analiza: this.concatRange(h2, 'H56:T56'), rfc_muestrea: null, rfc_autoriza: this.concatRange(h2, 'H56:T56') },
-      condiciones_ambientales: { temperatura_c: null, humedad_hr: null, presion_kpa: 0 }, observaciones: [],
-      firmas: { analizado_por: { nombre: gm(h2, 'B56:G56') }, muestreado_por: {}, autorizado_por: { nombre: gm(h2, 'B56:G56') } },
-      version: 'dictamen_v2', fin_informe: this.cleanText(gm(h2, 'B76:U76'))?.toLowerCase().includes('fin del documento') || false, codigo_procedimiento: 'FR-T55',
-      titulo_documento: gm(h2, 'B3:U3'),
-      personal_proveedor_emite_dictamen: { nombre: gm(h2, 'B56:G56'), rfc: this.concatRange(h2, 'H56:T56'), declaracion: gm(h2, 'B57:U57'), firma_texto: gm(h2, 'E62:N62') },
+      metodos_y_resultados: {
+        metodo_muestreo: { descripcion: gm(h2, 'B45:E45'), norma: gm(h2, 'F45:I45') },
+        metodo_cromatografia: { descripcion: gm(h2, 'B46:E49'), norma: gm(h2, 'F46:I49') },
+        resultados: [
+          { componente: 'Propano en la mezcla', valor: propano, valor_redondeado_visible: propano === null ? null : Number(propano.toFixed(1)), unidad: '%vol' },
+          { componente: 'Butano en la mezcla', valor: butano, valor_redondeado_visible: butano === null ? null : Number(butano.toFixed(1)), unidad: '%vol' }
+        ]
+      },
+      personal_proveedor_emite_dictamen: {
+        nombre: gm(h2, 'B56:G56'), rfc: this.concatRange(h2, 'H56:T56'), declaracion: gm(h2, 'B57:U57'), firma_texto: gm(h2, 'E62:N62')
+      },
+      representante_legal: {
+        nombre: gm(h2, 'B67:G67'), rfc: this.concatRange(h2, 'H67:T67'), declaracion: gm(h2, 'B68:U68'), firma_texto: gm(h2, 'E73:N73')
+      },
+      firmas: {
+        personal_proveedor_emite_dictamen: { nombre: gm(h2, 'B56:G56'), rfc: this.concatRange(h2, 'H56:T56') },
+        representante_legal: { nombre: gm(h2, 'B67:G67'), rfc: this.concatRange(h2, 'H67:T67') }
+      },
       analisis_tecnico_gas_lp: {
-        titulo: gm(h1, 'A1:H1'), metodo: gm(h1, 'A3:H3'),
+        titulo: gm(h1, 'A1:H1'),
+        tipo_producto: 'Gas Licuado de Petróleo (Gas LP)',
+        metodo: gm(h1, 'A3:H3'),
         tabla_componentes: {
-          encabezados: ['A4','B4','C4','D4','E4','F4','G4','H4'].map((c)=>this.cleanText(h1?.[c]?.v)),
-          filas: Array.from({ length: 16 }, (_, i) => i + 5).map((row) => ['A','B','C','D','E','F','G','H'].map((col)=>this.cleanText(h1?.[`${col}${row}`]?.v))),
-          totales: ['D21','E21','F21','G21','H21'].map((c)=>h1?.[c]?.v ?? null)
+          columnas: columnMap,
+          filas,
+          totales: {
+            etiqueta: gm(h1, 'D21:D21'),
+            porcentaje_volumen_liquido: this.toNumberOrNull(h1?.['E21']?.v),
+            presion_parcial_vapor_kpa: this.toNumberOrNull(h1?.['F21']?.v),
+            densidad_relativa_parcial: this.toNumberOrNull(h1?.['G21']?.v),
+            mon_parcial: this.toNumberOrNull(h1?.['H21']?.v)
+          }
         },
         resultados_resumen: {
-          densidad: { etiqueta: gm(h1, 'D23:D23'), valor: h1?.['E23']?.v ?? null, unidad: gm(h1, 'F23:F23') },
-          presion_vapor: { etiqueta: gm(h1, 'D24:D24'), valor: h1?.['E24']?.v ?? null, unidad: gm(h1, 'F24:F24') },
-          mon: { etiqueta: gm(h1, 'D25:D25'), valor: h1?.['E25']?.v ?? null, unidad: gm(h1, 'F25:F25') },
-          propano: { etiqueta: gm(h1, 'D26:D26'), valor: h1?.['E26']?.v ?? null, unidad: gm(h1, 'F26:F26') },
-          butano: { etiqueta: gm(h1, 'D27:D27'), valor: h1?.['E27']?.v ?? null, unidad: gm(h1, 'F27:F27') },
-          otros_componentes: { etiqueta: gm(h1, 'D28:D28'), valor: h1?.['E28']?.v ?? null, unidad: gm(h1, 'F28:F28') },
-          propano_butano: { etiqueta: gm(h1, 'D29:D29'), valor: h1?.['E29']?.v ?? null, unidad: gm(h1, 'F29:F29') },
-          propano_normalizado: { etiqueta: gm(h1, 'D30:D30'), valor: h1?.['E30']?.v ?? null, unidad: gm(h1, 'F30:F30') },
-          butano_normalizado: { etiqueta: gm(h1, 'D31:D31'), valor: h1?.['E31']?.v ?? null, unidad: gm(h1, 'F31:F31') }
+          densidad: { etiqueta: gm(h1, 'D23:D23'), valor: this.toNumberOrNull(h1?.['E23']?.v), unidad: gm(h1, 'F23:F23') },
+          presion_vapor: { etiqueta: gm(h1, 'D24:D24'), valor: this.toNumberOrNull(h1?.['E24']?.v), unidad: gm(h1, 'F24:F24') },
+          mon: { etiqueta: gm(h1, 'D25:D25'), valor: this.toNumberOrNull(h1?.['E25']?.v), unidad: gm(h1, 'F25:F25') },
+          propano: { etiqueta: gm(h1, 'D26:D26'), valor: this.toNumberOrNull(h1?.['E26']?.v), unidad: gm(h1, 'F26:F26') },
+          butano: { etiqueta: gm(h1, 'D27:D27'), valor: this.toNumberOrNull(h1?.['E27']?.v), unidad: gm(h1, 'F27:F27') },
+          otros_componentes: { etiqueta: gm(h1, 'D28:D28'), valor: this.toNumberOrNull(h1?.['E28']?.v), unidad: gm(h1, 'F28:F28') },
+          propano_butano: { etiqueta: gm(h1, 'D29:D29'), valor: this.toNumberOrNull(h1?.['E29']?.v), unidad: gm(h1, 'F29:F29') },
+          propano_normalizado: { etiqueta: gm(h1, 'D30:D30'), valor: this.toNumberOrNull(h1?.['E30']?.v), unidad: gm(h1, 'F30:F30') },
+          butano_normalizado: { etiqueta: gm(h1, 'D31:D31'), valor: this.toNumberOrNull(h1?.['E31']?.v), unidad: gm(h1, 'F31:F31') }
         }
-      }
+      },
+      fin_informe: (gm(h2, 'B76:U76') || '').toLowerCase().includes('fin del documento')
     };
-    return base;
   }
 
   private extractDictamenV1FromWorkbook(workbook: XLSX.WorkBook): any {

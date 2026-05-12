@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title style="text-align: center;">Editar Usuario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="editarUsuario()" [formGroup]="editarForm" style="margin: 5%;">
+    <!-- Nombre de Usuario -->
+    <ion-item>
+      <ion-input
+        labelPlacement="floating"
+        label="Nombre de Usuario"
+        type="text"
+        formControlName="usuario"
+        placeholder="Nombre del usuario"
+        required
+      ></ion-input>
+    </ion-item>
+    <ion-note *ngIf="editarForm.get('usuario')?.hasError('required') && editarForm.get('usuario')?.touched">
+      El nombre de usuario es obligatorio.
+    </ion-note>
+    <br />
+
+    <!-- Rol -->
+    <ion-item>
+      <ion-select
+        label="Rol"
+        label-placement="floating"
+        formControlName="rol"
+        placeholder="Selecciona un rol"
+      >
+        <ion-select-option value="admin">Administrador</ion-select-option>
+        <ion-select-option value="capturista">Capturista</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-note *ngIf="editarForm.get('rol')?.hasError('required') && editarForm.get('rol')?.touched">
+      El rol es obligatorio.
+    </ion-note>
+    <br />
+
+    <!-- Botón de Guardar -->
+    <ion-button
+      type="submit"
+      expand="block"
+      fill="solid"
+      color="primary"
+      [disabled]="editarForm.invalid"
+    >
+      Guardar Cambios
+    </ion-button>
+  </form>
+</ion-content>

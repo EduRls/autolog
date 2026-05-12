@@ -1,0 +1,104 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title style="text-align: center;">
+      Detalles de la unidad - {{ evento.unidad.unidad }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- SECCIÓN ESPECIAL -->
+  <ion-grid fixed>
+    <ion-row>
+      <!-- Dinero invertido en la unidad -->
+      <ion-col size="12" size-sm="4">
+        <h5 style="text-align: center;">
+          <b>Dinero invertido en la unidad</b>
+        </h5>
+        <ion-card style="height: 55%;">
+          <ion-card-content>
+            <h1 style="text-align: center; margin-top: 5%;">${{ dineroInvertido | number }}</h1>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+  
+      <!-- Datos de la unidad -->
+      <ion-col size="12" size-sm="4">
+        <h5 style="text-align: center;">
+          <b>Datos de la unidad</b>
+        </h5>
+        <ion-card style="height: 55%;">
+          <ion-card-content>
+            <p><b>Placa:</b> {{ placaUnidad }}</p>
+            <p><b>Operador:</b> {{ operadorUnidad }}</p>
+            <p><b>Último servicio:</b> {{ ultimaFechaServicio }}</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+  
+      <!-- Administración -->
+      <ion-col size="12" size-sm="4">
+        <h5 style="text-align: center;">
+          <b>Administración</b>
+        </h5>
+        <ion-card style="height: 55%;">
+          <ion-card-content style="text-align: center; margin-top: 2%;">
+            <ion-button shape="round" expand="block" (click)="exportarHisotiral()" color="success">
+              Exportar a Excel
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Tabla de historial -->
+  <ion-card class="custom-card-table">
+    <ion-card-content>
+      <div class="table-container">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Unidad</th>
+              <th>Servicio</th>
+              <th>Artículos</th>
+              <th>Costo</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let registro of registrosPaginados">
+              <td>{{ registro.unidad.unidad }}</td>
+              <td>{{ registro.servicio }}</td>
+              <td>
+                <div *ngIf="registro.articulos && registro.articulos.length > 0; else noArticulos">
+                  <ul>
+                    <li *ngFor="let articulo of registro.articulos">
+                      {{ articulo.nombre }} ({{ articulo.cantidad }}) - ${{ articulo.precio }}
+                    </li>
+                  </ul>
+                </div>
+                <ng-template #noArticulos>
+                  {{ registro.articulo || 'Sin artículos' }}
+                </ng-template>
+              </td>
+              <td>${{ registro.costo | number }}</td>
+              <td>{{ registro.fecha }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" style="text-align: center; margin-top: 20px;">
+        <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+        <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
+        <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

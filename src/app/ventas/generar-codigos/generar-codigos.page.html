@@ -1,0 +1,110 @@
+<app-menu titulo="codigosQR"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <h3 style="margin: 1% 2% 0% 2%">
+    <b>Generador</b> & <span style="font-size:medium;"><ion-icon size="medium" name="qr-code-outline"></ion-icon>
+      Códigos QR</span>
+  </h3>
+
+  <ion-card class="custom-card">
+    <ion-card-content>
+      <form [formGroup]="qrForm" (ngSubmit)="generarCodigos()">
+        <ion-grid>
+          <h2>Espesificaicones de los codigos</h2>
+          <ion-row>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Cantidad de códigos</ion-label>
+                <ion-input type="number" formControlName="cantidad" required></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Código de envío (3 dígitos)</ion-label>
+                <ion-input type="text" formControlName="codigoEnvio" required maxlength="3"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Prefijo (opcional)</ion-label>
+                <ion-input type="text" formControlName="prefijo"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Capacidad del tanque (kg)</ion-label>
+                <ion-input type="number" formControlName="capacidadTanque" required></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <h2>Espesificaicones de las hojas</h2>
+          <ion-row>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Número de columnas</ion-label>
+                <ion-input type="number" formControlName="columnas" required></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Número de filas</ion-label>
+                <ion-input type="text" formControlName="filas" required maxlength="3"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Alto de la hoja</ion-label>
+                <ion-input type="text" formControlName="alto_hoja"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="3">
+              <ion-item>
+                <ion-label position="floating">Largo de la hoja</ion-label>
+                <ion-input type="number" formControlName="largo_hoja" required></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+        <ion-button type="submit" expand="block" [disabled]="qrForm.invalid">Generar códigos</ion-button>
+      </form>
+
+      <ion-button *ngIf="codigosGenerados.length > 0" expand="block" (click)="generarWordDocument()" color="success">Generar Doc y Guardar los códigos</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Tabla de códigos generados -->
+  <ion-card class="custom-card-table" *ngIf="codigosGenerados.length > 0">
+    <ion-card-content>
+      <div class="table-container">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID</th>
+              <th>Tanque (kg)</th>
+              <th>Código QR</th>
+              <th>Código GBZ</th>
+              <th>Código Envío</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let codigo of registrosPaginados; let i = index">
+              <td>{{ (paginaActual - 1) * registrosPorPagina + i + 1 }}</td>
+              <td>{{ codigo.idUnico }}</td>
+              <td>{{ codigo.capacidadTanque }}</td>
+              <td><img [src]="codigo.qrData" alt="QR" width="50"></td>
+              <td>{{ codigo.codigoGBZ }}</td>
+              <td>{{ codigo.codigoEnvio }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <div class="pagination" *ngIf="codigosGenerados.length > 0">
+    <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+    <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
+    <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+  </div>
+
+</ion-content>

@@ -1,0 +1,32 @@
+<app-menu titulo="convertidorDictamen"></app-menu>
+
+<ion-content [fullscreen]="true" id="main-content" class="convertidor-content">
+  <div class="container">
+    <h2>Convertidor de Dictamen</h2>
+
+    <div class="dropzone" (click)="abrirSelector()">
+      <div class="dropzone-inner">
+        <ion-icon name="document-outline"></ion-icon>
+        <p>Arrastra o haz clic para seleccionar archivo</p>
+      </div>
+      <input #fileInput type="file" hidden (change)="onFileChange($event)" />
+    </div>
+
+
+    <div *ngIf="jsonPreview" class="json-preview">
+      <h3 style="text-align: center;"> JSON GENERADO: </h3>
+      <pre>{{ jsonPreview | json }}</pre>
+    </div>
+
+    <ion-grid class="actions" *ngIf="jsonPreview">
+      <ion-row>
+        <ion-col size="6">
+          <ion-button expand="block" color="primary" (click)="copiarJSON()">Copiar</ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button expand="block" color="success" (click)="descargarJSON()">Descargar</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

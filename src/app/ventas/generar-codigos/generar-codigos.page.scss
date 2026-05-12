@@ -1,0 +1,58 @@
+.custom-card {
+    margin: 2%;
+    box-shadow: 1px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+}
+
+.custom-card-table {
+    margin: 1%;
+    box-shadow: 1px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    width: 98%;
+    max-width: 100%;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin: 0%;
+    padding: 0%;
+}
+
+.responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.responsive-table th {
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #f8f8f8;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.responsive-table td {
+    font-size: 16px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.responsive-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.pagination ion-button {
+    margin: 0 10px;
+}

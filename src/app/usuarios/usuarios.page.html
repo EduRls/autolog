@@ -1,0 +1,50 @@
+<app-menu titulo="admUser"></app-menu>
+
+<ion-content id="main-content">
+  <ion-grid>
+    <!-- Botón para agregar un nuevo usuario -->
+    <ion-row>
+      <ion-col size="12" style="text-align: right; margin-bottom: 10px;">
+        <ion-button style="color: white;" color="success" (click)="agregarUsuario()">
+          <ion-icon slot="start" name="person-add-outline"></ion-icon>
+          Nuevo Usuario
+        </ion-button>
+      </ion-col>
+    </ion-row>
+
+    <!-- Tabla de Usuarios -->
+    <ion-card class="custom-card-table">
+      <ion-card-content>
+        <div class="table-container">
+          <table class="responsive-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th style="text-align: center;">Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let usuario of usuarios">
+                <td>{{ usuario.usuario }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.rol == 'admin' ? 'Administrador' : 'Capturista' }}</td>
+                <td style="text-align: center;">
+                  <!-- Botón Editar -->
+                  <ion-button fill="clear" color="primary" (click)="editarUsuario(usuario)">
+                    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                  </ion-button>
+                  <!-- Botón Eliminar -->
+                  <ion-button fill="clear" color="danger" (click)="eliminarUsuario(usuario)">
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                  </ion-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ion-grid>
+</ion-content>

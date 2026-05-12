@@ -1,0 +1,34 @@
+.custom-datetime-item {
+  --border-radius: 8px;
+  --background: white;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.2);
+  width: 83%;
+  margin: 0 auto;
+}
+
+.cardInfo{
+    width: auto;
+    height: 60vh;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.responsive-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.responsive-table th,
+.responsive-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.responsive-table th {
+  background-color: #f4f4f4;
+}

@@ -1,0 +1,68 @@
+<app-menu titulo="distribu"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true" class="ion-padding">
+  <h3 style="margin: 1% 2% 0% 2%">
+    <b>Administración</b> || <span style="font-size:medium;"><ion-icon size="medium" name="people-outline"></ion-icon>
+      Distribuidores</span>
+  </h3>
+  <h5 style="text-align: center;">Busqueda por ID ó nombre del distribuidor</h5>
+  <div style="width: 98%; margin: 1%;">
+    <ion-searchbar style="--border-radius: 8px; transform: scale(1.2);  width: 83%; margin: 0 auto;"
+      placeholder="ID ó nombre del distribuidor" 
+      [debounce]="50" 
+      showCancelButton="focus"
+      [(ngModel)]="busqueda"
+      (ionInput)="filtrarDistribuidores()"
+      ></ion-searchbar>
+  </div>
+  <div>
+    <ion-card>
+      <ion-card-content>
+        <!-- Aquí va la tabla -->
+        <div class="table-container">
+          <table class="responsive-table">
+            <thead>
+              <tr>
+                <th>Identificador</th>
+                <th>Nombre</th>
+                <th>Ruta</th>
+                <th>Zona</th>
+                <th style="text-align: center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let distribuidor of distribuidoresPaginados">
+                <td>{{ distribuidor.identificador }}</td>
+                <td>{{ distribuidor.nombre }}</td>
+                <td>{{ distribuidor.ruta }}</td>
+                <td>{{ transformarZona(distribuidor.zona) }}</td>
+                <td style="text-align: center;">
+                  <ion-button fill="clear" color="primary" (click)="editarDistribuidor(distribuidor)">
+                    <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" color="danger" (click)="eliminarDistribuidor(distribuidor.id)">
+                    <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination">
+          <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+          <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
+          <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+
+  <ion-fab horizontal="end" vertical="bottom" slot="fixed" (click)="addDistribuidor()">
+    <ion-fab-button>
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

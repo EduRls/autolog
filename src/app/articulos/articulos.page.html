@@ -1,0 +1,63 @@
+<app-menu titulo="art"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <h3 style="margin: 1% 2% 0% 2%">
+    <b>Administración</b> & <span style="font-size:medium;"><ion-icon size="medium" name="cart-outline"></ion-icon>
+      Artículos registrados</span>
+  </h3>
+
+  <h5 style="text-align: center;">Busqueda por unidad</h5>
+  <div style="width: 100%;">
+    <ion-searchbar style="--border-radius: 8px; transform: scale(1.21);  width: 83%; margin: 0 auto;"
+      placeholder="Buscar algun articulo" [debounce]="25" showCancelButton="focus" (ionInput)="buscarArticulo($event)"
+      ></ion-searchbar>
+  </div>
+
+  <ion-card class="custom-card-table">
+    <ion-card-content>
+      <div class="table-container">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Nombre del artículo</th>
+              <th>Costo</th>
+              <th>Descripción</th>
+              <th style="text-align: center;">Eliminar/Editar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let registro of registrosPaginados">
+              <td>{{ registro.articulo }}</td>
+              <td>${{ registro.precio }}</td>
+              <td>{{ registro.desc }}</td>
+              <td>
+                <ion-row class="ion-justify-content-center ion-align-items-center">
+                  <ion-button fill="clear" color="danger" size="large" (click)="borrarArticulo(registro)" *ngIf="userRole == 'admin'">
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" color="primary" size="large" (click)="editarArticulo(registro)">
+                    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                  </ion-button>
+                </ion-row>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </ion-card-content>
+  </ion-card>
+  <div class="pagination">
+    <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+    <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
+    <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+  </div>
+
+
+
+  <ion-fab horizontal="end" vertical="bottom" slot="fixed" (click)="agregarArticulo()">
+    <ion-fab-button>
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

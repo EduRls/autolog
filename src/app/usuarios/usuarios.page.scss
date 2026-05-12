@@ -1,0 +1,38 @@
+.custom-card-table {
+    margin: 1%;
+    box-shadow: 1px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    width: 100%;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  
+  .responsive-table th {
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f8f8f8;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .responsive-table td {
+    font-size: 14px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .responsive-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  

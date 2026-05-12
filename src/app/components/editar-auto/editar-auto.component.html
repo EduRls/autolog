@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title style="text-align: center;">
+      Editar el auto - {{auto.unidad}}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="editarAutoFirebase()" [formGroup]="editarAuto" style="margin: 5%;">
+    <ion-input label="Agrega las placas de la unidad" label-placement="floating" fill="outline" placeholder="Placas"
+      style="--background: #ffffff;" formControlName="unidad">
+    </ion-input>
+    <br>
+    <ion-input label="Agrega el operador de la unidad" label-placement="floating" fill="outline" placeholder="Operador"
+      style="--background: #ffffff;" formControlName="operador">
+    </ion-input>
+    <br>
+    <br>
+    <ion-row>
+      <ion-col size="4">
+        <ion-input label="Establece el Kilometraje inicial" type="number" label-placement="floating" fill="outline"
+          placeholder="Kilometraje" style="--background: #ffffff;" formControlName="kilometraje" (ionChange)="establecerKilometraje()">
+        </ion-input>
+      </ion-col>
+      <ion-col size="4">
+        <ion-input label="Establece el kilometraje actual" type="number" label-placement="floating" fill="outline"
+          placeholder="Kilometraje" style="--background: #ffffff;" formControlName="km_actual" (ionChange)="verificarCambioServicio()">
+        </ion-input>
+      </ion-col>
+      <ion-col size="4">
+        <ion-input label="Establece el Kilometraje proximo servicio" type="number" label-placement="floating" fill="outline"
+          placeholder="Kilometraje" style="--background: #ffffff;" formControlName="km_proximo_servicio">
+        </ion-input>
+      </ion-col>
+    </ion-row>
+    <br>
+    <ion-textarea label="Outline textarea" labelPlacement="floating" fill="outline" placeholder="Enter text"
+      [autoGrow]="true" rows="10" style="--background: #ffffff;" formControlName="desc">
+    </ion-textarea>
+    <br>
+    <ion-button type="submit" expand="block" fill="clear" shape="round" color="success">
+      Editar auto
+    </ion-button>
+  </form>
+</ion-content>

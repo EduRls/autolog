@@ -1,0 +1,7 @@
+{
+  "name": "autolog",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

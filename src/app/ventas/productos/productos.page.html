@@ -1,0 +1,103 @@
+<app-menu titulo="cilindros"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+    <h3 style="margin: 1% 2% 0% 2%">
+        <b>Administración</b> ||
+        <span style="font-size:medium;">
+            <ion-icon size="medium" name="cart-outline"></ion-icon> Productos
+        </span>
+    </h3>
+
+    <div style="width: 98%; margin: 1%;">
+        <ion-searchbar style="--border-radius: 8px; transform: scale(1.2); width: 83%; margin: 0 auto;"
+            placeholder="ID ó nombre del distribuidor" (ionInput)="onSearchBarChange($event)"></ion-searchbar>
+    </div>
+
+    <ion-grid>
+        <ion-row>
+            <!-- Sección distribuidores -->
+            <ion-col size="12" size-sm="5">
+                <h5 style="text-align: center;"><b>Lista de distribuidres</b></h5>
+                <ion-card>
+                    <ion-card-content>
+                        <div class="table-container">
+                            <table class="responsive-table">
+                                <thead>
+                                    <tr>
+                                        <th>Identificador</th>
+                                        <th>Nombre</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let distribuidor of distribuidoresPaginados"
+                                        (click)="seleccionarDistribuidor(distribuidor)" class="selectable-row">
+                                        <td>{{ distribuidor.identificador }}</td>
+                                        <td>{{ distribuidor.nombre }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </ion-card-content>
+                </ion-card>
+                <!-- Paginación distribuidores -->
+                <div class="pagination">
+                    <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+                    <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
+                    <ion-button (click)="paginaSiguiente()"
+                        [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+                </div>
+            </ion-col>
+
+            <!-- Sección productos -->
+            <ion-col size="12" size-sm="7">
+                <h5 style="text-align: center;"><b>Asignación de productos</b></h5>
+                <ion-card class="productos">
+                    <ion-card-content style="text-align: center;">
+                        <div *ngIf="!isDistribuidorSelected; else elseblock">
+                            Selecciona un distribuidor para revisar sus productos
+                        </div>
+                        <ng-template #elseblock>
+                            Has seleccionado al distribuidor:
+                            <br>
+                            <h2>
+                                {{ distribuidorSelected.nombre }} ||
+                                {{ distribuidorSelected.identificador }}
+                            </h2>
+                            <div>
+                                <div class="table-container">
+                                    <table class="responsive-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Estado</th>
+                                                <th>Incidente</th>
+                                                <th>Fecha de creación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let producto of productosListPaginados">
+                                                <td>Cilindro | {{ producto.codigo }}</td>
+                                                <td>{{ producto.estado_venta }}</td>
+                                                <td>{{ producto.incidente }}</td>
+                                                <td>{{ producto.fecha_asignacion }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ion-card-content>
+                </ion-card>
+                <div class="pagination" style="margin-top: 15px;">
+                    <ion-button (click)="productosPaginaAnterior()"
+                        [disabled]="productosPaginaActual === 1">Anterior</ion-button>
+                    <span>Página {{ productosPaginaActual }} de {{ getTotalPaginasProductos() }}</span>
+                    <ion-button (click)="productosPaginaSiguiente()"
+                        [disabled]="productosPaginaActual === getTotalPaginasProductos()">Siguiente</ion-button>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+
+</ion-content>

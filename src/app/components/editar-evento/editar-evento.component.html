@@ -1,0 +1,198 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title style="text-align: center;">
+      Editar servicio
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="editarEvento()" [formGroup]="editarEventoRegistro" style="margin: 2%">
+    <ion-grid>
+      <ion-row>
+        <!-- Unidad -->
+        <ion-col size="12" size-sm="3">
+          <ion-select label="Selecciona una unidad" label-placement="floating" fill="outline"
+            style="--background: #ffffff;" formControlName="unidad">
+            <ion-select-option *ngFor="let item of autos" [value]="item.id">{{item.unidad}}</ion-select-option>
+          </ion-select>
+        </ion-col>
+
+        <!-- Kilometraje -->
+        <ion-col size="12" size-sm="3">
+          <ion-input label="Kilometraje de la unidad" type="number" label-placement="floating" fill="outline"
+            placeholder="kilometraje" style="--background: #ffffff;" formControlName="kilometraje">
+          </ion-input>
+        </ion-col>
+
+        <!-- Costo -->
+        <ion-col size="12" size-sm="3">
+          <ion-input label="Costo del servicio" type="number" label-placement="floating" fill="outline"
+            placeholder="Costo $$" style="--background: #ffffff;" formControlName="costo">
+          </ion-input>
+        </ion-col>
+
+        <!-- Fecha -->
+        <ion-col size="12" size-sm="3">
+          <div style="text-align: center;">Día en que se realizó el servicio</div>
+          <ion-datetime-button datetime="dateTimeServicio" color="light"></ion-datetime-button>
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime id="dateTimeServicio" presentation="date" formControlName="fecha"></ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </ion-col>
+      </ion-row>
+
+      <!-- Usuario que autorizó -->
+      <ion-row>
+        <ion-col size="12">
+          <ion-input label="¿Quién autorizó esta operación?" label-placement="floating" fill="outline"
+            placeholder="Nombre de quien lo autorizó" style="--background: #ffffff; margin: 0.5%;"
+            formControlName="autUser">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <!-- Servicio -->
+      <ion-row>
+        <ion-col size="12">
+          <ion-textarea label="Descripción del servicio realizado a la unidad" labelPlacement="floating" fill="outline"
+            placeholder="Servicio" [autoGrow]="true" rows="5" style="--background: #ffffff;" formControlName="servicio">
+          </ion-textarea>
+        </ion-col>
+      </ion-row>
+
+      <!-- Artículos -->
+      <ion-row>
+        <ion-col size="12" size-sm="12">
+          <ion-grid>
+            <ion-row>
+              <ion-col size="12" size-sm="12">
+                <h5 style="text-align: center;"><b>Lista</b> de artículos</h5>
+              </ion-col>
+              <ion-col size="12" size-sm="12" style="text-align: center;">
+                <ion-grid>
+                  <ion-row>
+                    <ion-col size="12" size-sm="10">
+                      <h6>Busca y agrega los artículos registrado previamente, <b>en caso de que no encuentres un artículo, da click para agregar un nuevo artículo desde esta pestaña</b></h6>
+                    </ion-col>
+                    <ion-col size="12" size-sm="2">
+                      <ion-button (click)="agregarArticuloNuevo()" fill="clear" shape="round" style="text-align: center;">
+                        <b>Agregar nuevo artículo</b>
+                      </ion-button>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+          <ion-searchbar placeholder="Artículos" style="--background: #ffffff;" (ionInput)="filtrarArticulos($event)">
+          </ion-searchbar>
+          <div *ngIf="articulosFiltrados.length > 0" class="autocomplete-list">
+            <ion-item lines="none" button *ngFor="let articulo of articulosFiltrados"
+              (click)="agregarArticulo(articulo)" style="border-radius: 5%;">
+              {{ articulo.nombre }}
+            </ion-item>
+          </div>
+
+          <!-- Tabla con los artículos seleccionados -->
+          <ion-card class="custom-card-table">
+            <ion-card-content>
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="12" size-sm="8">
+                    <div class="table-container">
+                      <table class="responsive-table">
+                        <thead>
+                          <tr>
+                            <th>Artículo</th>
+                            <th>Costo Unitario</th>
+                            <th>Cantidad</th>
+                            <th style="text-align: center;">Eliminar</th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="articulos">
+                          <tr *ngFor="let articulo of articulosFormArray.controls; let i = index" [formGroupName]="i">
+                            <td>{{ articulo.get('nombre')?.value }}</td>
+                            <td>
+                              <!-- Input reactivo para el precio -->
+                              <ion-input
+                                type="number"
+                                formControlName="precio"
+                                min="0"
+                                fill="outline"
+                                placeholder="Precio"
+                                (ionInput)="calcularTotales()"
+                                style="font-size: small; width: 80px;"
+                              ></ion-input>
+                            </td>
+                            <td>
+                              <!-- Input reactivo para la cantidad -->
+                              <ion-input
+                                type="number"
+                                formControlName="cantidad"
+                                min="1"
+                                fill="outline"
+                                placeholder="Cantidad"
+                                (ionInput)="calcularTotales()"
+                                style="font-size: small; width: 80px;"
+                              ></ion-input>
+                            </td>
+                            <td>
+                              <!-- Input reactivo para el proveedor -->
+                              <ion-input
+                                type="text"
+                                formControlName="proveedor"
+                                fill="outline"
+                                placeholder="Proveedor"
+                                style="font-size: small; width: 120px;"
+                              ></ion-input>
+                            </td>
+                            <td style="text-align: center;">
+                              <!-- Botón para eliminar el artículo -->
+                              <ion-button fill="clear" color="danger" size="small" (click)="eliminarArticulo(i)">
+                                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                              </ion-button>
+                            </td>
+                          </tr>
+                        </tbody>
+                        
+                      </table>
+                    </div>
+                  </ion-col>
+                  <ion-col size="12" size-sm="4">
+                    <div style="text-align: center; font-size: large; font-weight: bold;">
+                      Totales:
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px;">
+                      <span>Total sin IVA:</span>
+                      <span>{{ totalSinIVA | currency }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px;">
+                      <span>Total con IVA:</span>
+                      <span>{{ totalConIVA | currency }}</span>
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card-content>
+          </ion-card>
+
+        </ion-col>
+      </ion-row>
+
+      <!-- Totales -->
+    </ion-grid>
+
+    <!-- Botón para guardar cambios -->
+    <ion-button type="submit" expand="block" fill="clear" shape="round" color="success">
+      Guardar cambios
+    </ion-button>
+  </form>
+</ion-content>

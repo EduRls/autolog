@@ -1,0 +1,272 @@
+<app-menu titulo="panelVen"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <h3 style="margin: 1% 2% 0% 2%">
+    <b>Ventas en tiempo real</b> & <span style="font-size:medium;"><ion-icon name="bar-chart-outline"></ion-icon>
+      Analisis por
+      graficos</span>
+    <ion-text class="reloj">{{ fechaHoraActual }}</ion-text>
+  </h3>
+
+  <!-- Estadistica general -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-sm="3">
+        <ion-card class="ventas-tarjeta">
+          <ion-card-content>
+            <ion-row>
+              <ion-col size="6" style="text-align: center;">
+                <b>Total de ventas</b>
+                <br>
+                <ion-icon name="bag-check-outline" size="large"></ion-icon>
+              </ion-col>
+              <ion-col size="6" style="background-color: white; border-radius: 5%; padding-top: 10px;">
+                <h1 style="text-align: center;">{{ totalVentas }}</h1>
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-sm="3">
+
+        <ion-card class="ingresos-tarjeta">
+          <ion-card-content>
+            <ion-row>
+              <ion-col size="6" style="text-align: center;">
+                <b>Total de ingresos</b>
+                <br>
+                <ion-icon name="cash-outline" size="large"></ion-icon>
+              </ion-col>
+              <ion-col size="6" style="background-color: white; border-radius: 5%; padding-top: 10px;">
+                <h1 style="text-align: center;">${{ totalIngresos | number:'1.2-2' }}</h1>
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+
+      <ion-col size="12" size-sm="3">
+        <ion-card class="incidentes-tarjeta">
+          <ion-card-content>
+            <ion-row>
+              <ion-col size="6" style="text-align: center;">
+                <b>Total de incidentes</b>
+                <br>
+                <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+              </ion-col>
+              <ion-col size="6" style="background-color: white; border-radius: 5%; padding-top: 10px;">
+                <h1 style="text-align: center;">{{ totalIncidentes }}</h1>
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+
+      <ion-col size="12" size-sm="3">
+        <ion-card class="incidente-frecuente-tarjeta">
+          <ion-card-content>
+            <ion-row>
+              <ion-col size="6" style="text-align: center;">
+                <b>Incidente frecuente</b>
+                <br>
+                <ion-icon name="warning-outline" size="large"></ion-icon>
+              </ion-col>
+              <ion-col size="6" style="background-color: white; border-radius: 5%; padding-top: 10px;">
+                <h2 style="text-align: center;">{{ incidenteMasFrecuente }}</h2>
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+  <!-- Estadistica -->
+  <!-- Estadística -->
+  <div>
+    <ion-grid>
+      <ion-row>
+        <!-- Mejores proveedores (Gráfico Pie) -->
+        <ion-col size="12" size-sm="4">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title style="text-align: center;"><b>Mejores proveedores</b></ion-card-title>
+            </ion-card-header>
+            <ion-card-content class="custome-card-best-p"
+              style="display: flex; justify-content: center; align-items: center;">
+              <apx-chart *ngIf="chartMejoresProveedores.series?.length > 0" [series]="chartMejoresProveedores.series"
+                [chart]="chartMejoresProveedores.chart" [labels]="chartMejoresProveedores.labels">
+              </apx-chart>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Mapa de ventas -->
+        <ion-col size="12" size-sm="4">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title style="text-align: center;"><b>Mapa de ventas</b></ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="map-container">
+                <div leaflet [leafletOptions]="options" [leafletLayers]="layers">
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+
+
+        <!-- Ventas en el día -->
+        <ion-col size="12" size-sm="4">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title style="text-align: center;">
+                <b>Ventas en el día</b>
+              </ion-card-title>
+            </ion-card-header>
+            <ion-card-content style="display: flex; justify-content: center; align-items: center;">
+              <apx-chart *ngIf="chartVentasDia.series?.length > 0" [series]="chartVentasDia.series"
+                [chart]="chartVentasDia.chart" [xaxis]="chartVentasDia.xaxis">
+              </apx-chart>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+
+
+  <!-- Tabla de ventas realizadas -->
+  <h1 style="text-align: center;"><b>Ventas Realizadas</b></h1>
+  <ion-card class="tabla-ventas-tarjeta">
+    <ion-card-content>
+      <ion-grid class="tabla-responsive">
+        <ion-row class="encabezado">
+          <ion-col size="3"><b>Nombre</b></ion-col>
+          <ion-col size="3"><b>Precio</b></ion-col>
+          <ion-col size="3"><b>Domicilio</b></ion-col>
+          <ion-col size="3"><b>Fecha</b></ion-col>
+        </ion-row>
+
+        <ion-row *ngFor="let venta of registrosPaginados">
+          <ion-col size="3">{{ venta.NOMBRE_VENDEDOR }}</ion-col>
+          <ion-col size="3">${{ venta.PRECIO }}</ion-col>
+          <ion-col size="3">
+            <ion-icon name="location-outline" style="color: var(--ion-color-primary);"></ion-icon>
+            <!-- Si existe la dirección geocodificada, la mostramos. De lo contrario, mostramos la lat/long. -->
+            {{ lugares[venta.DOMICILIO] ? lugares[venta.DOMICILIO] : venta.DOMICILIO }}
+          </ion-col>
+          <ion-col size="3">
+            <ion-icon name="calendar-outline" style="color: var(--ion-color-tertiary);"></ion-icon>
+            {{ convertirFecha(venta.FECHA_VENTA.seconds) }}
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <!-- Paginación -->
+      <div class="pagination">
+        <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+        <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
+        <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+
+  <!-- Tabla de incidentes -->
+  <h1 style="text-align: center;">
+    <b>Incidentes Registrados</b>
+  </h1>
+  <ion-grid>
+    <ion-row>
+      <!-- Tabla de Incidentes -->
+      <ion-col size="12" size-md="6">
+        <ion-card class="tabla-incidentes-tarjeta">
+          <ion-card-content>
+            <ion-grid class="tabla-responsive">
+              <ion-row class="encabezado">
+                <ion-col size="4"><b>Vendedor</b></ion-col>
+                <ion-col size="4"><b>Tipo de Incidente</b></ion-col>
+                <ion-col size="4"><b>Fecha y Hora</b></ion-col>
+              </ion-row>
+
+              <ion-row *ngFor="let incidente of incidentesPagina">
+                <ion-col size="4">
+                  <ion-icon name="person-circle-outline" style="color: var(--ion-color-primary);"></ion-icon>
+                  {{ incidente.NOMBRE_VENDEDOR }}
+                </ion-col>
+                <ion-col size="4">
+                  <ion-icon name="alert-circle-outline" style="color: var(--ion-color-danger);"></ion-icon>
+                  {{ incidente.tipo }}
+                </ion-col>
+                <ion-col size="4">
+                  <ion-icon name="time-outline" style="color: var(--ion-color-tertiary);"></ion-icon>
+                  {{ convertirFechaHora(incidente.FECHA_VENTA.seconds) }}
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <!-- Paginación de Incidentes -->
+
+          </ion-card-content>
+        </ion-card>
+        <div class="pagination">
+          <ion-button (click)="paginaAnteriorIncidentes()" [disabled]="paginaActualIncidentes === 1">
+            Anterior
+          </ion-button>
+          <span>Página {{ paginaActualIncidentes }} de {{ getTotalPaginasIncidentes() }}</span>
+          <ion-button (click)="paginaSiguienteIncidentes()"
+            [disabled]="paginaActualIncidentes === getTotalPaginasIncidentes()">
+            Siguiente
+          </ion-button>
+        </div>
+      </ion-col>
+
+      <!-- Aquí podrías agregar los gráficos en la otra columna -->
+      <ion-col size="12" size-md="6">
+        <!-- Sección para los gráficos -->
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <!-- 🔹 Gráfico de pastel: Vendedores con más incidentes -->
+              <ion-card class="grafico-card">
+                <ion-card-header>
+                  <ion-card-title style="text-align: center;"><b>Incidentes por Vendedor</b></ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart [series]="graficoPastel.series" [chart]="graficoPastel.chart"
+                    [labels]="graficoPastel.labels" [colors]="graficoPastel.colors" [legend]="graficoPastel.legend">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <!-- 🔹 Gráfico de barras: Cantidad de incidentes por tipo -->
+              <ion-card class="grafico-card">
+                <ion-card-header>
+                  <ion-card-title style="text-align: center;"><b>Tipos de Incidentes</b></ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <apx-chart [series]="graficoBarras.series" [chart]="graficoBarras.chart" [xaxis]="graficoBarras.xaxis"
+                    [colors]="graficoBarras.colors">
+                  </apx-chart>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-col>
+
+    </ion-row>
+  </ion-grid>
+
+
+</ion-content>

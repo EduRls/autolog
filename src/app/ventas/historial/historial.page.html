@@ -1,0 +1,258 @@
+<app-menu titulo="historialVentas"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <h3 style="margin: 1% 2% 0% 2%">
+    <b>Hisotiral</b> || <span style="font-size:medium;"><ion-icon size="medium" name="library-outline"></ion-icon>
+      Ventas & incidentes</span>
+  </h3>
+
+  <ion-segment [(ngModel)]="periodoSeleccionado" (ionChange)="cambiarPeriodo(periodoSeleccionado)">
+    <ion-segment-button value="primer">
+      <ion-label>Primer Semestre</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="segundo">
+      <ion-label>Segundo Semestre</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <h2 class="ion-margin">Filtro de busquedas</h2>
+  <ion-card class="ion-padding ion-margin">
+    <ion-grid>
+      <ion-row>
+         <ion-col size="6">
+          <ion-searchbar style="--border-radius: 8px; transform: scale(1.2); width: 83%; margin: 0 auto;"
+            placeholder="ID ó nombre del distribuidor" [debounce]="250" showCancelButton="focus"
+            [(ngModel)]="busquedaProveedor" (ionInput)="filtrarPorProveedor()" (ionChange)="actualizarDatos()">
+          </ion-searchbar>
+        </ion-col>
+        <ion-col size="6">
+          <ion-select [(ngModel)]="ubicacionSeleccionada" (ionChange)="filtrarPorProveedor()" interface="popover"
+            placeholder="Selecciona un estado" fill="outline">
+            <ion-select-option value="todo">Todos</ion-select-option>
+            <ion-select-option value="guada">Guadalupe</ion-select-option>
+            <ion-select-option value="zaca">Zacatecas</ion-select-option>
+          </ion-select>
+        </ion-col>
+       
+      </ion-row>
+    </ion-grid>
+  </ion-card>
+  <h2 class="ion-margin">Resultados</h2>
+  <ion-grid>
+    <ion-row>
+      <!-- Gráfico de mejor proveedor -->
+      <ion-col size="12" size-sm="4">
+        <ion-card>
+          <ion-card-content style="display: flex; justify-content: center; align-items: center; min-height: 250px;">
+            <ng-container *ngIf="chartMejoresProveedores.series?.length > 0; else sinDatosProveedor">
+              <apx-chart [series]="chartMejoresProveedores.series" [chart]="chartMejoresProveedores.chart"
+                [labels]="chartMejoresProveedores.labels" [legend]="chartMejoresProveedores.legend"
+                [dataLabels]="chartMejoresProveedores.dataLabels" [title]="chartMejoresProveedores.title">
+              </apx-chart>
+            </ng-container>
+            <ng-template #sinDatosProveedor>
+              <p style="color: #999; font-size: 14px; text-align: center; height: 430px;">
+                <ion-icon name="bar-chart-outline" style="margin-right: 6px;"></ion-icon>
+                No hay datos para mostrar.
+              </p>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Gráfico de proveedor con más incidentes -->
+      <ion-col size="12" size-sm="4">
+        <ion-card>
+          <ion-card-content style="display: flex; justify-content: center; align-items: center; min-height: 250px;">
+            <ng-container *ngIf="chartIncidentesProveedores.series?.length > 0; else sinDatosIncidentes">
+              <apx-chart [series]="chartIncidentesProveedores.series" [chart]="chartIncidentesProveedores.chart"
+                [labels]="chartIncidentesProveedores.labels" [legend]="chartIncidentesProveedores.legend"
+                [dataLabels]="chartIncidentesProveedores.dataLabels" [title]="chartIncidentesProveedores.title">
+              </apx-chart>
+            </ng-container>
+            <ng-template #sinDatosIncidentes>
+              <p style="color: #999; font-size: 14px; text-align: center; height: 430px;">
+                <ion-icon name="warning-outline" style="margin-right: 6px;"></ion-icon>
+                No hay incidentes registrados.
+              </p>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Gráfico de barras por tipo de incidente -->
+      <ion-col size="12" size-sm="4">
+        <ion-card>
+          <ion-card-content style="display: flex; justify-content: center; align-items: center; min-height: 250px;">
+            <ng-container *ngIf="hayDatosTiposIncidentes; else sinDatosTipos">
+              <apx-chart [series]="chartTiposIncidentes.series" [chart]="chartTiposIncidentes.chart"
+                [xaxis]="chartTiposIncidentes.xaxis" [title]="chartTiposIncidentes.title"
+                [dataLabels]="chartTiposIncidentes.dataLabels" [stroke]="chartTiposIncidentes.stroke">
+              </apx-chart>
+            </ng-container>
+            <ng-template #sinDatosTipos>
+              <p style="color: #999; font-size: 14px; text-align: center; height: 430px;">
+                <ion-icon name="analytics-outline" style="margin-right: 6px;"></ion-icon>
+                No hay tipos de incidente disponibles.
+              </p>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+  <!-- Sección de busqueda x proveedor -->
+  <ion-grid>
+    <ion-row>
+      <!-- Tabla de Ventas -->
+      <ion-col size="12" size-sm="6">
+        <h5 style="text-align: center;">Ventas del Proveedor</h5>
+        <ion-card>
+          <ion-card-content>
+            <ng-container *ngIf="ventasPaginadas.length > 0; else sinVentas">
+              <div class="table-responsive">
+                <table class="ventas-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Domicilio</th>
+                      <th>Fecha</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let venta of ventasPaginadas">
+                      <td>{{ obtenerNombreVendedor(venta.ID_VENDEDOR) ? obtenerNombreVendedor(venta.ID_VENDEDOR) :
+                        "Cargando nombre..." }}</td>
+                      <td>{{ venta.NOMBRE_LUGAR }}</td>
+                      <td>{{ venta.FECHA_VENTA }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ng-container>
+            <ng-template #sinVentas>
+              <p style="color: #888; text-align: center; margin: 20px 0; height: 315px;">
+                <ion-icon name="file-tray-outline" style="margin-right: 6px;"></ion-icon>
+                No se encontraron ventas para mostrar.
+              </p>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+
+        <div class="pagination" *ngIf="ventasPaginadas.length > 0">
+          <ion-button (click)="paginaAnteriorVentas()" [disabled]="paginaActualVentas === 1">Anterior</ion-button>
+          <span>Página {{ paginaActualVentas }} de {{ getTotalPaginasVentas() }}</span>
+          <ion-button (click)="paginaSiguienteVentas()"
+            [disabled]="paginaActualVentas === getTotalPaginasVentas()">Siguiente</ion-button>
+        </div>
+      </ion-col>
+
+      <!-- Tabla de Ventas con Incidentes -->
+      <ion-col size="12" size-sm="6">
+        <h5 style="text-align: center;">Ventas con Incidentes</h5>
+        <ion-card>
+          <ion-card-content>
+            <ng-container *ngIf="incidentesPaginados.length > 0; else sinIncidentes">
+              <div class="table-responsive">
+                <table class="incidentes-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Tipo de Incidente</th>
+                      <th>Fecha</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let incidente of incidentesPaginados">
+                      <td>{{ obtenerNombreVendedor(incidente.ID_VENDEDOR) ? obtenerNombreVendedor(incidente.ID_VENDEDOR) :
+                        "Cargando nombre..." }}</td>
+                      <td>{{ incidente.tipoIncidente }}</td>
+                      <td>{{ incidente.FECHA_VENTA }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ng-container>
+            <ng-template #sinIncidentes>
+              <p style="color: #888; text-align: center; margin: 20px 0; height: 315px;">
+                <ion-icon name="alert-circle-outline" style="margin-right: 6px;"></ion-icon>
+                No se encontraron incidentes en el periodo seleccionado.
+              </p>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+
+        <div class="pagination" *ngIf="incidentesPaginados.length > 0">
+          <ion-button (click)="paginaAnteriorIncidentes()"
+            [disabled]="paginaActualIncidentes === 1">Anterior</ion-button>
+          <span>Página {{ paginaActualIncidentes }} de {{ getTotalPaginasIncidentes() }}</span>
+          <ion-button (click)="paginaSiguienteIncidentes()"
+            [disabled]="paginaActualIncidentes === getTotalPaginasIncidentes()">Siguiente</ion-button>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+
+  <ion-grid>
+    <ion-row>
+      <!-- Actividad de ventas -->
+      <ion-col size="6">
+        <h5 style="text-align: center;">Estadísticas en las <br> ventas del Proveedor</h5>
+        <ng-container *ngIf="chartActividadVentas?.series?.length > 0; else sinDatosVentas">
+          <apx-chart [series]="chartActividadVentas.series" [chart]="chartActividadVentas.chart"
+            [xaxis]="chartActividadVentas.xaxis" [title]="chartActividadVentas.title"
+            [dataLabels]="chartActividadVentas.dataLabels" [stroke]="chartActividadVentas.stroke">
+          </apx-chart>
+        </ng-container>
+        <ng-template #sinDatosVentas>
+          <p style="text-align: center; color: #777; margin-top: 20px;">
+            <ion-icon name="stats-chart-outline" style="margin-right: 6px;"></ion-icon>
+            No hay estadísticas de ventas disponibles.
+          </p>
+        </ng-template>
+      </ion-col>
+
+      <!-- Actividad de incidentes -->
+      <ion-col size="6">
+        <h5 style="text-align: center;">Estadísticas <br> de incidentes del Proveedor</h5>
+        <ng-container *ngIf="chartActividadIncidentes?.series?.length > 0; else sinDatosIncidentes">
+          <apx-chart [series]="chartActividadIncidentes.series" [chart]="chartActividadIncidentes.chart"
+            [xaxis]="chartActividadIncidentes.xaxis" [title]="chartActividadIncidentes.title"
+            [dataLabels]="chartActividadIncidentes.dataLabels" [stroke]="chartActividadIncidentes.stroke">
+          </apx-chart>
+        </ng-container>
+        <ng-template #sinDatosIncidentes>
+          <p style="text-align: center; color: #777; margin-top: 20px;">
+            <ion-icon name="bug-outline" style="margin-right: 6px;"></ion-icon>
+            No hay estadísticas de incidentes disponibles.
+          </p>
+        </ng-template>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button>
+      <ion-icon name="chevron-up-circle"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button (click)="abrirModalReporte()">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </ion-fab-button>
+       <ion-fab-button (click)="abrirmodalVentas()">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-fab-button>
+
+      <ion-fab-button (click)="establecerPago()">
+        <ion-icon name="cash-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+</ion-content>

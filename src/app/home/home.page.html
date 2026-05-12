@@ -1,0 +1,267 @@
+<app-menu titulo="pc"></app-menu>
+
+
+<ion-content id="main-content" [fullscreen]="true">
+  <!-- SECCIÓN DE BUSQUEDA -->
+
+  <h3 style="margin: 1% 2% 0% 2%">
+    <b>Busqueda</b> & <span style="font-size:medium;"><ion-icon name="bar-chart-outline"></ion-icon> Analisis por
+      graficos</span>
+  </h3>
+
+
+
+
+  <ion-grid>
+    <ion-row>
+      <!-- Gráfico Pie: Mayor gasto por unidad -->
+      <ion-col size="12" size-sm="4">
+        <h5 style="text-align: center;">Mayor gasto por unidad</h5>
+        <ion-card *ngIf="chartPieTopCost.series?.length > 0">
+          <apx-chart [series]="chartPieTopCost.series" [chart]="chartPieTopCost.chart"
+            [labels]="chartPieTopCost.labels">
+          </apx-chart>
+        </ion-card>
+      </ion-col>
+
+      <!-- Gráfico Pie: Mayores servicios realizados -->
+      <ion-col size="12" size-sm="4">
+        <h5 style="text-align: center;">Mayores servicios realizados</h5>
+        <ion-card *ngIf="chartPieTopServices.series?.length > 0">
+          <apx-chart [series]="chartPieTopServices.series" [chart]="chartPieTopServices.chart"
+            [labels]="chartPieTopServices.labels">
+          </apx-chart>
+        </ion-card>
+      </ion-col>
+
+      <!-- Gráfico Bar: Actividad mensual -->
+      <ion-col size="12" size-sm="4">
+        <h5 style="text-align: center;">Actividad en el año</h5>
+        <ion-card *ngIf="chartBarMonthlyActivity.series?.length > 0">
+          <apx-chart [series]="chartBarMonthlyActivity.series" [chart]="chartBarMonthlyActivity.chart"
+            [xaxis]="chartBarMonthlyActivity.xaxis">
+          </apx-chart>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- SECCIÓN DE COLORIMETRÍA -->
+  <h5 style="text-align: center; margin-top: 20px;">
+    <b>Colorimetría de Unidades</b>
+  </h5>
+  <ion-row>
+    <ion-col size="12" size-sm="10">
+      <ion-searchbar style="--border-radius: 8px; transform: scale(1.21); width: 83%; margin: 0 auto;"
+        placeholder="Buscar por unidad y/o operador" showCancelButton="focus" (ionInput)="buscarUnidad($event)">
+      </ion-searchbar>
+    </ion-col>
+    <ion-col size="12" size-sm="2">
+      <!-- FILTRAR POR ESTADO -->
+      <ion-select style="--border-radius: 8px; width: 83%; margin: 0 auto; background: white;" placeholder="Filtrar por estado"
+      (ionChange)="estadoSeleccionado = $event.detail.value; aplicarFiltros()" fill="outline">
+        <ion-select-option value="">Todos</ion-select-option>
+        <ion-select-option value="verde">En buen estado</ion-select-option>
+        <ion-select-option value="amarillo">Próximo a servicio</ion-select-option>
+        <ion-select-option value="rojo">Servicio vencido</ion-select-option>
+      </ion-select>
+    </ion-col>
+  </ion-row>
+  <ion-card class="custom-card-table-colori">
+    <ion-card-content>
+      <div class="table-container">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Unidad</th>
+              <th>Operador</th>
+              <th style="text-align: center;">KM Actual</th>
+              <th style="text-align: center;">KM Próximo Servicio</th>
+              <th style="text-align: center;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let unidad of colorimetriaPaginada"  [ngClass]="calcularColor(unidad)">
+              <td>{{ unidad.unidad }}</td>
+              <td>{{ unidad.operador || 'No asignado' }}</td>
+              <td style="text-align: center;">{{ unidad.km_actual || 'N/A' }} km</td>
+              <td style="text-align: center;">{{ unidad.km_proximo_servicio || 'N/A' }} km</td>
+              <td style="text-align: center;">
+                <ion-badge [color]="calcularColor(unidad)">
+                  {{ calcularEstado(unidad) }}
+                </ion-badge>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" style="text-align: center; margin-top: 20px;">
+        <ion-button (click)="paginaColorimetriaAnterior()"
+          [disabled]="paginaColorimetriaActual === 1">Anterior</ion-button>
+        <span>Página {{ paginaColorimetriaActual }} de {{ getTotalPaginasColorimetria() }}</span>
+        <ion-button (click)="paginaColorimetriaSiguiente()"
+          [disabled]="paginaColorimetriaActual === getTotalPaginasColorimetria()">Siguiente</ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- SECCIÓN DE COLORES -->
+
+  <!-- SECCIÓN DE HISTORIAL -->
+  <ion-grid>
+    <ion-row>
+      <!-- Búsqueda por unidad -->
+      <ion-col size="12" size-sm="8">
+        <h5 style="text-align: center;">Búsqueda por unidad</h5>
+        <ion-searchbar style="--border-radius: 8px; transform: scale(1.21); width: 83%; margin: 0 auto;"
+          placeholder="Buscar algún servicio/unidad/artículo/fecha" showCancelButton="focus"
+          (ionInput)="buscarEvento($event)">
+        </ion-searchbar>
+      </ion-col>
+
+      <!-- Búsqueda por rango de fechas -->
+      <ion-col size="12" size-sm="4">
+        <h5 style="text-align: center;">Búsqueda por rango de fechas</h5>
+        <ion-card style="border-radius: 13px;">
+          <ion-row>
+            <!-- Fecha inicial -->
+            <ion-col size="12" size-sm="4" style="text-align: center;">
+              <ion-datetime-button datetime="datetimeIni"></ion-datetime-button>
+              <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime id="datetimeIni" presentation="date"
+                    (ionChange)="setFechaInicio($event)"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+              <span>Fecha inicial</span>
+            </ion-col>
+
+            <!-- Fecha final -->
+            <ion-col size="12" size-sm="4" style="text-align: center;">
+              <ion-datetime-button datetime="datetimeFin" color="light"></ion-datetime-button>
+              <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime id="datetimeFin" presentation="date" (ionChange)="setFechaFin($event)"></ion-datetime>
+                </ng-template>
+              </ion-modal>
+              <span>Fecha final</span>
+            </ion-col>
+
+            <ion-col size="12" size-sm="4" style="text-align: center;">
+              <ion-button color="tertiary" fill="solid" shape="round" size="small" (click)="reiniciarBusqueda()">
+                Reiniciar búsqueda
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <!-- FIN SECCIÓN DE BUSQUEDA -->
+
+  <h5 style="text-align: center;">
+    <b>Historial</b>
+  </h5>
+  <ion-card class="custom-card-table">
+    <ion-card-content>
+      <div class="table-container">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Unidad</th>
+              <th>Servicio</th>
+              <th>Artículos Utilizados</th>
+              <th>Kilometraje</th>
+              <th>Costo Total</th>
+              <th>Fecha</th>
+              <th style="text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let registro of registrosPaginados">
+              <!-- Unidad -->
+              <td>{{ registro.unidad?.unidad || 'N/A' }}</td>
+
+              <!-- Servicio -->
+              <td>{{ registro.servicio || 'N/A' }}</td>
+
+              <!-- Artículos Utilizados -->
+              <td>
+                <ng-container *ngIf="registro.articulos && registro.articulos.length > 0; else noArticulos">
+                  <ul>
+                    <li *ngFor="let articulo of registro.articulos">
+                      {{ articulo.nombre }} ({{ articulo.cantidad || 1 }}) - ${{ articulo.precio }}
+                    </li>
+                  </ul>
+                </ng-container>
+                <ng-template #noArticulos>
+                  No hay artículos registrados.
+                </ng-template>
+              </td>
+
+              <!-- Kilometraje -->
+              <td>{{ registro.kilometraje ? registro.kilometraje + ' km' : 'N/A' }}</td>
+
+              <!-- Costo Total -->
+              <td>${{ registro.costo | number: '1.2-2' || 'N/A' }}</td>
+
+              <!-- Fecha -->
+              <td>{{ registro.fecha || 'N/A' }}</td>
+
+              <!-- Acciones -->
+              <td style="text-align: center;">
+                <ion-row class="ion-justify-content-center ion-align-items-center">
+                  <!-- Eliminar -->
+                  <ion-button fill="clear" color="danger" size="large" (click)="borrarEvento(registro)"
+                    *ngIf="userRole == 'admin'">
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                  </ion-button>
+
+                  <!-- Editar -->
+                  <ion-button fill="clear" color="primary" size="large" (click)="editarEvento(registro)">
+                    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                  </ion-button>
+
+                  <!-- Ver Detalles -->
+                  <ion-button fill="clear" color="secondary" size="large" (click)="detallesEventoRegistro(registro)">
+                    <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
+                  </ion-button>
+
+                  <!-- Exportar -->
+                  <ion-button fill="clear" color="success" size="large" (click)="exportarHisotiralEspesifico(registro)">
+                    <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+                  </ion-button>
+                </ion-row>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="pagination">
+    <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+    <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
+    <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+  </div>
+
+  <!-- Grafica de pastel para indicar los autos más afectados, y grafica de barras para la acitivdad segun el mes -->
+
+
+  <!-- BTON DE ACCIONES -->
+  <ion-fab horizontal="end" vertical="bottom" slot="fixed">
+    <ion-fab-button>
+      <ion-icon name="document-outline"></ion-icon>
+    </ion-fab-button>
+
+    <ion-fab-list side="top">
+      <ion-fab-button (click)="exportarTodosLosEventos()">
+        <ion-icon name="documents-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="agregarEvento()">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+</ion-content>

@@ -1,0 +1,84 @@
+<app-menu titulo="admSorteos"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+    <div class="ion-margin">
+        <ion-item class="custom-datetime-item" lines="none">
+            <ion-label>Mes de búsqueda</ion-label>
+
+            <!-- El botón que abre el modal -->
+            <ion-datetime-button datetime="fechaMes"></ion-datetime-button>
+
+            <!-- El datetime DEBE estar justo después, directo en el DOM, NO envuelto en divs, ni ngIf, ni nada -->
+            <ion-modal [keepContentsMounted]="true">
+                <ng-template>
+                    <ion-datetime id="fechaMes" presentation="month-year" prefer-wheel="false"
+                        (ionChange)="cambiarMes($event)"></ion-datetime>
+                </ng-template>
+            </ion-modal>
+
+        </ion-item>
+
+    </div>
+
+    <ion-grid>
+        <ion-searchbar style="--border-radius: 8px; transform: scale(1.2); width: 83%; margin: 0 auto;"
+            placeholder="ID ó nombre del distribuidor" [debounce]="250" showCancelButton="focus"
+            (ionInput)="filtrarVenta()" (ionChange)="actualizarDatos()">
+        </ion-searchbar>
+        <ion-row>
+            <ion-col size="12" size-md="8">
+                <h3 style="text-align: center;">Clientes registrados en el sorteo</h3>
+                <ion-card class="cardInfo">
+                    <div class="table-container">
+                        <table class="responsive-table">
+                            <thead>
+                                <tr>
+                                    <th># Registros</th>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Fecha y hora de registro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+                <h3 style="text-align: center;">Estadistica y ganadores del mes</h3>
+                <ion-card class="cardInfo">
+                    <div class="table-container">
+                        <table class="responsive-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Fecha y hora de registro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </ion-card>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+     <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button>
+      <ion-icon name="chevron-up-circle"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button>
+        <ion-icon name="documents-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="rToGanaPremiosButano()">
+        <ion-icon name="link-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+</ion-content>

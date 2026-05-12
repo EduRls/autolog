@@ -1,0 +1,266 @@
+<ion-menu side="start" content-id="main-content" type="overlay">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Menú</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content style="--background: #FFF;">
+    <ion-list>
+      <ion-item>
+        <ion-label>
+          <b>VENTAS</b>
+        </ion-label>
+      </ion-item>
+      <ion-item button (click)="rToPanelVentas()">
+        <ion-icon name="pie-chart-outline" slot="start"></ion-icon>
+        <ion-label>Panel de Ventas</ion-label>
+      </ion-item>
+      <ion-item button (click)="rToHistorialVentas()">
+        <ion-icon name="list-outline" slot="start"></ion-icon>
+        <ion-label>Hisotiral de ventas & Incidentes</ion-label>
+      </ion-item>
+      <ion-item button (click)="rToDistribu()">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        <ion-label>Distribuidores</ion-label>
+      </ion-item>
+      <ion-item button (click)="rToGenerarCodigo()" *ngIf="userRole == 'admin'">
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        <ion-label>Generar codigo</ion-label>
+      </ion-item>
+      <ion-item button (click)="rToProductos()" *ngIf="userRole == 'admin'">
+        <ion-icon name="cube-outline" slot="start"></ion-icon>
+        <ion-label>Productos - Cilindros</ion-label>
+      </ion-item>
+      <ion-item button (click)="rToSroteos()">
+        <ion-icon name="gift-outline" slot="start"></ion-icon>
+        <ion-label>Sorteos</ion-label>
+      </ion-item>
+
+
+      <ion-item>
+        <ion-label>
+          <b>SERVICIOS & <b>AUTOS</b></b>
+        </ion-label>
+      </ion-item>
+      <ion-item button (click)="rToPanelControl()">
+        <ion-icon name="pie-chart-outline" slot="start"></ion-icon>
+        <ion-label>Panel de Servicios</ion-label>
+      </ion-item>
+      <ion-item button (click)="rToAutosPage()">
+        <ion-icon name="car-outline" slot="start"></ion-icon>
+        <ion-label>Autos</ion-label>
+      </ion-item>
+      <ion-item button (click)="rToPageArticulos()">
+        <ion-icon name="cart-outline" slot="start"></ion-icon>
+        <ion-label>Articulos</ion-label>
+      </ion-item>
+
+      <ion-item *ngIf="userRole == 'admin'">
+        <ion-label>
+          <b>HERRAMIENTAS</b>
+        </ion-label>
+      </ion-item>
+      <ion-item button (click)="rToConvertidor()" *ngIf="userRole == 'admin'">
+        <ion-icon name="code-slash-outline" slot="start"></ion-icon>
+        <ion-label>Convertir JSON</ion-label>
+      </ion-item>
+
+      <ion-item *ngIf="userRole == 'admin'">
+        <ion-label>
+          <b>USUARIOS</b>
+        </ion-label>
+      </ion-item>
+      <ion-item button (click)="rToAdmUsuarios()" *ngIf="userRole == 'admin'">
+        <ion-icon name="person-add-outline" slot="start"></ion-icon>
+        <ion-label>Cuentas</ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>
+
+<ion-header [translucent]="true" *ngIf="titulo == 'pc'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>P A N E L</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;C O N T R O L
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-header [translucent]="true" *ngIf="titulo == 'auto'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>A D M I N I S T R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;A U T O S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-header [translucent]="true" *ngIf="titulo == 'art'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>A D M I N I S T R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;A R T I C U L O S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-header [translucent]="true" *ngIf="titulo == 'admUser'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>A D M I N I S T R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;U S U A R I O S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-header [translucent]="true" *ngIf="titulo == 'panelVen'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>P A N E L</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;V E N T A S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-header [translucent]="true" *ngIf="titulo == 'historialVentas'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>H I S T O R I A L</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;V E N T A S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-header [translucent]="true" *ngIf="titulo == 'distribu'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>A D M I N I S T R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;D I S T R I B U I D O R E S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-header [translucent]="true" *ngIf="titulo == 'cilindros'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>A D M I N I S T R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;C I L I N D R O S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-header [translucent]="true" *ngIf="titulo == 'incidentes'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>A D M I N I S T R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;I N C I D E N T E S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-header [translucent]="true" *ngIf="titulo == 'codigosQR'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>G E N E R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;C O D I G O S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-header [translucent]="true" *ngIf="titulo == 'convertidorDictamen'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>C O N V E R T I D O R</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;J S O N
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-header [translucent]="true" *ngIf="titulo == 'admSorteos'">
+  <ion-toolbar style="--background-color: #FCFCFD;">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title style="text-align: center; color: #475569; letter-spacing: 5px;">
+      <b>A D M I N I S T R A C I Ó N</b>&nbsp;&nbsp;&nbsp;D E&nbsp;&nbsp;&nbsp;S O R T E O S
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>

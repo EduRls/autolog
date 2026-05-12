@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar >
+    <ion-title style="text-align: center;">
+      Agrega un nuevo artículo
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="agregarArticuloNuevo()" [formGroup]="articuloNuevo" style="margin: 5%;">
+    <ion-input 
+    label="Nombre del artículo" 
+    label-placement="floating" 
+    fill="outline" 
+    placeholder="Nombre" 
+    style="--background: #ffffff;"
+    formControlName="articulo">
+    </ion-input>
+    <br>
+    <ion-input 
+    label="Precio del artículo" 
+    label-placement="floating"
+    type="number" 
+    fill="outline" 
+    placeholder="Precio" 
+    style="--background: #ffffff;"
+    formControlName="precio">
+    </ion-input>
+    <br>
+    <ion-textarea 
+    label="Descripción del artículo" 
+    labelPlacement="floating" 
+    fill="outline" 
+    placeholder="Descripción" 
+    [autoGrow]="true" 
+    rows="9" 
+    style="--background: #ffffff;"
+    formControlName="desc">
+    </ion-textarea>
+    <ion-button type="submit" expand="block" fill="clear" shape="round" color="success">
+      Agregar artículo
+    </ion-button>
+  </form>
+</ion-content>

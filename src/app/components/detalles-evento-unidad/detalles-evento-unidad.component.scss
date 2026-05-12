@@ -1,0 +1,111 @@
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.pagination ion-button {
+    margin: 0 10px;
+}
+
+.custom-card {
+    margin: 2%;
+    box-shadow: 1px;
+    /* Elimina la sombra */
+    border-radius: 8px;
+    /* Bordes redondeados (ajusta el valor según prefieras) */
+    border: 1px solid #e0e0e0;
+    /* Opcional: agrega un borde suave */
+    background-color: #ffffff;
+    /* Fondo del card */
+}
+
+.custom-card-data {
+    margin: 1%;
+    box-shadow: 1px;
+    /* Elimina la sombra */
+    border-radius: 8px;
+    /* Bordes redondeados (ajusta el valor según prefieras) */
+    border: 1px solid #e0e0e0;
+    /* Opcional: agrega un borde suave */
+    background-color: #ffffff;
+    /* Fondo del card */
+}
+
+.custom-card-table {
+    margin: 1%;
+    box-shadow: 1px;
+    /* Elimina la sombra */
+    border-radius: 8px;
+    /* Bordes redondeados (ajusta el valor según prefieras) */
+    border: 1px solid #e0e0e0;
+    /* Opcional: agrega un borde suave */
+    background-color: #ffffff;
+    /* Fondo del card */
+    width: 98%;
+    /* Asegura que el card use todo el ancho disponible */
+    max-width: 100%;
+    /* Evita que exceda el contenedor */
+    height: 75%;
+}
+
+
+.table-container {
+    overflow-x: auto;
+    margin: 0%;
+    padding: 0%;
+    /* Habilita desplazamiento horizontal si la tabla es muy ancha */
+}
+
+.responsive-table {
+    width: 100%;
+    /* Asegura que la tabla ocupe todo el ancho disponible */
+    border-collapse: collapse;
+    /* Remueve los espacios entre celdas */
+    text-align: left;
+    /* Alinea el texto a la izquierda */
+}
+
+/* Encabezado */
+.responsive-table th {
+    font-size: 18px;
+    /* Aumenta el tamaño de la letra */
+    font-weight: bold;
+    /* Hace el texto del encabezado en negritas */
+    background-color: #f8f8f8;
+    /* Fondo para los encabezados */
+    padding: 10px 12px;
+    /* Espacio interno en las celdas */
+    border-bottom: 1px solid #ddd;
+    /* Solo borde inferior */
+}
+
+/* Celdas de datos */
+.responsive-table td {
+    font-size: 16px;
+    /* Tamaño de texto para las celdas */
+    padding: 10px 12px;
+    /* Espacio interno en las celdas */
+    border-bottom: 1px solid #ddd;
+    /* Solo borde inferior */
+}
+
+/* Alternancia de colores en las filas */
+.responsive-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+    /* Alterna el color en las filas */
+}
+
+/* Elimina los bordes laterales */
+.responsive-table th:first-child,
+.responsive-table td:first-child {
+    border-left: none;
+    /* Sin borde izquierdo */
+}
+
+.responsive-table th:last-child,
+.responsive-table td:last-child {
+    border-right: none;
+    /* Sin borde derecho */
+}

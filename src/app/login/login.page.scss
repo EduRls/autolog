@@ -1,0 +1,24 @@
+ion-content {
+    --background: #f5f5f5; /* Fondo claro */
+  }
+  
+  ion-card {
+    --background: #ffffff; /* Fondo blanco del card */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    border-radius: 15px; /* Bordes redondeados */
+  }
+  
+  ion-input {
+    --background: #f9f9f9; /* Fondo claro en los campos de entrada */
+    border-radius: 8px; /* Bordes redondeados */
+  }
+  
+  ion-button {
+    margin-top: 15px; /* Espaciado entre botones */
+  }
+  
+  ion-note {
+    color: var(--ion-color-danger); /* Texto de errores en color rojo */
+    font-size: 12px;
+  }
+  

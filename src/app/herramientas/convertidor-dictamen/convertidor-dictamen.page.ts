@@ -197,8 +197,7 @@ export class ConvertidorDictamenPage {
         tipo_producto: 'Gas Licuado de Petróleo (Gas LP)',
         metodo: gm(h1, 'A3:H3'),
         tabla_componentes: {
-          columnas: columnMap,
-          filas,
+          "compontentes": filas,
           totales: {
             etiqueta: gm(h1, 'D21:D21'),
             porcentaje_volumen_liquido: this.toNumberOrNull(h1?.['E21']?.v),
@@ -218,8 +217,7 @@ export class ConvertidorDictamenPage {
           propano_normalizado: { etiqueta: gm(h1, 'D30:D30'), valor: this.toNumberOrNull(h1?.['E30']?.v), unidad: gm(h1, 'F30:F30') },
           butano_normalizado: { etiqueta: gm(h1, 'D31:D31'), valor: this.toNumberOrNull(h1?.['E31']?.v), unidad: gm(h1, 'F31:F31') }
         }
-      },
-      fin_informe: (gm(h2, 'B76:U76') || '').toLowerCase().includes('fin del documento')
+      }
     };
   }
 

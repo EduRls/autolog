@@ -15,7 +15,7 @@
 
     <div *ngIf="jsonPreview" class="json-preview">
       <h3 style="text-align: center;"> JSON GENERADO: </h3>
-      <pre>{{ jsonPreview | json }}</pre>
+      <ion-textarea autoGrow="true" rows="18" [(ngModel)]="jsonEditable" (ionInput)="onJsonEditableChange()"></ion-textarea>
     </div>
 
     <ion-grid class="actions" *ngIf="jsonPreview">

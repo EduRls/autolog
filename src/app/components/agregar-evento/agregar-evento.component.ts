@@ -62,13 +62,8 @@ export class AgregarEventoComponent implements OnInit {
 
   async getAutos() {
     this.firebaseService.getAutos().subscribe({
-      next: (data) => {
-        this.autos = data;
-
-      },
-      error: (error) => {
-        console.log('Error getting documents', error);
-      }
+      next: (data) => { this.autos = data; },
+      error: (error) => { console.log('Error getting documents', error); }
     });
   }
 

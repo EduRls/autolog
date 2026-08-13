@@ -16,6 +16,8 @@ export class DetallesEventoUnidadComponent implements OnInit {
   @Input() evento: any;
 
   public historialUnidad: any[] = [];
+  public historialFiltrado: any[] = [];
+  public terminoBusqueda: string = '';
   registrosPaginados: any[] = [];
   paginaActual: number = 1;
   registrosPorPagina: number = 5;
@@ -72,17 +74,33 @@ export class DetallesEventoUnidadComponent implements OnInit {
     this.historialUnidad = this.datos
       .filter((registro: any) => registro.unidad.unidad === this.evento.unidad.unidad)
       .sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+    this.historialFiltrado = [...this.historialUnidad];
     this.actualizarTabla();
   }
 
   getTotalPaginas(): number {
-    return Math.ceil(this.historialUnidad.length / this.registrosPorPagina);
+    return Math.max(1, Math.ceil(this.historialFiltrado.length / this.registrosPorPagina));
   }
 
   actualizarTabla() {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
     const fin = inicio + this.registrosPorPagina;
-    this.registrosPaginados = this.historialUnidad.slice(inicio, fin);
+    this.registrosPaginados = this.historialFiltrado.slice(inicio, fin);
+  }
+
+  buscarHistorial(event: any) {
+    this.terminoBusqueda = String(event.detail?.value || event.target?.value || '').trim().toLowerCase();
+
+    this.historialFiltrado = !this.terminoBusqueda
+      ? [...this.historialUnidad]
+      : this.historialUnidad.filter((registro: any) => {
+          const articulos = registro.articulos?.map((articulo: any) => articulo.nombre).join(' ') || '';
+          return [registro.unidad?.unidad, registro.servicio, articulos, registro.fecha, registro.costo]
+            .some(valor => String(valor || '').toLowerCase().includes(this.terminoBusqueda));
+        });
+
+    this.paginaActual = 1;
+    this.actualizarTabla();
   }
 
   paginaSiguiente() {

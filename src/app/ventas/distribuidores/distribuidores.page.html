@@ -1,6 +1,10 @@
 <app-menu titulo="distribu"></app-menu>
 
 <ion-content id="main-content" [fullscreen]="true" class="ion-padding">
+  <div class="page-toolbar">
+    <div><h2 class="toolbar-title">Directorio de distribuidores</h2><p>Consulta identificadores, rutas y zonas asignadas.</p></div>
+    <ion-button color="primary" (click)="addDistribuidor()"><ion-icon slot="start" name="add-outline"></ion-icon>Nuevo distribuidor</ion-button>
+  </div>
   <h3 style="margin: 1% 2% 0% 2%">
     <b>Administración</b> || <span style="font-size:medium;"><ion-icon size="medium" name="people-outline"></ion-icon>
       Distribuidores</span>

@@ -1,10 +1,8 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title style="text-align: center;">
-      Detalles de la unidad - {{ evento.unidad.unidad }}
-    </ion-title>
+    <ion-title>Detalles de la unidad · {{ evento.unidad.unidad }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="cancel()">
+      <ion-button (click)="cancel()" aria-label="Cerrar detalles" title="Cerrar">
         <ion-icon slot="icon-only" name="close-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -12,93 +10,62 @@
 </ion-header>
 
 <ion-content>
-  <!-- SECCIÓN ESPECIAL -->
-  <ion-grid fixed>
-    <ion-row>
-      <!-- Dinero invertido en la unidad -->
-      <ion-col size="12" size-sm="4">
-        <h5 style="text-align: center;">
-          <b>Dinero invertido en la unidad</b>
-        </h5>
-        <ion-card style="height: 55%;">
-          <ion-card-content>
-            <h1 style="text-align: center; margin-top: 5%;">${{ dineroInvertido | number }}</h1>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-  
-      <!-- Datos de la unidad -->
-      <ion-col size="12" size-sm="4">
-        <h5 style="text-align: center;">
-          <b>Datos de la unidad</b>
-        </h5>
-        <ion-card style="height: 55%;">
-          <ion-card-content>
-            <p><b>Placa:</b> {{ placaUnidad }}</p>
-            <p><b>Operador:</b> {{ operadorUnidad }}</p>
-            <p><b>Último servicio:</b> {{ ultimaFechaServicio }}</p>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-  
-      <!-- Administración -->
-      <ion-col size="12" size-sm="4">
-        <h5 style="text-align: center;">
-          <b>Administración</b>
-        </h5>
-        <ion-card style="height: 55%;">
-          <ion-card-content style="text-align: center; margin-top: 2%;">
-            <ion-button shape="round" expand="block" (click)="exportarHisotiral()" color="success">
-              Exportar a Excel
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <div class="details-layout">
+    <section class="summary-grid">
+      <article class="summary-card investment-card">
+        <span class="summary-icon"><ion-icon name="cash-outline"></ion-icon></span>
+        <div><small>Inversión acumulada</small><strong>{{ dineroInvertido | currency:'MXN':'symbol-narrow':'1.2-2' }}</strong></div>
+      </article>
 
-  <!-- Tabla de historial -->
-  <ion-card class="custom-card-table">
-    <ion-card-content>
+      <article class="summary-card unit-card">
+        <span class="summary-icon"><ion-icon name="car-outline"></ion-icon></span>
+        <div class="unit-details">
+          <small>Información de la unidad</small>
+          <span><b>Placa:</b> {{ placaUnidad }}</span>
+          <span><b>Operador:</b> {{ operadorUnidad }}</span>
+          <span><b>Último servicio:</b> {{ ultimaFechaServicio }}</span>
+        </div>
+      </article>
+
+      <article class="summary-card export-card">
+        <div><small>Reporte completo</small><span>Descarga todo el historial de esta unidad.</span></div>
+        <ion-button color="success" (click)="exportarHisotiral()"><ion-icon slot="start" name="download-outline"></ion-icon>Exportar a Excel</ion-button>
+      </article>
+    </section>
+
+    <section class="history-section">
+      <div class="history-heading">
+        <div><h2>Historial de servicios</h2><p>{{ historialFiltrado.length }} registros encontrados</p></div>
+        <ion-searchbar [value]="terminoBusqueda" (ionInput)="buscarHistorial($event)"
+          placeholder="Buscar servicio, artículo o fecha" showCancelButton="focus" aria-label="Buscar en el historial de la unidad"></ion-searchbar>
+      </div>
+
       <div class="table-container">
         <table class="responsive-table">
-          <thead>
-            <tr>
-              <th>Unidad</th>
-              <th>Servicio</th>
-              <th>Artículos</th>
-              <th>Costo</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Unidad</th><th>Servicio</th><th>Artículos</th><th class="number-cell">Costo</th><th>Fecha</th></tr></thead>
           <tbody>
             <tr *ngFor="let registro of registrosPaginados">
-              <td>{{ registro.unidad.unidad }}</td>
+              <td><strong>{{ registro.unidad.unidad }}</strong></td>
               <td>{{ registro.servicio }}</td>
               <td>
-                <div *ngIf="registro.articulos && registro.articulos.length > 0; else noArticulos">
-                  <ul>
-                    <li *ngFor="let articulo of registro.articulos">
-                      {{ articulo.nombre }} ({{ articulo.cantidad }}) - ${{ articulo.precio }}
-                    </li>
-                  </ul>
-                </div>
-                <ng-template #noArticulos>
-                  {{ registro.articulo || 'Sin artículos' }}
-                </ng-template>
+                <ul class="article-list" *ngIf="registro.articulos && registro.articulos.length > 0; else noArticulos">
+                  <li *ngFor="let articulo of registro.articulos">{{ articulo.nombre }} × {{ articulo.cantidad }} · {{ articulo.precio | currency:'MXN':'symbol-narrow':'1.2-2' }}</li>
+                </ul>
+                <ng-template #noArticulos><span class="muted-value">{{ registro.articulo || 'Sin artículos' }}</span></ng-template>
               </td>
-              <td>${{ registro.costo | number }}</td>
+              <td class="number-cell"><strong>{{ registro.costo | currency:'MXN':'symbol-narrow':'1.2-2' }}</strong></td>
               <td>{{ registro.fecha }}</td>
             </tr>
+            <tr *ngIf="registrosPaginados.length === 0"><td colspan="5"><div class="empty-results"><ion-icon name="search-outline"></ion-icon><span>No se encontraron servicios.</span></div></td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="pagination" style="text-align: center; margin-top: 20px;">
-        <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+      <div class="pagination">
+        <ion-button fill="outline" (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
         <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
-        <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+        <ion-button fill="outline" (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
       </div>
-    </ion-card-content>
-  </ion-card>
+    </section>
+  </div>
 </ion-content>

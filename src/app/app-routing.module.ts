@@ -84,6 +84,11 @@ const routes: Routes = [
     loadChildren: () => import('./ventas/sorteos/sorteos.module').then( m => m.SorteosPageModule)
   },
   {
+    path: 'panel-expendio',
+    loadChildren: () => import('./expendio/panel-expendio/panel-expendio.module').then(m => m.PanelExpendioPageModule),
+    ...canActivate(redirectUnauthorizedToLogin)
+  },
+  {
     path: 'politicas',
     loadChildren: () => import('./politicas/politicas.module').then( m => m.PoliticasPageModule)
   },

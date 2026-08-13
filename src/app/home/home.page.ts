@@ -52,7 +52,7 @@ export class HomePage implements OnInit {
   registros: any[] = []; // Lista completa de registros
   registrosPaginados: any[] = []; // Registros visibles en la página actual
   paginaActual: number = 1; // Página actual
-  registrosPorPagina: number = 5; // Registros por página
+  registrosPorPagina: number = 5;
   registrosOriginales: any[] = []; // Lista completa de registros sin filtrar
 
   fechaInicio: string | null = null; // Fecha inicial seleccionada
@@ -89,7 +89,6 @@ export class HomePage implements OnInit {
     if (this.fechaInicio && this.fechaFin) {
       const inicio = new Date(this.fechaInicio).getTime();
       const fin = new Date(this.fechaFin).getTime();
-
       this.registros = this.registrosOriginales.filter((item) => {
         const fechaRegistro = new Date(item.fecha).getTime();
         return fechaRegistro >= inicio && fechaRegistro <= fin;
@@ -97,9 +96,8 @@ export class HomePage implements OnInit {
     } else {
       this.registros = [...this.registrosOriginales];
     }
-
     this.actualizarTabla();
-    this.generarGraficosConDatos(this.registros); // Actualizar gráficos con registros filtrados
+    this.generarGraficosConDatos(this.registros);
   }
 
   async showLoading(msg: string) {
@@ -131,9 +129,7 @@ export class HomePage implements OnInit {
   async getEventos() {
     this.firebaseSerive.getEvento().subscribe({
       next: (data) => {
-        this.storageService.get('currentUser').then((user: any) => {
-          this.userRole = user.rol;
-        })
+        this.storageService.get('currentUser').then((user: any) => { this.userRole = user.rol; });
         const registrosOrdenados = data.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
         this.registros = registrosOrdenados;
         this.registrosOriginales = [...registrosOrdenados];
@@ -143,14 +139,11 @@ export class HomePage implements OnInit {
             this.unidadesFiltradas = [...this.autos];
             this.actualizarColorimetriaPaginada();
           },
-        })
-
+        });
         this.actualizarTabla();
-        this.generarGraficos(); // Generar gráficos después de cargar y ordenar datos
+        this.generarGraficos();
       },
-      error: (error) => {
-        console.error('Error al obtener eventos:', error);
-      },
+      error: (error) => { console.error('Error al obtener eventos:', error); },
     });
   }
 
@@ -316,8 +309,8 @@ export class HomePage implements OnInit {
   reiniciarBusqueda() {
     this.fechaInicio = null; // Limpia la fecha inicial
     this.fechaFin = null;    // Limpia la fecha final
-    this.registros = [...this.registrosOriginales]; // Restaura los datos originales
-    this.actualizarTabla(); // Actualiza la tabla
+    this.registros = [...this.registrosOriginales];
+    this.actualizarTabla();
   }
 
   // Cambia a la página siguiente
@@ -341,7 +334,7 @@ export class HomePage implements OnInit {
   async agregarEvento() {
     const modalAddEvento = await this.modalController.create({
       component: AgregarEventoComponent,
-      cssClass: 'my-custom-class-agregar-evento'
+      cssClass: 'autolog-service-modal'
     });
 
     modalAddEvento.present();
@@ -376,10 +369,10 @@ export class HomePage implements OnInit {
   async borrarRegistro(item: any) {
     this.showLoading('Eliminando evento')
     try {
-      this.firebaseSerive.deleteEvento(item.id).then((res => {
+      this.firebaseSerive.deleteEvento(item.id).then(() => {
         this.actualizarTabla();
         this.presentToast('Evento eliminado correctamente', 'bottom', 'success');
-      }))
+      });
     } catch (error) {
       this.presentToast('Error al eliminar evento', 'bottom', 'danger');
       console.error(error);

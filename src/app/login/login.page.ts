@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonicModule, LoadingController, ToastController } from '@ionic/angular';
+import { LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth.service';
 import { FirebaseService } from '../services/firebase/firebase.service';
@@ -32,65 +32,57 @@ export class LoginPage implements OnInit {
   }
 
   async login() {
-    if (this.loginForm.valid) {
-      const loading = await this.loadingController.create({
-        message: 'Iniciando sesión...',
-      });
-      await loading.present();
-  
-      const { email, password } = this.loginForm.value;
-  
-      try {
-        const userCredential = await this.authService.login({ email, password });
-  
-        if (userCredential) {
-          // Obtén la información del usuario desde Firestore
-          const userDoc = await this.firebaseService.getUserByEmail(email); // Necesitas implementar esta función
-          const userData = userDoc ? userDoc.data() : null;
-  
-          if (userData) {
-            // Guarda el usuario y rol en el almacenamiento local o en un servicio
-            this.storageService.set('currentUser', userData); // Ejemplo con localStorage
-            console.log('Información del usuario:', userData);
-  
-            // Muestra mensaje de éxito y redirige
-            this.showToast('Inicio de sesión exitoso', 'success');
-            this.router.navigate(['/home']); // Redirige al dashboard
-          } else {
-            // Si no se encuentra el usuario en Firestore
-            this.showToast('El usuario no tiene un rol asignado', 'danger');
-          }
-        } else {
-          // Si el inicio de sesión falló
-          this.showToast('Correo o contraseña incorrectos', 'danger');
-        }
-      } catch (error) {
-        console.error('Error durante el inicio de sesión:', error);
-        this.showToast('Ocurrió un error al iniciar sesión', 'danger');
-      } finally {
-        loading.dismiss();
+    if (!this.loginForm.valid) {
+      await this.showToast('Por favor, completa los campos correctamente', 'warning');
+      return;
+    }
+
+    const loading = await this.loadingController.create({ message: 'Iniciando sesión...' });
+    await loading.present();
+    const { email, password } = this.loginForm.value;
+
+    try {
+      const userCredential = await this.authService.login({ email, password });
+
+      if (!userCredential) {
+        await this.showToast('Correo o contraseña incorrectos', 'danger');
+        return;
       }
-    } else {
-      this.showToast('Por favor, completa los campos correctamente', 'warning');
+
+      const userDoc = await this.firebaseService.getUserProfile(userCredential.user.uid, email);
+      const userData = userDoc?.data();
+
+      if (!userData) {
+        await this.showToast('El usuario no tiene un rol asignado', 'danger');
+        return;
+      }
+
+      const normalizedUser = {
+        ...userData,
+        rol: String(userData['rol'] || '').trim().toLowerCase()
+      };
+
+      await this.storageService.set('currentUser', normalizedUser);
+      await this.showToast('Inicio de sesión exitoso', 'success');
+      await this.router.navigate(['/home']);
+    } catch (error) {
+      console.error('Error durante el inicio de sesión:', error);
+      await this.showToast('Ocurrió un error al iniciar sesión', 'danger');
+    } finally {
+      await loading.dismiss();
     }
   }
-  
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning') {
-    const toast = await this.toastController.create({
-      message,
-      duration: 2000,
-      color,
-    });
+    const toast = await this.toastController.create({ message, duration: 2000, color });
     await toast.present();
   }
 
   goToRegister() {
-    this.router.navigate(['/register']); // Cambia la ruta a la pantalla de registro
+    this.router.navigate(['/register']);
   }
 
   recoverPassword() {
-    this.router.navigate(['/recover-password']); // Cambia la ruta a la pantalla de recuperación de contraseña
+    this.router.navigate(['/recover-password']);
   }
-
 }

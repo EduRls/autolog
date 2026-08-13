@@ -12,7 +12,8 @@ import {
   addDoc,
   query,
   where,
-  getDocs
+  getDocs,
+  getDoc
 } from 'firebase/firestore';
 import {
   Auth
@@ -59,6 +60,16 @@ export class FirebaseService {
     } else {
       return null; // No se encontró el usuario
     }
+  }
+
+  async getUserProfile(uid: string, email: string) {
+    const userByUid = await getDoc(doc(this.firestore, `usuarios/${uid}`));
+
+    if (userByUid.exists()) {
+      return userByUid;
+    }
+
+    return this.getUserByEmail(email);
   }
 
 

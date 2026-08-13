@@ -1,210 +1,113 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title style="text-align: center;">
-      Agrega un nuevo servicio
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cancel()">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<form class="service-form" (ngSubmit)="agregarEvento()" [formGroup]="eventoNuevo">
+  <ion-header class="service-modal-header">
+    <ion-toolbar>
+      <div class="modal-heading">
+        <span class="heading-icon" aria-hidden="true"><ion-icon name="construct-outline"></ion-icon></span>
+        <div><ion-title>Registrar nuevo servicio</ion-title><p>Captura los datos del mantenimiento y los artículos utilizados.</p></div>
+      </div>
+      <ion-buttons slot="end">
+        <ion-button type="button" class="close-button" (click)="cancel()" aria-label="Cerrar modal" title="Cerrar">
+          <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
 
-<ion-content>
-  <form (ngSubmit)="agregarEvento()" [formGroup]="eventoNuevo">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="12" size-sm="12">
-          <h5 style="text-align: center;"><b>Datos</b> del servicio</h5>
-          <ion-row>
-            <!-- Unidad -->
-            <ion-col size="12" size-sm="3">
-              <ion-select label="Selecciona una unidad" label-placement="floating" fill="outline"
-                style="--background: #ffffff;" formControlName="unidad">
-                <ion-select-option *ngFor="let item of autos" [value]="item.id">{{item.unidad}}</ion-select-option>
-              </ion-select>
-            </ion-col>
+  <ion-content class="service-modal-content">
+    <div class="service-workspace">
+      <section class="form-panel general-panel" aria-labelledby="service-data-title">
+        <header class="panel-heading"><h2 id="service-data-title">Datos del servicio</h2><p>Información general del mantenimiento realizado.</p></header>
 
-            <!-- Kilometraje -->
-            <ion-col size="12" size-sm="3">
-              <ion-input label="Kilometraje de la unidad" type="number" label-placement="floating" fill="outline"
-                placeholder="kilometraje" style="--background: #ffffff;" formControlName="kilometraje">
-              </ion-input>
-            </ion-col>
-
-            <!-- Costo -->
-            <ion-col size="12" size-sm="3">
-              <ion-input label="Costo del servicio" type="number" label-placement="floating" fill="outline"
-                placeholder="Costo $$" style="--background: #ffffff;" formControlName="costo">
-              </ion-input>
-            </ion-col>
-
-            <!-- Fecha -->
-            <ion-col size="12" size-sm="3">
-              <div style="text-align: center;">Día en que se realizó el servicio</div>
-              <ion-datetime-button datetime="dateTimeServicio" color="light"></ion-datetime-button>
-              <ion-modal [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime id="dateTimeServicio" presentation="date" formControlName="fecha"></ion-datetime>
-                </ng-template>
-              </ion-modal>
-            </ion-col>
-          </ion-row>
-
-          <br>
-          <!-- Usuario que autorizó -->
-          <ion-input label="¿Quién autorizó esta operación?" label-placement="floating" fill="outline"
-            placeholder="Nombre de quien lo autorizó" style="--background: #ffffff; margin: 0.5%;"
-            formControlName="autUser">
-          </ion-input>
-
-          <br>
-          <!-- Descripción del servicio -->
-          <ion-textarea label="Descripción del servicio realizado a la unidad" labelPlacement="floating" fill="outline"
-            placeholder="Servicio" [autoGrow]="true" rows="5" style="--background: #ffffff; margin: 0.5%;"
-            formControlName="servicio">
-          </ion-textarea>
-        </ion-col>
-        <ion-col size="12" size-sm="6">
-
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-    <!-- Lista de artículos -->
-
-    <ion-row>
-      <ion-col size="12">
-
-        <!-- Input con autocompletado -->
-        
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-sm="12">
-              <h5 style="text-align: center;"><b>Lista</b> de artículos</h5>
-            </ion-col>
-            <ion-col size="12" size-sm="12" style="text-align: center;">
-              <ion-grid>
-                <ion-row>
-                  <ion-col size="12" size-sm="10">
-                    <h6>Busca y agrega los artículos registrado previamente, <b>en caso de que no encuentres un artículo, da click para agregar un nuevo artículo desde esta pestaña</b></h6>
-                  </ion-col>
-                  <ion-col size="12" size-sm="2">
-                    <ion-button (click)="agregarArticuloNuevo()" fill="clear" shape="round" style="text-align: center;">
-                      <b>Agregar nuevo artículo</b>
-                    </ion-button>
-                  </ion-col>
-                </ion-row>
-              </ion-grid>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-        <ion-searchbar placeholder="Artículos" style="--background: #ffffff;" (ionInput)="filtrarArticulos($event)">
-        </ion-searchbar>
-        <div *ngIf="articulosFiltrados.length > 0" class="autocomplete-list">
-          <ion-item lines="none" button *ngFor="let articulo of articulosFiltrados" (click)="agregarArticulo(articulo)"
-            style="border-radius: 5%;">
-            {{ articulo.nombre }}
-          </ion-item>
+        <div class="field-group">
+          <label>Unidad <span aria-hidden="true">*</span></label>
+          <ion-select placeholder="Selecciona una unidad" fill="outline" formControlName="unidad" aria-label="Unidad">
+            <ion-select-option *ngFor="let item of autos" [value]="item.id">{{ item.unidad }}</ion-select-option>
+          </ion-select>
+          <ion-note *ngIf="eventoNuevo.get('unidad')?.invalid && eventoNuevo.get('unidad')?.touched">Selecciona una unidad.</ion-note>
         </div>
 
+        <div class="compact-fields">
+          <div class="field-group">
+            <label>Kilometraje actual <span aria-hidden="true">*</span></label>
+            <div class="affixed-control suffix-control">
+              <ion-input type="number" fill="outline" placeholder="0" formControlName="kilometraje" aria-label="Kilometraje actual"></ion-input><span>km</span>
+            </div>
+            <ion-note *ngIf="eventoNuevo.get('kilometraje')?.invalid && eventoNuevo.get('kilometraje')?.touched">Ingresa un kilometraje válido.</ion-note>
+          </div>
 
-        <!-- Tabla con los artículos seleccionados -->
-        <ion-card class="custom-card-table">
-          <ion-card-content>
-            <ion-grid>
-              <ion-row>
-                <ion-col size="12" size-sm="8">
-                  <div class="table-container">
-                    <table class="responsive-table">
-                      <thead>
-                        <tr>
-                          <th>Artículo</th>
-                          <th>Costo Unitario</th>
-                          <th>Cantidad</th>
-                          <th style="text-align: center;">Eliminar</th>
-                        </tr>
-                      </thead>
-                      <tbody formArrayName="articulos">
-                        <tr *ngFor="let articulo of articulosFormArray.controls; let i = index" [formGroupName]="i">
-                          <td>{{ articulo.get('nombre')?.value }}</td>
-                          <td>
-                            <!-- Input reactivo para el precio -->
-                            <ion-input
-                              type="number"
-                              formControlName="precio"
-                              min="0"
-                              fill="outline"
-                              placeholder="Precio"
-                              (ionInput)="calcularTotales()"
-                              style="font-size: small; width: 80px;"
-                            ></ion-input>
-                          </td>
-                          <td>
-                            <!-- Input reactivo para la cantidad -->
-                            <ion-input
-                              type="number"
-                              formControlName="cantidad"
-                              min="1"
-                              fill="outline"
-                              placeholder="Cantidad"
-                              (ionInput)="calcularTotales()"
-                              style="font-size: small; width: 80px;"
-                            ></ion-input>
-                          </td>
-                          <td>
-                            <!-- Input reactivo para el proveedor -->
-                            <ion-input
-                              type="text"
-                              formControlName="proveedor"
-                              fill="outline"
-                              placeholder="Proveedor"
-                              style="font-size: small; width: 120px;"
-                            ></ion-input>
-                          </td>
-                          <td style="text-align: center;">
-                            <!-- Botón para eliminar el artículo -->
-                            <ion-button fill="clear" color="danger" size="small" (click)="eliminarArticulo(i)">
-                              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-                            </ion-button>
-                          </td>
-                        </tr>
-                      </tbody>
-                      
-                    </table>
-                  </div>
-                </ion-col>
-                <ion-col size="12" size-sm="4">
-                  <div style="text-align: center; font-size: large; font-weight: bold;">
-                    Totales:
-                  </div>
-                  <div style="display: flex; justify-content: space-between; padding: 10px;">
-                    <span>Total sin IVA:</span>
-                    <span>{{ totalSinIVA | currency }}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; padding: 10px;">
-                    <span>Total con IVA:</span>
-                    <span>{{ totalConIVA | currency }}</span>
-                  </div>
-                </ion-col>
-              </ion-row>
-            </ion-grid>
-          </ion-card-content>
-        </ion-card>
+          <div class="field-group">
+            <label>Costo del servicio <span aria-hidden="true">*</span></label>
+            <div class="affixed-control money-control">
+              <span>$</span><ion-input type="number" fill="outline" placeholder="0.00" formControlName="costo" aria-label="Costo del servicio"></ion-input><small>MXN</small>
+            </div>
+            <ion-note *ngIf="eventoNuevo.get('costo')?.invalid && eventoNuevo.get('costo')?.touched">Ingresa un costo válido.</ion-note>
+          </div>
+        </div>
 
-      </ion-col>
-    </ion-row>
+        <div class="field-group">
+          <label>Fecha del servicio <span aria-hidden="true">*</span></label>
+          <div class="date-control"><ion-icon name="calendar-outline"></ion-icon><ion-datetime-button datetime="dateTimeServicio"></ion-datetime-button></div>
+          <ion-modal [keepContentsMounted]="true"><ng-template><ion-datetime id="dateTimeServicio" presentation="date" formControlName="fecha"></ion-datetime></ng-template></ion-modal>
+        </div>
 
-    <br>
+        <div class="field-group">
+          <label>Autorizado por <span aria-hidden="true">*</span></label>
+          <ion-input fill="outline" placeholder="Nombre de quien autoriza la operación" formControlName="autUser" aria-label="Autorizado por"></ion-input>
+          <ion-note *ngIf="eventoNuevo.get('autUser')?.invalid && eventoNuevo.get('autUser')?.touched">Indica quién autoriza la operación.</ion-note>
+        </div>
 
+        <div class="field-group description-field">
+          <label>Descripción del servicio <span aria-hidden="true">*</span></label>
+          <ion-textarea fill="outline" placeholder="Describe el mantenimiento realizado" [autoGrow]="true" rows="5" formControlName="servicio" aria-label="Descripción del servicio"></ion-textarea>
+          <ion-note *ngIf="eventoNuevo.get('servicio')?.invalid && eventoNuevo.get('servicio')?.touched">Describe el servicio realizado.</ion-note>
+        </div>
+      </section>
 
-    <!-- Botón para agregar evento -->
-    <ion-col size="12">
-      <ion-button type="submit" expand="block" shape="round" color="success">
-        Agregar servicio
-      </ion-button>
-    </ion-col>
+      <section class="form-panel articles-panel" aria-labelledby="articles-title">
+        <header class="panel-heading"><h2 id="articles-title">Artículos utilizados</h2><p>Busca artículos registrados y configura los datos utilizados en este servicio.</p></header>
 
+        <div class="article-toolbar">
+          <div class="article-search">
+            <ion-searchbar placeholder="Buscar en el catálogo" (ionInput)="filtrarArticulos($event)" aria-label="Buscar artículos"></ion-searchbar>
+            <div *ngIf="articulosFiltrados.length > 0" class="autocomplete-list" role="listbox" aria-label="Resultados de artículos">
+              <button type="button" *ngFor="let articulo of articulosFiltrados" (click)="agregarArticulo(articulo)" role="option">
+                <span>{{ articulo.nombre }}</span><small>{{ articulo.precio | currency:'MXN':'symbol-narrow':'1.2-2' }}</small>
+              </button>
+            </div>
+          </div>
+          <ion-button type="button" fill="outline" color="primary" (click)="agregarArticuloNuevo()"><ion-icon slot="start" name="add-outline"></ion-icon>Nuevo artículo</ion-button>
+        </div>
+        <p class="search-help">Selecciona un artículo del catálogo o registra uno nuevo si no está disponible.</p>
 
-  </form>
-</ion-content>
+        <div class="articles-table-wrap">
+          <table class="articles-table">
+            <thead><tr><th>Artículo</th><th>Costo unitario</th><th>Cantidad</th><th>Proveedor</th><th><span class="sr-only">Acción</span></th></tr></thead>
+            <tbody formArrayName="articulos">
+              <tr *ngFor="let articulo of articulosFormArray.controls; let i = index" [formGroupName]="i">
+                <td data-label="Artículo"><strong>{{ articulo.get('nombre')?.value }}</strong></td>
+                <td data-label="Costo unitario"><ion-input class="table-number-input" type="number" formControlName="precio" min="0" fill="outline" placeholder="0.00" (ionInput)="calcularTotales()" [attr.aria-label]="'Costo unitario de ' + articulo.get('nombre')?.value"></ion-input></td>
+                <td data-label="Cantidad"><ion-input class="table-number-input quantity-input" type="number" formControlName="cantidad" min="1" fill="outline" placeholder="1" (ionInput)="calcularTotales()" [attr.aria-label]="'Cantidad de ' + articulo.get('nombre')?.value"></ion-input></td>
+                <td data-label="Proveedor"><ion-input type="text" formControlName="proveedor" fill="outline" placeholder="Proveedor" [attr.aria-label]="'Proveedor de ' + articulo.get('nombre')?.value"></ion-input></td>
+                <td class="remove-cell"><ion-button type="button" class="remove-button" fill="clear" color="danger" (click)="eliminarArticulo(i)" [attr.aria-label]="'Eliminar ' + articulo.get('nombre')?.value" title="Eliminar artículo"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button></td>
+              </tr>
+              <tr class="empty-row" *ngIf="articulosFormArray.length === 0">
+                <td colspan="5"><div class="empty-articles"><ion-icon name="cube-outline"></ion-icon><strong>Todavía no has agregado artículos</strong><span>Busca un artículo en el catálogo para añadirlo al servicio.</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </ion-content>
+
+  <ion-footer class="service-modal-footer">
+    <div class="footer-summary">
+      <span class="items-count"><b>{{ articulosFormArray.length }}</b> {{ articulosFormArray.length === 1 ? 'artículo' : 'artículos' }}</span>
+      <div class="totals"><span>Total sin IVA <b>{{ (totalSinIVA || 0) | currency:'MXN':'symbol-narrow':'1.2-2' }}</b></span><span>IVA <b>{{ ((totalConIVA || 0) - (totalSinIVA || 0)) | currency:'MXN':'symbol-narrow':'1.2-2' }}</b></span><strong>Total <em>{{ (totalConIVA || 0) | currency:'MXN':'symbol-narrow':'1.2-2' }} MXN</em></strong></div>
+    </div>
+    <div class="footer-actions">
+      <ion-button type="button" fill="outline" color="medium" (click)="cancel()">Cancelar</ion-button>
+      <ion-button type="submit" color="primary"><ion-icon slot="start" name="checkmark-outline"></ion-icon>Guardar servicio</ion-button>
+    </div>
+  </ion-footer>
+</form>

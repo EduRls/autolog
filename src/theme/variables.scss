@@ -1,6 +1,50 @@
-// For information on how to create your own theme, please see:
-// http://ionicframework.com/docs/theming/
 :root {
-    --ion-font-family: 'Comfortaa', sans-serif;
-    /* Cambia la fuente global */
+  --ion-font-family: Inter, Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ion-color-primary: #2563eb;
+  --ion-color-primary-rgb: 37, 99, 235;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #1d4ed8;
+  --ion-color-primary-tint: #3b72ed;
+
+  --autolog-bg: #f4f7fb;
+  --autolog-surface: #ffffff;
+  --autolog-sidebar: #101828;
+  --autolog-sidebar-hover: #1d2939;
+  --autolog-sidebar-active: #263449;
+  --autolog-primary: #2563eb;
+  --autolog-primary-hover: #1d4ed8;
+  --autolog-primary-soft: #eaf2ff;
+  --autolog-text: #172033;
+  --autolog-text-secondary: #667085;
+  --autolog-text-muted: #98a2b3;
+  --autolog-border: #e5eaf1;
+  --autolog-success: #16a66a;
+  --autolog-success-soft: #e8f8f0;
+  --autolog-warning: #f59e0b;
+  --autolog-warning-soft: #fff4dd;
+  --autolog-danger: #dc3545;
+  --autolog-danger-soft: #fdecec;
+  --autolog-info: #2563eb;
+  --autolog-info-soft: #eaf2ff;
+
+  --autolog-space-1: 4px;
+  --autolog-space-2: 8px;
+  --autolog-space-3: 12px;
+  --autolog-space-4: 16px;
+  --autolog-space-5: 20px;
+  --autolog-space-6: 24px;
+  --autolog-space-8: 32px;
+  --autolog-radius-sm: 8px;
+  --autolog-radius-md: 12px;
+  --autolog-radius-lg: 16px;
+  --autolog-shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.06);
+  --autolog-shadow-md: 0 8px 24px rgba(16, 24, 40, 0.08);
+  --autolog-control-height: 44px;
+  --autolog-sidebar-expanded: 260px;
+  --autolog-sidebar-collapsed: 76px;
+  --autolog-topbar-height: 68px;
+  --autolog-transition: 220ms cubic-bezier(0.2, 0, 0, 1);
+  --autolog-z-sidebar: 1000;
+  --autolog-z-topbar: 900;
+  --autolog-z-backdrop: 950;
 }

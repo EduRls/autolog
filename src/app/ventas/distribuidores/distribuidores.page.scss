@@ -1,27 +1,4 @@
-
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.responsive-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.responsive-table th, .responsive-table td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.responsive-table th {
-  background-color: #f4f4f4;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 10px;
-}
+ion-card { margin: 18px 0; }
+.table-container { overflow-x: auto; }
+.pagination { margin-bottom: 72px !important; }
+ion-fab { display: none; }

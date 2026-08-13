@@ -60,12 +60,8 @@ export class EditarEventoComponent implements OnInit {
 
   async getAutos() {
     this.firebaseService.getAutos().subscribe({
-      next: (data) => {
-        this.autos = data;
-      },
-      error: (error) => {
-        console.error('Error getting documents', error);
-      }
+      next: (data) => { this.autos = data; },
+      error: (error) => { console.error('Error getting documents', error); }
     });
   }
 

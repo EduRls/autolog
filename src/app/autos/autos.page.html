@@ -1,6 +1,10 @@
 <app-menu titulo="auto"></app-menu>
 
 <ion-content id="main-content" [fullscreen]="true">
+  <div class="page-toolbar">
+    <div><h2 class="toolbar-title">Flotilla registrada</h2><p>Consulta y actualiza los datos de cada unidad.</p></div>
+    <ion-button color="primary" (click)="addAuto()"><ion-icon slot="start" name="add-outline"></ion-icon>Agregar unidad</ion-button>
+  </div>
   <h3 style="margin: 1% 2% 0% 2%">
     <b>Administración</b> & <span style="font-size:medium;"><ion-icon size="medium" name="car-outline"></ion-icon>
       Autos registrados</span>

@@ -1,24 +1,33 @@
-ion-content {
-    --background: #f5f5f5; /* Fondo claro */
-  }
-  
-  ion-card {
-    --background: #ffffff; /* Fondo blanco del card */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
-    border-radius: 15px; /* Bordes redondeados */
-  }
-  
-  ion-input {
-    --background: #f9f9f9; /* Fondo claro en los campos de entrada */
-    border-radius: 8px; /* Bordes redondeados */
-  }
-  
-  ion-button {
-    margin-top: 15px; /* Espaciado entre botones */
-  }
-  
-  ion-note {
-    color: var(--ion-color-danger); /* Texto de errores en color rojo */
-    font-size: 12px;
-  }
-  
+.login-page { --background: #eef3f9; }
+.login-layout { display: grid; grid-template-columns: minmax(360px, .9fr) 1.1fr; min-height: 100%; }
+.login-brand { position: relative; display: grid; place-items: center; overflow: hidden; padding: 48px; color: #fff; background: var(--autolog-sidebar); }
+.login-brand::before, .login-brand::after { content: ''; position: absolute; border-radius: 50%; background: rgba(37, 99, 235, .2); }
+.login-brand::before { width: 420px; height: 420px; right: -200px; top: -180px; }
+.login-brand::after { width: 280px; height: 280px; left: -140px; bottom: -100px; }
+.login-brand-inner { position: relative; z-index: 1; max-width: 430px; }
+.login-logo { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; color: #fff; background: var(--autolog-primary); box-shadow: 0 14px 30px rgba(37, 99, 235, .3); font-size: 29px; }
+.login-eyebrow { display: block; margin-top: 30px; color: #93c5fd; font-size: 11px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+.login-brand h1 { margin: 7px 0 12px; font-family: Comfortaa, sans-serif; font-size: clamp(36px, 5vw, 58px); letter-spacing: -.05em; }
+.login-brand > div > p { max-width: 390px; margin: 0 0 32px; color: #b8c4d5; font-size: 15px; line-height: 1.7; }
+.brand-feature { display: flex; align-items: center; gap: 11px; margin: 13px 0; color: #d9e1ec; font-size: 12px; }
+.brand-feature ion-icon { color: #60a5fa; font-size: 19px; }
+.login-form-panel { display: grid; place-items: center; padding: 32px; }
+.login-card { width: min(100%, 460px); margin: 0; box-shadow: var(--autolog-shadow-md); }
+.login-card ion-card-content { padding: clamp(26px, 4vw, 42px); }
+.login-card header span { color: var(--autolog-primary); font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.login-card h2 { margin: 7px 0 8px; color: var(--autolog-text); font-size: 27px; letter-spacing: -.035em; }
+.login-card header p { margin: 0 0 28px; color: var(--autolog-text-secondary); font-size: 13px; }
+.login-card form { display: grid; gap: 18px; }
+.login-card ion-input { min-height: 54px; --background: #fff; --border-color: var(--autolog-border); --border-radius: 10px; }
+.login-card ion-button { height: 46px; margin-top: 5px; }
+.login-footnote { margin: 22px 0 0; color: var(--autolog-text-muted); font-size: 11px; text-align: center; }
+.mobile-brand { display: none; align-items: center; gap: 10px; margin-bottom: 28px; font-family: Comfortaa, sans-serif; font-size: 19px; }
+.mobile-brand .login-logo { width: 40px; height: 40px; border-radius: 11px; font-size: 21px; }
+
+@media (max-width: 767px) {
+  .login-layout { display: block; min-height: 100%; }
+  .login-brand { display: none; }
+  .login-form-panel { min-height: 100%; padding: 18px; }
+  .login-card { box-shadow: var(--autolog-shadow-sm); }
+  .mobile-brand { display: flex; }
+}

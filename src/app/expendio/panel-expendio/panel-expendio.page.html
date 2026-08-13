@@ -1,0 +1,155 @@
+<app-menu titulo="panelExpendio"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack expendio-page">
+    <header class="page-toolbar panel-heading">
+      <div>
+        <h1>Panel de expendio</h1>
+        <p>Monitoreo de niveles, consumo y recargas de los tanques de almacenamiento.</p>
+      </div>
+      <ion-button fill="outline" color="medium" (click)="refreshAll()" [disabled]="devicesState === 'loading'" aria-label="Actualizar panel de expendio">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>Actualizar
+      </ion-button>
+    </header>
+
+    <ion-card class="filter-card selector-card">
+      <ion-card-content>
+        <div class="selector-layout">
+          <div class="selector-control">
+            <label for="device-search">Expendio</label>
+            <ion-searchbar id="device-search" [(ngModel)]="searchTerm" (ionInput)="applyDeviceFilter()" placeholder="Buscar por alias, unidad o IMEI" aria-label="Buscar expendio"></ion-searchbar>
+            <select *ngIf="devicesState === 'ready'" [(ngModel)]="selectedImei" (ngModelChange)="selectDevice($event)" aria-label="Seleccionar expendio">
+              <option *ngFor="let device of filteredDevices" [value]="imeiOf(device)">{{ deviceName(device) }} · {{ imeiOf(device) }} · {{ isActive(device) ? 'Activo' : 'Inactivo' }}</option>
+            </select>
+            <p class="no-match" *ngIf="devicesState === 'ready' && !filteredDevices.length">No hay coincidencias para la búsqueda.</p>
+          </div>
+          <div class="selected-summary" *ngIf="selectedDevice() as selected">
+            <div>
+              <strong>{{ deviceName(selected) }}</strong>
+              <span>IMEI {{ imeiOf(selected) }}</span>
+            </div>
+            <ion-badge [color]="isActive(selected) ? 'success' : 'medium'">{{ isActive(selected) ? 'Activo' : 'Inactivo' }}</ion-badge>
+            <ion-button fill="clear" (click)="refreshSelected()" [disabled]="detailState === 'loading' || consumptionsState === 'loading'" title="Actualizar expendio seleccionado" aria-label="Actualizar expendio seleccionado">
+              <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+            </ion-button>
+            <small>Última actualización exitosa<br><strong>{{ lastSuccessfulUpdate ? (lastSuccessfulUpdate | date:'medium') : 'Sin información' }}</strong></small>
+          </div>
+        </div>
+        <div class="section-state compact" *ngIf="devicesState === 'loading'" role="status"><ion-spinner name="crescent"></ion-spinner><span>Cargando expendios…</span></div>
+        <div class="section-state" *ngIf="devicesState === 'empty'"><ion-icon name="storefront-outline"></ion-icon><strong>No hay dispositivos asociados a la compañía.</strong></div>
+        <div class="section-state error" *ngIf="devicesState === 'error'"><ion-icon name="alert-circle-outline"></ion-icon><strong>{{ errors.devices?.message }}</strong><ion-button fill="outline" (click)="loadDevices()">Reintentar</ion-button></div>
+      </ion-card-content>
+    </ion-card>
+
+    <ng-container *ngIf="selectedImei">
+      <section class="context-strip" *ngIf="detailState === 'ready' && detail">
+        <div class="context-title"><span class="metric-icon"><ion-icon name="business-outline"></ion-icon></span><div><h2>{{ detailName(detail) }}</h2><p *ngIf="text(detail.alias)">Alias: {{ text(detail.alias) }}</p></div></div>
+        <dl>
+          <div><dt>IMEI</dt><dd>{{ imeiOf(detail) }}</dd></div>
+          <div><dt>Estado</dt><dd><ion-badge [color]="isActive(detail) ? 'success' : 'medium'">{{ isActive(detail) ? 'Activo' : 'Inactivo' }}</ion-badge></dd></div>
+          <div *ngIf="text(detail.responsible || detail.manager)"><dt>Responsable</dt><dd>{{ text(detail.responsible || detail.manager) }}</dd></div>
+          <div *ngIf="text(detail.phone)"><dt>Teléfono</dt><dd>{{ text(detail.phone) }}</dd></div>
+          <div *ngIf="numeric(value(detail, 'capacity')) !== null"><dt>Capacidad</dt><dd>{{ formatNumber(numeric(value(detail, 'capacity'))) }} L</dd></div>
+          <div *ngIf="detail.lastReading"><dt>Última lectura</dt><dd>{{ formatDate(detail.lastReading.timestamp || detail.lastReading.date || detail.lastReading.createdAt) }}</dd></div>
+          <div *ngIf="lastTransmissionDate()"><dt>Última transmisión</dt><dd>{{ formatDate(lastTransmissionDate()) }}</dd></div>
+        </dl>
+      </section>
+      <div class="context-skeleton" *ngIf="detailState === 'loading'" aria-label="Cargando información del expendio"><span></span><span></span><span></span></div>
+      <div class="section-state error autolog-card" *ngIf="detailState === 'error'"><strong>{{ errors.detail?.message }}</strong><ion-button fill="outline" (click)="refreshSelected()">Reintentar</ion-button></div>
+
+      <section class="metrics-grid" *ngIf="detailState === 'ready' && detail">
+        <ion-card class="metric-card level-card" [class.metric-success]="levelStatus() === 'success'" [class.metric-warning]="levelStatus() === 'warning'" [class.metric-danger]="levelStatus() === 'danger'">
+          <ion-card-content>
+            <div class="tank-indicator" [attr.aria-label]="'Nivel actual ' + formatNumber(numeric(value(detail, 'levelPercentage'))) + ' por ciento'"><span [style.height.%]="levelHeight()"></span></div>
+            <div><p>Nivel actual</p><h3>{{ formatNumber(numeric(value(detail, 'levelPercentage'))) }}<small *ngIf="numeric(value(detail, 'levelPercentage')) !== null">%</small></h3><p>{{ formatNumber(numeric(value(detail, 'levelLiters'))) }} L</p><small class="status-text">{{ levelStatusText() }}</small></div>
+          </ion-card-content>
+        </ion-card>
+        <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="cube-outline"></ion-icon></span><div><p>Capacidad</p><h3>{{ formatNumber(numeric(value(detail, 'capacity')), 0) }}<small *ngIf="numeric(value(detail, 'capacity')) !== null"> L</small></h3></div></ion-card-content></ion-card>
+        <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="trending-down-outline"></ion-icon></span><div><p>Consumo promedio</p><h3>{{ formatNumber(numeric(detail.avarageConsumptionPercentage)) }}<small *ngIf="numeric(detail.avarageConsumptionPercentage) !== null">%</small></h3><p>{{ formatNumber(numeric(detail.avarageConsumptionLiters)) }} L</p></div></ion-card-content></ion-card>
+        <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="water-outline"></ion-icon></span><div><p>Última recarga</p><h3>{{ formatNumber(numeric(detail.lastPercentageRecharged)) }}<small *ngIf="numeric(detail.lastPercentageRecharged) !== null">%</small></h3><p>{{ formatNumber(numeric(detail.lastLitersRecharged)) }} L</p></div></ion-card-content></ion-card>
+        <ion-card class="metric-card sensor-card"><ion-card-content><span class="metric-icon"><ion-icon name="pulse-outline"></ion-icon></span><div><p>Estado del sensor</p><h3 class="sensor-status">{{ isActive(detail) ? 'Activo' : 'Inactivo' }}</h3><p *ngIf="numeric(transmissionValue('batteryPercentage') || transmissionValue('battery') || detail.battery) !== null">Batería: {{ formatNumber(numeric(transmissionValue('batteryPercentage') || transmissionValue('battery') || detail.battery)) }}%</p><p *ngIf="numeric(transmissionValue('rsrp') || transmissionValue('signal') || detail.rsrp) !== null">RSRP: {{ formatNumber(numeric(transmissionValue('rsrp') || transmissionValue('signal') || detail.rsrp)) }} dBm</p><p *ngIf="lastTransmissionDate()">{{ formatDate(lastTransmissionDate()) }}</p></div></ion-card-content></ion-card>
+      </section>
+
+      <ion-card class="autolog-card day-comparison-card">
+        <ion-card-content>
+          <div class="comparison-heading">
+            <span class="metric-icon"><ion-icon name="calendar-outline"></ion-icon></span>
+            <div><h2>Cierre de ayer e inicio de hoy</h2><p>Última captura hasta las 19:00 y primera captura desde las 07:00.</p></div>
+          </div>
+          <div class="comparison-values" *ngIf="consumptionsState === 'ready' || consumptionsState === 'empty'">
+            <div><span>Cierre de ayer · 19:00</span><strong>{{ yesterdayClose() ? formatNumber(yesterdayClose()!.percentage) + '%' : 'Sin información' }}</strong><small *ngIf="yesterdayClose()">Captura {{ yesterdayClose()!.timestamp | date:'shortTime' }}<ng-container *ngIf="yesterdayClose()!.liters !== null"> · {{ formatNumber(yesterdayClose()!.liters) }} L</ng-container></small></div>
+            <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+            <div><span>Inicio de hoy · 07:00</span><strong>{{ todayOpen() ? formatNumber(todayOpen()!.percentage) + '%' : 'Sin información' }}</strong><small *ngIf="todayOpen()">Captura {{ todayOpen()!.timestamp | date:'shortTime' }}<ng-container *ngIf="todayOpen()!.liters !== null"> · {{ formatNumber(todayOpen()!.liters) }} L</ng-container></small></div>
+            <div class="comparison-change"><span>Variación</span><strong>{{ overnightVariation() !== null ? formatNumber(overnightVariation()) + ' pp' : 'Sin información' }}</strong></div>
+          </div>
+          <div class="section-state compact" *ngIf="consumptionsState === 'loading'" role="status"><ion-spinner name="crescent"></ion-spinner><span>Calculando comparación diaria…</span></div>
+          <div class="comparison-error" *ngIf="consumptionsState === 'error'">No fue posible obtener las capturas necesarias para esta comparación.</div>
+        </ion-card-content>
+      </ion-card>
+
+      <section class="primary-grid">
+        <ion-card class="chart-card recent-card">
+          <ion-card-content>
+            <div class="section-heading"><div><h2>Nivel del tanque · últimas 24 capturas</h2><p>Porcentaje y litros registrados por el sensor.</p></div><ion-button fill="clear" (click)="refreshSelected()" title="Reintentar capturas" aria-label="Actualizar capturas"><ion-icon slot="icon-only" name="refresh-outline"></ion-icon></ion-button></div>
+            <div class="chart-shell" *ngIf="consumptionsState === 'ready'">
+              <apx-chart [series]="recentChart.series!" [chart]="recentChart.chart!" [xaxis]="recentChart.xaxis!" [yaxis]="recentChart.yaxis!" [stroke]="recentChart.stroke!" [fill]="recentChart.fill!" [markers]="recentChart.markers!" [dataLabels]="recentChart.dataLabels!" [tooltip]="recentChart.tooltip!" [colors]="recentChart.colors!"></apx-chart>
+            </div>
+            <div class="chart-skeleton" *ngIf="consumptionsState === 'loading'" role="status"><ion-spinner></ion-spinner><span>Cargando lecturas recientes…</span></div>
+            <div class="section-state" *ngIf="consumptionsState === 'empty'"><ion-icon name="analytics-outline"></ion-icon><strong>No se encontraron lecturas recientes.</strong></div>
+            <div class="section-state error" *ngIf="consumptionsState === 'error'"><strong>{{ errors.consumptions?.message }}</strong><ion-button fill="outline" (click)="refreshSelected()">Reintentar</ion-button></div>
+            <div class="reading-summary" *ngIf="consumptions.length"><span>Capturas <strong>{{ consumptions.length }}</strong></span><span>Último nivel <strong>{{ formatNumber(consumptions[consumptions.length - 1].percentage) }}%</strong></span></div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="autolog-card map-card">
+          <ion-card-content>
+            <div class="section-heading"><div><h2>Ubicación del expendio</h2><p>{{ showAllLocations ? 'Vista de ubicaciones conocidas' : 'Ubicación registrada del dispositivo' }}</p></div></div>
+            <button type="button" class="map-toggle" (click)="toggleAllLocations()">{{ showAllLocations ? 'Solo expendio seleccionado' : 'Ver todos los expendios en el mapa' }}</button>
+            <div class="map-progress" *ngIf="locationsState === 'loading'" role="status">Cargando ubicaciones {{ locationProgress.loaded }} de {{ locationProgress.total }}</div>
+            <div #mapContainer class="map-container" [class.map-hidden]="(!showAllLocations && !coordinates()) || (showAllLocations && locationsState === 'empty')" role="img" aria-label="Mapa de ubicación de expendios"></div>
+            <div class="section-state map-empty" *ngIf="!showAllLocations && detailState === 'ready' && !coordinates()">Este expendio no tiene una ubicación válida registrada.</div>
+            <div class="section-state map-empty" *ngIf="showAllLocations && locationsState === 'empty'">No hay ubicaciones válidas registradas.</div>
+            <div class="section-state error" *ngIf="locationsState === 'error'"><strong>{{ errors.locations?.message }}</strong><ion-button fill="outline" (click)="toggleAllLocations(); toggleAllLocations()">Reintentar</ion-button></div>
+            <address *ngIf="!showAllLocations && address()">{{ address() }}<span *ngIf="text(detail?.reference)"><strong>Referencia:</strong> {{ text(detail?.reference) }}</span></address>
+          </ion-card-content>
+        </ion-card>
+      </section>
+
+      <ion-card class="autolog-card detail-sections">
+        <ion-card-content>
+          <ion-segment [value]="activeSection" (ionChange)="changeSection($event.detail.value)">
+            <ion-segment-button value="historical"><ion-label>Histórico</ion-label></ion-segment-button>
+            <ion-segment-button value="recharges"><ion-label>Recargas detectadas</ion-label></ion-segment-button>
+          </ion-segment>
+
+          <section *ngIf="activeSection === 'historical'">
+            <div class="section-heading"><div><h2>Histórico</h2><p>Consulta lecturas del expendio en un rango específico.</p></div></div>
+            <form class="historical-form" (ngSubmit)="consultHistorical()">
+              <label>Fecha y hora inicial<input type="datetime-local" [(ngModel)]="historicalInit" name="historicalInit" (click)="openDatePicker($event)" required></label>
+              <label>Fecha y hora final<input type="datetime-local" [(ngModel)]="historicalEnd" name="historicalEnd" (click)="openDatePicker($event)" required></label>
+              <ion-button type="submit" [disabled]="historicalState === 'loading'">Consultar histórico</ion-button>
+              <ion-button type="button" fill="outline" color="medium" (click)="clearHistorical()">Limpiar</ion-button>
+            </form>
+            <p class="validation-message" *ngIf="historicalValidation" role="alert">{{ historicalValidation }}</p>
+            <div class="chart-skeleton" *ngIf="historicalState === 'loading'"><ion-spinner></ion-spinner><span>Consultando histórico…</span></div>
+            <apx-chart *ngIf="historicalState === 'ready'" [series]="historicalChart.series!" [chart]="historicalChart.chart!" [xaxis]="historicalChart.xaxis!" [yaxis]="historicalChart.yaxis!" [stroke]="historicalChart.stroke!" [fill]="historicalChart.fill!" [markers]="historicalChart.markers!" [dataLabels]="historicalChart.dataLabels!" [tooltip]="historicalChart.tooltip!" [colors]="historicalChart.colors!"></apx-chart>
+            <div class="section-state" *ngIf="historicalState === 'empty'">No se encontraron lecturas en el rango seleccionado.</div>
+            <div class="section-state error" *ngIf="historicalState === 'error'"><strong>{{ errors.historical?.message }}</strong><ion-button fill="outline" (click)="consultHistorical()">Reintentar</ion-button></div>
+            <div class="reading-summary historical-summary" *ngIf="historical.length"><span>Lecturas <strong>{{ historical.length }}</strong></span><span>Nivel inicial <strong>{{ formatNumber(historical[0].percentage) }}%</strong></span><span>Nivel final <strong>{{ formatNumber(historical[historical.length - 1].percentage) }}%</strong></span><span>Variación <strong>{{ formatNumber(historicalVariation()) }} pp</strong></span></div>
+          </section>
+
+          <section *ngIf="activeSection === 'recharges'">
+            <div class="section-heading"><div><h2>Recargas detectadas</h2><p>Eventos reportados por el dispositivo seleccionado.</p></div><ion-button fill="clear" (click)="loadRecharges(true)" [disabled]="rechargesState === 'loading'" title="Actualizar recargas" aria-label="Actualizar recargas"><ion-icon slot="icon-only" name="refresh-outline"></ion-icon></ion-button></div>
+            <div class="chart-skeleton" *ngIf="rechargesState === 'loading'"><ion-spinner></ion-spinner><span>Cargando recargas…</span></div>
+            <ng-container *ngIf="rechargesState === 'ready'">
+              <apx-chart [series]="rechargeChart.series!" [chart]="rechargeChart.chart!" [xaxis]="rechargeChart.xaxis!" [yaxis]="rechargeChart.yaxis!" [stroke]="rechargeChart.stroke!" [fill]="rechargeChart.fill!" [markers]="rechargeChart.markers!" [dataLabels]="rechargeChart.dataLabels!" [tooltip]="rechargeChart.tooltip!" [colors]="rechargeChart.colors!"></apx-chart>
+              <div class="table-container recharge-table"><table><thead><tr><th>Fecha y hora</th><th>Nivel registrado</th><th>Litros</th></tr></thead><tbody><tr *ngFor="let recharge of recharges"><td>{{ recharge.timestamp | date:'medium' }}</td><td>{{ formatNumber(recharge.percentage) }}%</td><td>{{ formatNumber(recharge.liters) }} L</td></tr></tbody></table></div>
+            </ng-container>
+            <div class="section-state" *ngIf="rechargesState === 'empty'">No se detectaron recargas para este dispositivo.</div>
+            <div class="section-state error" *ngIf="rechargesState === 'error'"><strong>{{ errors.recharges?.message }}</strong><ion-button fill="outline" (click)="loadRecharges(true)">Reintentar</ion-button></div>
+          </section>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+  </main>
+</ion-content>

@@ -1,66 +1,40 @@
+<ion-content class="login-page">
+  <main class="login-layout">
+    <section class="login-brand" aria-label="Presentación de Autolog">
+      <div class="login-brand-inner">
+        <div class="login-logo"><ion-icon name="car-sport"></ion-icon></div>
+        <span class="login-eyebrow">Control operativo</span>
+        <h1>Autolog</h1>
+        <p>La flotilla, los servicios y la operación comercial en un solo lugar.</p>
+        <div class="brand-feature"><ion-icon name="checkmark-circle"></ion-icon><span>Seguimiento claro de unidades y mantenimientos</span></div>
+        <div class="brand-feature"><ion-icon name="checkmark-circle"></ion-icon><span>Información operativa centralizada</span></div>
+        <div class="brand-feature"><ion-icon name="checkmark-circle"></ion-icon><span>Acceso seguro para tu equipo</span></div>
+      </div>
+    </section>
 
-<ion-content>
-  <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-    <ion-card style="width: 90%; max-width: 400px; padding: 20px;">
-      <ion-card-title style="text-align: center; padding-top: 10px;">
-        INICIO DE SESIÓN
-      </ion-card-title>
-      <ion-card-content>
-        <form [formGroup]="loginForm" (ngSubmit)="login()">
-          <!-- Email -->
-          <ion-item>
-            <ion-input
-              labelPlacement="floating"
-              label="Correo Electrónico"
-              type="email"
-              formControlName="email"
-              placeholder="usuario@email.com"
-              required
-            ></ion-input>
-          </ion-item>
-          <ion-note *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">
-            El correo es obligatorio.
-          </ion-note>
-          <ion-note *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
-            El correo no es válido.
-          </ion-note>
-          <br />
-
-          <!-- Contraseña -->
-          <ion-item>
-            <ion-input
-              labelPlacement="floating"
-              label="Contraseña"
-              type="password"
-              formControlName="password"
-              placeholder="********"
-              required
-            ></ion-input>
-          </ion-item>
-          <ion-note *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
-            La contraseña es obligatoria.
-          </ion-note>
-          <ion-note *ngIf="loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched">
-            La contraseña debe tener al menos 6 caracteres.
-          </ion-note>
-          <br />
-
-          <!-- Botón de Login -->
-          <ion-button
-            type="submit"
-            expand="block"
-            fill="solid"
-            color="primary"
-            [disabled]="loginForm.invalid"
-          >
-            Iniciar Sesión
-          </ion-button>
-          <br />
-
-          <!-- Enlace para registro o recuperación de contraseña -->
-          
-        </form>
-      </ion-card-content>
-    </ion-card>
-  </div>
+    <section class="login-form-panel">
+      <ion-card class="login-card">
+        <ion-card-content>
+          <div class="mobile-brand"><div class="login-logo"><ion-icon name="car-sport"></ion-icon></div><strong>Autolog</strong></div>
+          <header><span>Bienvenido</span><h2>Inicia sesión</h2><p>Ingresa tus credenciales para continuar.</p></header>
+          <form [formGroup]="loginForm" (ngSubmit)="login()">
+            <div class="form-field">
+              <ion-input labelPlacement="stacked" label="Correo electrónico" type="email" formControlName="email"
+                placeholder="usuario@email.com" required fill="outline" autocomplete="email"></ion-input>
+              <ion-note *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">El correo es obligatorio.</ion-note>
+              <ion-note *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">Ingresa un correo válido.</ion-note>
+            </div>
+            <div class="form-field">
+              <ion-input labelPlacement="stacked" label="Contraseña" type="password" formControlName="password"
+                placeholder="Ingresa tu contraseña" required fill="outline" autocomplete="current-password"></ion-input>
+              <ion-note *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">La contraseña es obligatoria.</ion-note>
+              <ion-note *ngIf="loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched">La contraseña debe tener al menos 6 caracteres.</ion-note>
+            </div>
+            <ion-button type="submit" expand="block" color="primary" [disabled]="loginForm.invalid">Iniciar sesión<ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+          </form>
+          <p class="login-footnote">Acceso exclusivo para personal autorizado.</p>
+        </ion-card-content>
+      </ion-card>
+    </section>
+  </main>
 </ion-content>

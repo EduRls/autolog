@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  externalDeviceApiUrl: "https://us-central1-autolog-13584.cloudfunctions.net/externalDeviceApi",
   firebaseConfig: {
     apiKey: "AIzaSyDHNLqcTwcxh_VU212_h9wbOfQ9wuyw0u8",
     authDomain: "autolog-13584.firebaseapp.com",

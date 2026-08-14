@@ -72,6 +72,9 @@
 .historical-summary { justify-content: space-between; }
 .recharge-table { max-height: 360px; margin-top: 16px; }
 .recharge-table table { min-width: 520px; }
+.recharge-pagination { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-top: 12px; color: var(--autolog-text-secondary); font-size: 12px; }
+.recharge-pagination > div { display: flex; gap: 8px; align-items: center; }
+.recharge-pagination ion-button { min-width: 40px; margin: 0; }
 
 :host ::ng-deep .expendio-map-marker { background: transparent; border: 0; }
 :host ::ng-deep .expendio-map-marker span { display: block; width: 24px; height: 24px; border: 3px solid #fff; border-radius: 50% 50% 50% 0; background: var(--autolog-primary); box-shadow: 0 3px 8px rgba(16,24,40,.25); transform: rotate(-45deg); }
@@ -96,4 +99,6 @@
   .comparison-values { grid-template-columns: 1fr auto 1fr; gap: 10px; }
   .comparison-change { grid-column: 1 / -1; padding: 10px 0 0; border-top: 1px solid var(--autolog-border); border-left: 0; }
   .comparison-values strong { font-size: 19px; }
+  .recharge-pagination { align-items: stretch; flex-direction: column; text-align: center; }
+  .recharge-pagination > div { justify-content: center; }
 }

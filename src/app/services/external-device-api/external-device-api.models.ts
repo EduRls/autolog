@@ -84,6 +84,8 @@ export interface ExternalRecharge extends ExternalReading {
   percentage?: number | string | null;
   percentageRecharged?: number | string | null;
   litersRecharged?: number | string | null;
+  recharge_percentage?: number | string | null;
+  recharge_liters?: number | string | null;
 }
 
 export type ExternalCollection<T> = T[] | {

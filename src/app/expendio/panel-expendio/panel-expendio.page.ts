@@ -56,6 +56,8 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
   activeSection: 'historical' | 'recharges' = 'historical';
   showAllLocations = false;
   locationProgress = { loaded: 0, total: 0 };
+  rechargePage = 1;
+  readonly rechargesPerPage = 10;
 
   devicesState: LoadState = 'idle';
   detailState: LoadState = 'idle';
@@ -153,6 +155,7 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
     this.historicalState = 'idle';
     this.historicalValidation = '';
     this.showAllLocations = false;
+    this.rechargePage = 1;
     await this.loadSelected(false);
   }
 
@@ -296,6 +299,7 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
       const data = await this.api.getRecharges(imei);
       if (imei !== this.selectedImei) return;
       this.recharges = this.normalizeReadings(this.extractCollection(data, 'recharges'), true).sort((a, b) => b.timestamp - a.timestamp);
+      this.rechargePage = 1;
       this.rechargeCache.set(imei, this.recharges);
       this.rechargeLoaded.add(imei);
       this.rechargesState = this.recharges.length ? 'ready' : 'empty';
@@ -424,6 +428,15 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
     return latitude !== null && longitude !== null && latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180 ? [latitude, longitude] : null;
   }
   historicalVariation(): number | null { return this.historical.length ? this.historical[this.historical.length - 1].percentage - this.historical[0].percentage : null; }
+  paginatedRecharges(): PlotReading[] {
+    const start = (this.rechargePage - 1) * this.rechargesPerPage;
+    return this.recharges.slice(start, start + this.rechargesPerPage);
+  }
+  rechargeTotalPages(): number { return Math.max(1, Math.ceil(this.recharges.length / this.rechargesPerPage)); }
+  previousRechargePage(): void { if (this.rechargePage > 1) this.rechargePage--; }
+  nextRechargePage(): void { if (this.rechargePage < this.rechargeTotalPages()) this.rechargePage++; }
+  rechargePageStart(): number { return this.recharges.length ? (this.rechargePage - 1) * this.rechargesPerPage + 1 : 0; }
+  rechargePageEnd(): number { return Math.min(this.rechargePage * this.rechargesPerPage, this.recharges.length); }
   yesterdayClose(): PlotReading | null {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -458,8 +471,13 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
   private normalizeReadings<T extends ExternalReading>(items: T[], recharge = false): PlotReading[] {
     return items.map(item => {
       const timestamp = this.timestamp(item.timestamp ?? item.date ?? item.createdAt);
-      const percentage = this.numeric(recharge ? (item as ExternalRecharge).percentageRecharged ?? (item as ExternalRecharge).percentage ?? item.level_percentage ?? item.levelPercentage : item.level_percentage ?? item.levelPercentage);
-      const liters = this.numeric(recharge ? (item as ExternalRecharge).litersRecharged ?? item.liters ?? item.level_liters ?? item.levelLiters : item.level_liters ?? item.levelLiters ?? item.liters);
+      const rechargeItem = item as ExternalRecharge;
+      const percentage = this.numeric(recharge
+        ? rechargeItem.recharge_percentage ?? rechargeItem.percentageRecharged ?? rechargeItem.percentage ?? item.level_percentage ?? item.levelPercentage
+        : item.level_percentage ?? item.levelPercentage);
+      const liters = this.numeric(recharge
+        ? rechargeItem.recharge_liters ?? rechargeItem.litersRecharged ?? item.liters ?? item.level_liters ?? item.levelLiters
+        : item.level_liters ?? item.levelLiters ?? item.liters);
       return timestamp !== null && percentage !== null && percentage >= 0 && percentage <= 100 ? { timestamp, percentage, liters } : null;
     }).filter((item): item is PlotReading => item !== null).sort((a, b) => a.timestamp - b.timestamp);
   }

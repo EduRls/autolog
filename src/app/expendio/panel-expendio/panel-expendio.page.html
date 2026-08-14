@@ -143,7 +143,15 @@
             <div class="chart-skeleton" *ngIf="rechargesState === 'loading'"><ion-spinner></ion-spinner><span>Cargando recargas…</span></div>
             <ng-container *ngIf="rechargesState === 'ready'">
               <apx-chart [series]="rechargeChart.series!" [chart]="rechargeChart.chart!" [xaxis]="rechargeChart.xaxis!" [yaxis]="rechargeChart.yaxis!" [stroke]="rechargeChart.stroke!" [fill]="rechargeChart.fill!" [markers]="rechargeChart.markers!" [dataLabels]="rechargeChart.dataLabels!" [tooltip]="rechargeChart.tooltip!" [colors]="rechargeChart.colors!"></apx-chart>
-              <div class="table-container recharge-table"><table><thead><tr><th>Fecha y hora</th><th>Nivel registrado</th><th>Litros</th></tr></thead><tbody><tr *ngFor="let recharge of recharges"><td>{{ recharge.timestamp | date:'medium' }}</td><td>{{ formatNumber(recharge.percentage) }}%</td><td>{{ formatNumber(recharge.liters) }} L</td></tr></tbody></table></div>
+              <div class="table-container recharge-table"><table><thead><tr><th>Fecha y hora</th><th>Nivel registrado</th><th>Litros</th></tr></thead><tbody><tr *ngFor="let recharge of paginatedRecharges()"><td>{{ recharge.timestamp | date:'medium' }}</td><td>{{ formatNumber(recharge.percentage) }}%</td><td>{{ formatNumber(recharge.liters) }} L</td></tr></tbody></table></div>
+              <nav class="recharge-pagination" aria-label="Paginación de recargas">
+                <span>Mostrando {{ rechargePageStart() }}–{{ rechargePageEnd() }} de {{ recharges.length }}</span>
+                <div>
+                  <ion-button fill="outline" color="medium" (click)="previousRechargePage()" [disabled]="rechargePage === 1" aria-label="Página anterior de recargas"><ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon></ion-button>
+                  <span>Página {{ rechargePage }} de {{ rechargeTotalPages() }}</span>
+                  <ion-button fill="outline" color="medium" (click)="nextRechargePage()" [disabled]="rechargePage === rechargeTotalPages()" aria-label="Página siguiente de recargas"><ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon></ion-button>
+                </div>
+              </nav>
             </ng-container>
             <div class="section-state" *ngIf="rechargesState === 'empty'">No se detectaron recargas para este dispositivo.</div>
             <div class="section-state error" *ngIf="rechargesState === 'error'"><strong>{{ errors.recharges?.message }}</strong><ion-button fill="outline" (click)="loadRecharges(true)">Reintentar</ion-button></div>

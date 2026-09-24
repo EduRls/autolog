@@ -1,0 +1,13 @@
+<ion-header><ion-toolbar><ion-title>Acceso ASISTIA del distribuidor</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <app-asistia-status [distribuidorId]="distribuidorId"></app-asistia-status>
+  <p>Esta cuenta permite acceder a ASISTIA. No concede acceso a AUTOLOG.</p>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <ion-input label="Correo electrónico *" label-placement="stacked" type="email" fill="outline" formControlName="email"></ion-input>
+    <ion-input label="Nombre de usuario *" label-placement="stacked" fill="outline" formControlName="usuario"></ion-input>
+    <ion-input *ngIf="!usuarioData" label="Contraseña temporal *" label-placement="stacked" type="password" autocomplete="new-password" fill="outline" formControlName="password"></ion-input>
+    <ion-toggle *ngIf="usuarioData" formControlName="activo">Cuenta activa</ion-toggle>
+    <ion-button type="button" fill="outline" (click)="cancel()" [disabled]="saving">Cancelar</ion-button>
+    <ion-button type="submit" [disabled]="form.invalid || saving">Guardar acceso</ion-button>
+  </form>
+</ion-content>

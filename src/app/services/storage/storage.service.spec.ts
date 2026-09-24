@@ -1,3 +1,4 @@
+import { Storage } from '@ionic/storage-angular';
 import { TestBed } from '@angular/core/testing';
 
 import { StorageService } from './storage.service';
@@ -6,7 +7,8 @@ describe('StorageService', () => {
   let service: StorageService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    const storage = {create: async () => storage, get: async () => null, set: async () => undefined};
+    TestBed.configureTestingModule({providers: [{provide: Storage, useValue: storage}]});
     service = TestBed.inject(StorageService);
   });
 

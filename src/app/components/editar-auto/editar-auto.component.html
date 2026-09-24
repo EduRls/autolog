@@ -17,8 +17,14 @@
       style="--background: #ffffff;" formControlName="unidad">
     </ion-input>
     <br>
-    <ion-input label="Agrega el operador de la unidad" label-placement="floating" fill="outline" placeholder="Operador"
-      style="--background: #ffffff;" formControlName="operador">
+    <ion-select label="Distribuidor operador *" label-placement="floating" fill="outline"
+      formControlName="operadorId" interface="popover" (ionChange)="seleccionarOperador($event.detail.value)">
+      <ion-select-option [value]="null">Selecciona un distribuidor activo</ion-select-option>
+      <ion-select-option *ngFor="let distribuidor of operadoresDisponibles" [value]="distribuidor.id">{{ distribuidor.nombre }}</ion-select-option>
+    </ion-select>
+    <br>
+    <ion-input label="Nombre del operador (compatibilidad histórica)" label-placement="floating" fill="outline" placeholder="Operador"
+      style="--background: #ffffff;" formControlName="operador" [readonly]="true">
     </ion-input>
     <br>
     <br>

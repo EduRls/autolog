@@ -1,0 +1,266 @@
+rules_version = '2';
+
+// PROPUESTA LOCAL: no desplegar hasta comparar con las reglas activas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userProfile() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function hasUserProfile() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+
+    function activeUser() {
+      return hasUserProfile()
+        && (!('activo' in userProfile()) || userProfile().activo == true);
+    }
+
+    function canAccessAutolog() {
+      return activeUser()
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN', 'capturista', 'Capturista', 'CAPTURISTA', 'planta', 'Planta', 'PLANTA']
+        && (!('tipoPersonal' in userProfile()) || userProfile().tipoPersonal != 'DISTRIBUIDOR')
+        && (!('accesoAutolog' in userProfile()) || userProfile().accesoAutolog == true)
+        && (!(userProfile().rol in ['planta', 'Planta', 'PLANTA'])
+          || (userProfile().plantaIdPrincipal is string
+            && userProfile().accesoTodasPlantas != true));
+    }
+
+    function isAdmin() {
+      return canAccessAutolog()
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN'];
+    }
+
+    function isCapturista() {
+      return canAccessAutolog()
+        && userProfile().rol in ['capturista', 'Capturista', 'CAPTURISTA'];
+    }
+
+    function isPlantUser() {
+      return canAccessAutolog()
+        && userProfile().rol in ['planta', 'Planta', 'PLANTA'];
+    }
+
+    function isGlobalOperator() {
+      return isAdmin() || isCapturista();
+    }
+
+    function canReadPlant(plantaId) {
+      return isGlobalOperator()
+        || (isPlantUser() && plantaId is string
+          && (plantaId == userProfile().plantaIdPrincipal
+            || (userProfile().plantasLectura is list
+              && plantaId in userProfile().plantasLectura)));
+    }
+
+    function canWritePlant(plantaId) {
+      return isGlobalOperator()
+        || (isPlantUser() && plantaId is string
+          && plantaId == userProfile().plantaIdPrincipal);
+    }
+
+    function samePlant() {
+      return resource.data.plantaId == request.resource.data.plantaId;
+    }
+
+    function hasPlant(data) {
+      return 'plantaId' in data && data.plantaId is string;
+    }
+
+    function validAutoOperator(data) {
+      return data.operadorId is string
+        && get(/databases/$(database)/documents/distribuidores/$(data.operadorId)).data.plantaIdPrincipal == data.plantaId;
+    }
+
+    function validEventUnit(data) {
+      return data.unidad.id is string
+        && get(/databases/$(database)/documents/autos/$(data.unidad.id)).data.plantaId == data.plantaId;
+    }
+
+    function validPersonalDocument(personalType, collectionName, personalId, documentoId) {
+      let data = request.resource.data;
+      let newPath = '^personal/' + collectionName + '/' + personalId
+        + '/expediente/' + documentoId + '/[^/]+$';
+      let current = data.tipoPersonal == personalType
+        && data.personalId == personalId
+        && data.storagePath.matches(newPath);
+      return data.keys().hasOnly([
+          'personalId', 'tipoPersonal', 'distribuidorId', 'tipo',
+          'empleadoId', // Legacy null metadata on distributor documents only.
+          'nombre', 'nombreArchivo', 'storagePath', 'mimeType', 'size',
+          'fechaDocumento', 'fechaVencimiento', 'estadoManual', 'notas',
+          'uploadedAt', 'uploadedByUid', 'updatedAt', 'version',
+          'esVersionActual', 'replacedDocumentId', 'replacedByDocumentId'
+        ])
+        && (current)
+        && (!('empleadoId' in data) || data.empleadoId == null)
+        && data.mimeType in ['application/pdf', 'image/jpeg', 'image/png']
+        && data.size is int
+        && data.size > 0
+        && data.size <= 10 * 1024 * 1024
+        && data.uploadedAt is timestamp
+        && data.uploadedByUid is string
+        && data.updatedAt is timestamp;
+    }
+
+    match /usuarios/{uid} {
+      allow read: if isAdmin()
+        || (signedIn() && request.auth.uid == uid)
+        || (signedIn() && resource.data.email == request.auth.token.email);
+      allow create, update, delete: if false;
+    }
+
+    match /plantas/{plantaId} {
+      allow read: if isGlobalOperator()
+        || (isPlantUser() && (plantaId == userProfile().plantaIdPrincipal
+          || (userProfile().plantasLectura is list
+            && plantaId in userProfile().plantasLectura)));
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /autos/{autoId} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId)
+        && validAutoOperator(request.resource.data);
+      allow update: if (hasPlant(resource.data)
+          && canWritePlant(resource.data.plantaId)
+          && samePlant() && validAutoOperator(request.resource.data))
+        || (isGlobalOperator() && !hasPlant(resource.data)
+          && !hasPlant(request.resource.data));
+      allow delete: if canWritePlant(resource.data.plantaId);
+    }
+
+    match /eventos/{eventoId} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId)
+        && validEventUnit(request.resource.data);
+      allow update: if (hasPlant(resource.data)
+          && canWritePlant(resource.data.plantaId)
+          && samePlant() && validEventUnit(request.resource.data))
+        || (isGlobalOperator() && !hasPlant(resource.data)
+          && !hasPlant(request.resource.data));
+      allow delete: if canWritePlant(resource.data.plantaId);
+    }
+
+    match /articulos/{articuloId} {
+      allow read: if canAccessAutolog();
+      allow create, update, delete: if isGlobalOperator();
+    }
+
+    match /distribuidores/{distribuidorId} {
+      allow read: if canReadPlant(resource.data.plantaIdPrincipal);
+      allow create: if false; // Created exclusively by the administrative callable.
+      allow update: if (isGlobalOperator()
+          || canWritePlant(resource.data.plantaIdPrincipal))
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['usuarioUid', 'identificador', 'plantaIdPrincipal'])
+        && (isAdmin()
+          || !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['activo', 'estado', 'estatus']));
+      allow delete: if false;
+
+      match /expediente/{documentoId} {
+        allow read: if isAdmin();
+        allow create, update: if isAdmin()
+          && validPersonalDocument(
+            'DISTRIBUIDOR', 'distribuidores', distribuidorId, documentoId
+          );
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /ventas_gaslink/{ventaId} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create, update, delete: if isGlobalOperator();
+    }
+
+    match /ventas_sms/{id} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId);
+      allow update: if canWritePlant(resource.data.plantaId) && samePlant();
+      allow delete: if canWritePlant(resource.data.plantaId);
+    }
+
+    match /venta_dia_sms/{id} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId);
+      allow update: if canWritePlant(resource.data.plantaId) && samePlant();
+      allow delete: if canWritePlant(resource.data.plantaId);
+    }
+
+    match /venta_dia_sospechosa_sms/{id} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId);
+      allow update: if canWritePlant(resource.data.plantaId) && samePlant();
+      allow delete: if canWritePlant(resource.data.plantaId);
+    }
+
+    match /venta_sospechosa/{id} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId);
+      allow update: if canWritePlant(resource.data.plantaId) && samePlant();
+      allow delete: if canWritePlant(resource.data.plantaId);
+    }
+
+    match /asignacion_diaria/{id} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId);
+      allow update: if canWritePlant(resource.data.plantaId) && samePlant();
+      allow delete: if canWritePlant(resource.data.plantaId);
+    }
+
+    match /asistencias/{asistenciaId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /attendanceState/{stateId} {
+      allow read, write: if false;
+    }
+
+    match /attendanceIdempotency/{idempotencyId} {
+      allow read, write: if false;
+    }
+
+    match /asistencia_puntos/{puntoId} {
+      allow read, write: if false;
+    }
+
+    match /asistencia_punto_asignaciones/{asignacionId} {
+      allow read, write: if false;
+    }
+
+    // Compatibilidad temporal para colecciones comerciales legacy.
+    match /{rootCollection}/{document=**} {
+      allow read, write: if isGlobalOperator()
+        && rootCollection != 'plantas'
+        && rootCollection != 'autos'
+        && rootCollection != 'eventos'
+        && rootCollection != 'articulos'
+        && rootCollection != 'ventas_gaslink'
+        && rootCollection != 'ventas_sms'
+        && rootCollection != 'venta_dia_sms'
+        && rootCollection != 'venta_dia_sospechosa_sms'
+        && rootCollection != 'venta_sospechosa'
+        && rootCollection != 'asignacion_diaria'
+        && rootCollection != 'distributorCounters'
+        && rootCollection != 'distributorRequests'
+        && rootCollection != 'usuarios'
+        && rootCollection != 'distribuidores'
+        && rootCollection != 'asistencias'
+        && rootCollection != 'attendanceState'
+        && rootCollection != 'attendanceIdempotency'
+        && rootCollection != 'asistencia_puntos'
+        && rootCollection != 'asistia_user_acceptances'
+        && rootCollection != 'asistia_devices'
+        && rootCollection != 'asistia_presence_challenges'
+        && rootCollection != 'asistia_audit'
+        && rootCollection != 'asistencia_punto_asignaciones';
+    }
+  }
+}

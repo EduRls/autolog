@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-mi-perfil',
   templateUrl: './mi-perfil.page.html',
   styleUrls: ['./mi-perfil.page.scss'],
 })
-export class MiPerfilPage implements OnInit {
+export class MiPerfilPage {
 
   constructor() { }
-
-  ngOnInit() {
-  }
 
 }

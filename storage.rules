@@ -1,0 +1,61 @@
+rules_version = '2';
+
+// PROPUESTA LOCAL: no desplegar hasta comparar con las reglas activas.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userProfile() {
+      return firestore.get(
+        /databases/(default)/documents/usuarios/$(request.auth.uid)
+      ).data;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && firestore.exists(
+          /databases/(default)/documents/usuarios/$(request.auth.uid)
+        )
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN']
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN', 'capturista', 'Capturista', 'CAPTURISTA']
+        && (!('tipoPersonal' in userProfile()) || userProfile().tipoPersonal != 'DISTRIBUIDOR')
+        && (!('activo' in userProfile()) || userProfile().activo == true)
+        && (!('accesoAutolog' in userProfile())
+          || userProfile().accesoAutolog == true);
+    }
+
+    function canAccessAutolog() {
+      return signedIn()
+        && firestore.exists(
+          /databases/(default)/documents/usuarios/$(request.auth.uid)
+        )
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN', 'capturista', 'Capturista', 'CAPTURISTA']
+        && (!('tipoPersonal' in userProfile()) || userProfile().tipoPersonal != 'DISTRIBUIDOR')
+        && (!('activo' in userProfile()) || userProfile().activo == true)
+        && (!('accesoAutolog' in userProfile())
+          || userProfile().accesoAutolog == true);
+    }
+
+    function validDocumentUpload() {
+      return request.resource.size > 0
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType in [
+          'application/pdf', 'image/jpeg', 'image/png'
+        ];
+    }
+
+    match /personal/distribuidores/{distribuidorId}/expediente/{documentoId}/{filename} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin() && validDocumentUpload();
+      allow delete: if isAdmin();
+    }
+
+    // Conserva otras rutas legacy sin abrir las rutas de expedientes protegidas.
+    match /{rootFolder}/{remainingPath=**} {
+      allow read, write: if canAccessAutolog()
+        && rootFolder != 'personal';
+    }
+  }
+}

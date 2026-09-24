@@ -1,0 +1,14 @@
+.clock-shell { --background: linear-gradient(145deg, #eef4ff, #f8fafc 55%, #eaf7f3); }
+.clock-login, .clock-dashboard { width: min(680px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0; }
+.clock-login ion-card { max-width: 460px; margin: 8vh auto 0; }
+.clock-login form { display: grid; gap: 16px; }
+.clock-dashboard header { text-align: center; margin-bottom: 28px; }
+.clock-dashboard header p, .clock-dashboard header h1 { margin: 0; }
+.clock-dashboard header span { display: block; color: var(--ion-color-medium); margin-top: 8px; }
+.live-clock { display: grid; place-items: center; gap: 8px; padding: 32px; border-radius: 24px; background: white; box-shadow: 0 20px 50px rgb(15 23 42 / 10%); }
+.live-clock strong { font-size: clamp(42px, 12vw, 76px); letter-spacing: -0.04em; }
+.live-clock small { color: var(--ion-color-medium); text-align: center; }
+.attendance-action { margin: 24px 0; min-height: 62px; }
+.history { background: white; border-radius: 20px; padding: 20px; }
+.history h2 { margin-top: 0; }
+.clock-state { min-height: 70vh; display: grid; place-content: center; justify-items: center; gap: 12px; }

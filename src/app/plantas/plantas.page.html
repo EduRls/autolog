@@ -1,0 +1,113 @@
+<app-menu titulo="plantas"></app-menu>
+
+<ion-content id="main-content">
+  <main class="page-stack plants-page">
+    <header class="page-toolbar plants-toolbar">
+      <div>
+        <span class="page-eyebrow">Configuración operativa</span>
+        <h2 class="toolbar-title">Plantas</h2>
+        <p>Administra el catálogo maestro que define el alcance de AUTOLOG.</p>
+      </div>
+      <ion-button color="primary" *ngIf="editingId" (click)="reset()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Nueva planta
+      </ion-button>
+    </header>
+
+    <section class="plant-summary" aria-label="Resumen de plantas">
+      <article class="summary-card">
+        <span class="summary-icon"><ion-icon name="business-outline"></ion-icon></span>
+        <div><small>Total</small><strong>{{ plants.length }}</strong><span>Plantas registradas</span></div>
+      </article>
+      <article class="summary-card active-card">
+        <span class="summary-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></span>
+        <div><small>Activas</small><strong>{{ activeCount }}</strong><span>Disponibles para asignación</span></div>
+      </article>
+      <article class="summary-card inactive-card">
+        <span class="summary-icon"><ion-icon name="pause-circle-outline"></ion-icon></span>
+        <div><small>Inactivas</small><strong>{{ inactiveCount }}</strong><span>Fuera de operación</span></div>
+      </article>
+    </section>
+
+    <ion-card class="plant-form-card">
+      <ion-card-content>
+        <div class="section-heading form-heading">
+          <div>
+            <span class="section-kicker">{{ editingId ? 'Edición' : 'Nuevo registro' }}</span>
+            <h2>{{ editingId ? 'Editar planta' : 'Registrar planta' }}</h2>
+            <p>{{ editingId ? 'Actualiza los datos de identificación de la planta.' : 'Agrega una planta al catálogo operativo del sistema.' }}</p>
+          </div>
+          <span class="form-mode-icon" [class.editing]="editingId" aria-hidden="true">
+            <ion-icon [name]="editingId ? 'create-outline' : 'business-outline'"></ion-icon>
+          </span>
+        </div>
+
+        <div class="plant-form">
+          <div class="field">
+            <label for="plant-name">Nombre <span aria-hidden="true">*</span></label>
+            <input id="plant-name" [(ngModel)]="form.nombre" maxlength="120" autocomplete="off" placeholder="Ej. Planta Guadalupe">
+            <small>Nombre visible para los usuarios.</small>
+          </div>
+          <div class="field">
+            <label for="plant-key">Clave <span aria-hidden="true">*</span></label>
+            <input id="plant-key" [(ngModel)]="form.clave" maxlength="32" autocomplete="off" placeholder="Ej. GPE-01">
+            <small>Identificador corto y único; se guardará en mayúsculas.</small>
+          </div>
+          <div class="field wide">
+            <label for="plant-description">Descripción</label>
+            <textarea id="plant-description" [(ngModel)]="form.descripcion" maxlength="500" rows="3" placeholder="Información adicional para reconocer esta planta"></textarea>
+            <small class="character-count">{{ form.descripcion.length || 0 }}/500</small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <ion-button fill="outline" color="medium" *ngIf="editingId" (click)="reset()">Cancelar</ion-button>
+          <ion-button color="primary" (click)="save()" [disabled]="saving || !form.nombre.trim() || !form.clave.trim()">
+            <ion-spinner slot="start" name="crescent" *ngIf="saving"></ion-spinner>
+            <ion-icon slot="start" name="save-outline" *ngIf="!saving"></ion-icon>
+            {{ saving ? 'Guardando…' : (editingId ? 'Guardar cambios' : 'Registrar planta') }}
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="directory-card plants-directory">
+      <ion-card-content>
+        <div class="directory-header">
+          <div>
+            <h3>Directorio de plantas</h3>
+            <p>{{ filtered.length }} {{ filtered.length === 1 ? 'resultado' : 'resultados' }} en el catálogo</p>
+          </div>
+          <ion-searchbar [(ngModel)]="search" placeholder="Buscar por nombre o clave" aria-label="Buscar plantas"></ion-searchbar>
+        </div>
+
+        <div class="table-container" *ngIf="filtered.length; else emptyState">
+          <table class="responsive-table plants-table">
+            <thead><tr><th>Planta</th><th>Clave</th><th>Descripción</th><th>Estado</th><th class="actions-cell">Acciones</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let plant of filtered; trackBy: trackPlant">
+                <td><div class="plant-identity"><span class="table-avatar">{{ plantInitials(plant.nombre) }}</span><div><strong>{{ plant.nombre }}</strong><small>ID: {{ plant.id }}</small></div></div></td>
+                <td><span class="plant-key">{{ plant.clave }}</span></td>
+                <td><span class="plant-description">{{ plant.descripcion || 'Sin descripción' }}</span></td>
+                <td><ion-badge [color]="plant.activo ? 'success' : 'medium'">{{ plant.activo ? 'Activa' : 'Inactiva' }}</ion-badge></td>
+                <td class="actions-cell"><div class="row-actions">
+                  <ion-button fill="clear" color="primary" (click)="edit(plant)" aria-label="Editar planta" title="Editar planta"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-button>
+                  <ion-button fill="clear" [color]="plant.activo ? 'warning' : 'success'" (click)="toggle(plant)" [attr.aria-label]="plant.activo ? 'Desactivar planta' : 'Activar planta'" [title]="plant.activo ? 'Desactivar planta' : 'Activar planta'"><ion-icon slot="icon-only" [name]="plant.activo ? 'pause-circle-outline' : 'play-circle-outline'"></ion-icon></ion-button>
+                </div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ng-template #emptyState>
+          <div class="state-panel empty">
+            <span class="empty-icon"><ion-icon [name]="search ? 'search-outline' : 'business-outline'"></ion-icon></span>
+            <strong>{{ search ? 'No encontramos plantas' : 'Aún no hay plantas registradas' }}</strong>
+            <p>{{ search ? 'Prueba con otro nombre o clave.' : 'Completa el formulario para crear el primer registro.' }}</p>
+            <ion-button fill="outline" *ngIf="search" (click)="search = ''">Limpiar búsqueda</ion-button>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+  </main>
+</ion-content>

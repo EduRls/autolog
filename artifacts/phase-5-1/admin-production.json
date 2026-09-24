@@ -1,0 +1,83 @@
+{
+  "verification": "Local handlers with production Firestore; browser identity not asserted",
+  "authRecord": {
+    "uid": "xKNwKc5AyXSVi1oZmegeR0jhKrY2",
+    "disabled": false
+  },
+  "profile": {
+    "uid": "xKNwKc5AyXSVi1oZmegeR0jhKrY2",
+    "rol": "admin",
+    "activo": "legacy-default-true",
+    "accesoAutolog": "legacy-default-true",
+    "tipoPersonal": "legacy-SISTEMA"
+  },
+  "dashboard": {
+    "date": "2026-09-08",
+    "metrics": {
+      "present": 0,
+      "checkIns": 1,
+      "checkOuts": 1,
+      "movements": 2
+    },
+    "recentActivity": [
+      {
+        "id": "DqDL0KMLRUgXbSgYSsAe",
+        "distributorId": "0FAihED2Rm8DgdOGi04I",
+        "distributorName": "EDUARDO RUELAS CORTÉS",
+        "identifier": "VGBZ-0192",
+        "eventType": "CHECK_OUT",
+        "eventTime": "2026-09-08T20:44:38.351Z",
+        "pointName": "Gas Butano de Guadalupe"
+      },
+      {
+        "id": "vLLALAkMJFob1rIMLB2t",
+        "distributorId": "0FAihED2Rm8DgdOGi04I",
+        "distributorName": "EDUARDO RUELAS CORTÉS",
+        "identifier": "VGBZ-0192",
+        "eventType": "CHECK_IN",
+        "eventTime": "2026-09-08T20:42:46.033Z",
+        "pointName": "Gas Butano de Guadalupe"
+      }
+    ]
+  },
+  "records": {
+    "records": [
+      {
+        "id": "e6612ade8401c8b27c2b8e4c23dca6927dec0e4c23679efb694d75255da0e807",
+        "distributor": {
+          "id": "0FAihED2Rm8DgdOGi04I",
+          "name": "EDUARDO RUELAS CORTÉS",
+          "identifier": "VGBZ-0192"
+        },
+        "date": "2026-09-08",
+        "checkInTime": "2026-09-08T20:42:46.033Z",
+        "checkOutTime": "2026-09-08T20:44:38.351Z",
+        "workedMinutes": 1,
+        "pointName": "Gas Butano de Guadalupe",
+        "status": "COMPLETED"
+      }
+    ],
+    "nextCursor": null,
+    "hasMore": false
+  },
+  "dated": {
+    "records": [
+      {
+        "id": "e6612ade8401c8b27c2b8e4c23dca6927dec0e4c23679efb694d75255da0e807",
+        "distributor": {
+          "id": "0FAihED2Rm8DgdOGi04I",
+          "name": "EDUARDO RUELAS CORTÉS",
+          "identifier": "VGBZ-0192"
+        },
+        "date": "2026-09-08",
+        "checkInTime": "2026-09-08T20:42:46.033Z",
+        "checkOutTime": "2026-09-08T20:44:38.351Z",
+        "workedMinutes": 1,
+        "pointName": "Gas Butano de Guadalupe",
+        "status": "COMPLETED"
+      }
+    ],
+    "nextCursor": null,
+    "hasMore": false
+  }
+}

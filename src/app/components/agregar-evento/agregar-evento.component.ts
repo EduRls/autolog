@@ -166,16 +166,7 @@ export class AgregarEventoComponent implements OnInit {
           articulos // Incluimos el array de artículos con proveedor
         };
   
-        await this.firebaseService.addEvento(eventoData).then((res) => {
-          unidadSeleccionada.km_actual = this.eventoNuevo.get('kilometraje').value;
-          const unidadActulizacion = this.verificarDatosIniciales(unidadSeleccionada);
-  
-          this.firebaseService.updateAuto(unidadActulizacion).then(() => {
-            console.log('Unidad actualizada correctamente');
-          }).catch((error) => {
-            console.error('Error updating document:', error);
-          });
-        });
+        await this.firebaseService.addEvento(eventoData);
         this.presentToast('Evento agregado correctamente', 'bottom', 'success');
         this.cancel();
       } catch (error) {

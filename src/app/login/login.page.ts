@@ -53,7 +53,14 @@ export class LoginPage implements OnInit {
       const userData = userDoc?.data();
 
       if (!userData) {
+        await this.authService.logout();
         await this.showToast('El usuario no tiene un rol asignado', 'danger');
+        return;
+      }
+
+      if (userData['activo'] === false) {
+        await this.authService.logout();
+        await this.showToast('Esta cuenta se encuentra desactivada', 'danger');
         return;
       }
 
@@ -61,6 +68,18 @@ export class LoginPage implements OnInit {
         ...userData,
         rol: String(userData['rol'] || '').trim().toLowerCase()
       };
+
+      const validPlantScope = normalizedUser.rol !== 'planta' ||
+        (typeof userData['plantaIdPrincipal'] === 'string' && Boolean(userData['plantaIdPrincipal'].trim()) && userData['accesoTodasPlantas'] !== true);
+      if (userData['accesoAutolog'] === false || userData['tipoPersonal'] === 'DISTRIBUIDOR' || !['admin', 'capturista', 'planta'].includes(normalizedUser.rol) || !validPlantScope) {
+        if (userData['accesoAsistencia'] === true) {
+          await this.router.navigate(['/reloj']);
+          return;
+        }
+        await this.authService.logout();
+        await this.showToast('Esta cuenta no tiene accesos habilitados', 'danger');
+        return;
+      }
 
       await this.storageService.set('currentUser', normalizedUser);
       await this.showToast('Inicio de sesión exitoso', 'success');

@@ -1,0 +1,77 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BD52C914F3CBFB9E1B58C63231A36DBC97BCFA958E3D27C5BC8DD4CF8B8B09D2",
+    "Path": "D:\\Proyectos\\autolog\\src\\app\\asistencia\\panel\\asistencia-panel.page.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "FDA5791F26495A1C18C8A9A8ABC98873471D071AF4EB0EC10F869421C47D8561",
+    "Path": "D:\\Proyectos\\autolog\\src\\app\\asistencia\\panel\\asistencia-panel.page.html"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "FE94ABE7972C018C8017CF2DE2843DE2556C32175C1DB49A0F282DAFAA9C0277",
+    "Path": "D:\\Proyectos\\autolog\\src\\app\\asistencia\\registros\\asistencia-registros.page.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "7CD380EA7037A35620195C9084EF0FE52A34FDD97EB5B69667DD13278B484868",
+    "Path": "D:\\Proyectos\\autolog\\src\\app\\asistencia\\registros\\asistencia-registros.page.html"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "E8A5C791CA29472BFC3EDC0325942F8E9470A386F5BD3CB40C34B93C1BF492CA",
+    "Path": "D:\\Proyectos\\autolog\\src\\app\\asistencia\\asistencia.pages.spec.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "B64D701C71A0A61435B6252CE6F6851D9461B8830EAF3B4B411F5A7BF4E1CDC3",
+    "Path": "D:\\Proyectos\\asisitia\\asistia\\src\\App.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "EF49B27D2FCCA922400D4483880DA3FFBAD225CC8D10B1459A9E7569C00B7048",
+    "Path": "D:\\Proyectos\\asisitia\\asistia\\src\\components\\AttendanceFlow.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "A74333F018D25E7CDA963AE81AF40340018AA64A176CF7133606A8613239F712",
+    "Path": "D:\\Proyectos\\asisitia\\asistia\\src\\context\\AttendanceProvider.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "7AD6999FC35FB85F4E52FF112392C472E12FAF88AE98864E5F6A66D86BE00258",
+    "Path": "D:\\Proyectos\\asisitia\\asistia\\src\\services\\attendanceService.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "BE53D800C724A28CB1468530D006F3B26C35486488DA1F5F7F800AA531EC21A1",
+    "Path": "D:\\Proyectos\\asisitia\\asistia\\src\\types\\attendance.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "ADE7A1C004685C57FDF84AD012FE1563796170F800CB9881B3DB2D9DAA1AA93B",
+    "Path": "D:\\Proyectos\\asisitia\\asistia\\test\\phase5.test.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "74D4091FAF710F660D1CC008D6CCAEE3B80E4A3F12F19C8DF3AD8EEAAD4AF761",
+    "Path": "D:\\Proyectos\\asisitia\\asistia\\test\\phase5-1-flow.test.tsx"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "C79B108678FD385A3A828B217E78B180CACC23C9F169482C7BFC8F7E71643F87",
+    "Path": "D:\\Proyectos\\Subida_fire_hosting\\autolog\\functions\\src\\attendance\\register-attendance.callable.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "EC1E3F6A944C6D1B0128CC701D0C8623E5089DE5F1862AB8DBF763D74A6C6EA2",
+    "Path": "D:\\Proyectos\\Subida_fire_hosting\\autolog\\functions\\src\\attendance\\attendance.types.ts"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "7B681B90888A7D603FA1011C6F44EA33963E758D33BAEA8DC0F008F79CD1C8E1",
+    "Path": "D:\\Proyectos\\Subida_fire_hosting\\autolog\\functions\\test\\identity-attendance.emulator.test.js"
+  }
+]

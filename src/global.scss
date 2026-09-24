@@ -227,10 +227,18 @@ ion-modal ion-header ion-button ion-icon[slot="icon-only"] { font-size: 21px; }
   --box-shadow: 0 24px 60px rgba(16, 24, 40, .22);
   --backdrop-opacity: .48;
 }
-.my-custom-class-editar-operador { --width: min(700px, 94vw); --height: auto; --border-radius: var(--autolog-radius-lg); }
+.my-custom-class-editar-operador {
+  --width: min(700px, 94vw);
+  --height: min(720px, 92vh);
+  --max-height: 720px;
+  --border-radius: var(--autolog-radius-lg);
+}
 .my-custom-class-details { --width: min(1100px, 96vw); --border-radius: var(--autolog-radius-lg); }
 .custom-modal-generador { --width: min(760px, 94vw); --height: min(760px, 90vh); --border-radius: var(--autolog-radius-lg); }
 .modalBuscarVenta { --width: min(960px, 96vw); --height: min(900px, 94vh); --border-radius: var(--autolog-radius-lg); }
+.usuario-modal { --width: min(720px, 94vw); --height: min(760px, 92vh); }
+.expediente-personal-modal { --width: min(1380px, 98vw); --height: min(940px, 96vh); }
+.personal-documento-modal { --width: min(760px, 96vw); --height: min(850px, 94vh); }
 
 .alert-input.input-label { font-weight: 700; font-size: 13px; color: var(--autolog-text); border: 0 !important; background: transparent !important; pointer-events: none; }
 
@@ -238,11 +246,6 @@ ion-modal ion-header ion-button ion-icon[slot="icon-only"] { font-size: 21px; }
 .leaflet-container { border-radius: var(--autolog-radius-md); font-family: var(--ion-font-family); }
 .apexcharts-canvas text { fill: var(--autolog-text-secondary); font-family: var(--ion-font-family) !important; }
 .apexcharts-toolbar { display: none !important; }
-
-@media (max-width: 1199px) {
-  html.autolog-shell ion-content#main-content { left: var(--autolog-sidebar-collapsed); }
-  html.autolog-shell .autolog-topbar { left: var(--autolog-sidebar-collapsed); }
-}
 
 @media (max-width: 767px) {
   html.autolog-shell ion-content#main-content {
@@ -263,6 +266,11 @@ ion-modal ion-header ion-button ion-icon[slot="icon-only"] { font-size: 21px; }
   .pagination { gap: 7px; }
   .pagination ion-button { font-size: 11px; }
   ion-modal { --width: 100%; --height: calc(100% - 18px); --border-radius: 16px 16px 0 0; align-items: flex-end; }
+  ion-modal.my-custom-class-editar-operador {
+    --width: 100%;
+    --height: calc(100% - 18px);
+    --max-height: none;
+  }
   ion-modal.autolog-service-modal {
     --width: 100%;
     --height: 100%;
@@ -276,3 +284,5 @@ ion-modal ion-header ion-button ion-icon[slot="icon-only"] { font-size: 21px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
+
+@import './theme/administrative-form.scss';

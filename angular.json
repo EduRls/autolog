@@ -32,7 +32,7 @@
               }
             ],
             "styles": [
-              "src/global.scss", 
+              "src/global.scss",
               "src/theme/variables.scss",
               "./node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css"
@@ -71,6 +71,16 @@
             },
             "ci": {
               "progress": false
+            },
+            "preview": {
+              "main": "src/testing/preview/main.ts",
+              "tsConfig": "tsconfig.preview.json",
+              "outputPath": "www-preview",
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "sourceMap": true,
+              "namedChunks": true
             }
           },
           "defaultConfiguration": "production"
@@ -86,6 +96,9 @@
             },
             "ci": {
               "progress": false
+            },
+            "preview": {
+              "buildTarget": "app:build:preview"
             }
           },
           "defaultConfiguration": "development"
@@ -117,7 +130,7 @@
               }
             ],
             "styles": [
-              "src/global.scss", 
+              "src/global.scss",
               "src/theme/variables.scss",
               "./node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css"

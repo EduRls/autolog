@@ -13,6 +13,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
+import { getFunctions, provideFunctions } from '@angular/fire/functions';
 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { IonicStorageModule } from '@ionic/storage-angular';
@@ -30,6 +31,7 @@ import { LeafletModule } from '@bluehalo/ngx-leaflet';
     provideAuth(() => getAuth()), 
     provideFirestore(() => getFirestore()), 
     provideStorage(() => getStorage()),
+    provideFunctions(() => getFunctions(undefined, environment.firebaseFunctionsRegion)),
     provideHttpClient(withInterceptorsFromDi())
   ],
   bootstrap: [AppComponent],

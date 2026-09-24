@@ -1,0 +1,105 @@
+{
+  "verification": "Local handlers with production Firestore; browser identity not asserted",
+  "authRecord": {
+    "uid": "xKNwKc5AyXSVi1oZmegeR0jhKrY2",
+    "disabled": false
+  },
+  "profile": {
+    "uid": "xKNwKc5AyXSVi1oZmegeR0jhKrY2",
+    "rol": "admin",
+    "activo": "legacy-default-true",
+    "accesoAutolog": "legacy-default-true",
+    "tipoPersonal": "legacy-SISTEMA"
+  },
+  "dashboard": {
+    "date": "2026-09-09",
+    "metrics": {
+      "present": 0,
+      "checkIns": 0,
+      "checkOuts": 0,
+      "movements": 0
+    },
+    "recentActivity": []
+  },
+  "records": {
+    "records": [
+      {
+        "id": "e6612ade8401c8b27c2b8e4c23dca6927dec0e4c23679efb694d75255da0e807",
+        "distributor": {
+          "id": "0FAihED2Rm8DgdOGi04I",
+          "name": "EDUARDO RUELAS CORTÉS",
+          "identifier": "VGBZ-0192"
+        },
+        "date": "2026-09-08",
+        "checkInTime": "2026-09-08T20:42:46.033Z",
+        "checkOutTime": "2026-09-08T20:44:38.351Z",
+        "verification": {
+          "checkIn": {
+            "method": "FACE_MOCK",
+            "status": "MOCK_VERIFIED"
+          },
+          "checkOut": {
+            "method": "FACE_MOCK",
+            "status": "MOCK_VERIFIED"
+          }
+        },
+        "workedMinutes": 1,
+        "pointName": "Gas Butano de Guadalupe",
+        "status": "COMPLETED"
+      }
+    ],
+    "nextCursor": null,
+    "hasMore": false
+  },
+  "dated": {
+    "records": [
+      {
+        "id": "e6612ade8401c8b27c2b8e4c23dca6927dec0e4c23679efb694d75255da0e807",
+        "distributor": {
+          "id": "0FAihED2Rm8DgdOGi04I",
+          "name": "EDUARDO RUELAS CORTÉS",
+          "identifier": "VGBZ-0192"
+        },
+        "date": "2026-09-08",
+        "checkInTime": "2026-09-08T20:42:46.033Z",
+        "checkOutTime": "2026-09-08T20:44:38.351Z",
+        "verification": {
+          "checkIn": {
+            "method": "FACE_MOCK",
+            "status": "MOCK_VERIFIED"
+          },
+          "checkOut": {
+            "method": "FACE_MOCK",
+            "status": "MOCK_VERIFIED"
+          }
+        },
+        "workedMinutes": 1,
+        "pointName": "Gas Butano de Guadalupe",
+        "status": "COMPLETED"
+      }
+    ],
+    "nextCursor": null,
+    "hasMore": false
+  },
+  "onboardingStatus": {
+    "onboarding": {
+      "completed": false,
+      "generalPoliciesAccepted": false,
+      "generalPolicyVersion": "2026-09",
+      "termsVersion": "2026-09",
+      "biometricMode": null,
+      "biometricDecisionVersion": "2026-09"
+    },
+    "device": {
+      "linked": false,
+      "platform": null,
+      "linkedAt": null
+    },
+    "faceVerification": {
+      "presenceConfigured": false,
+      "method": null,
+      "biometricEnrollmentStatus": "NOT_APPLICABLE"
+    },
+    "canResetDevice": true
+  }
+}

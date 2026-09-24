@@ -3,7 +3,7 @@
 <ion-content id="main-content" [fullscreen]="true">
   <div class="page-toolbar">
     <div><h2 class="toolbar-title">Flotilla registrada</h2><p>Consulta y actualiza los datos de cada unidad.</p></div>
-    <ion-button color="primary" (click)="addAuto()"><ion-icon slot="start" name="add-outline"></ion-icon>Agregar unidad</ion-button>
+    <ion-button color="primary" (click)="addAuto()" [disabled]="!canWrite"><ion-icon slot="start" name="add-outline"></ion-icon>Agregar unidad</ion-button>
   </div>
   <h3 style="margin: 1% 2% 0% 2%">
     <b>Administración</b> & <span style="font-size:medium;"><ion-icon size="medium" name="car-outline"></ion-icon>
@@ -42,10 +42,10 @@
               <td>{{ registro.desc }}</td>
               <td>
                 <ion-row class="ion-justify-content-center ion-align-items-center">
-                  <ion-button fill="clear" color="danger" size="large" (click)="borrarAuto(registro)" *ngIf="userRole == 'admin'">
+                  <ion-button fill="clear" color="danger" size="large" (click)="borrarAuto(registro)" *ngIf="canWrite && userRole === 'admin'">
                     <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
                   </ion-button>
-                  <ion-button fill="clear" color="primary" size="large" (click)="editarAuto(registro)">
+                  <ion-button fill="clear" color="primary" size="large" (click)="editarAuto(registro)" *ngIf="canWrite">
                     <ion-icon slot="icon-only" name="create-outline"></ion-icon>
                   </ion-button>
                 </ion-row>
@@ -62,7 +62,7 @@
     <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
     <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
   </div>
-  <ion-fab horizontal="end" vertical="bottom" slot="fixed" (click)="addAuto()">
+  <ion-fab *ngIf="canWrite" horizontal="end" vertical="bottom" slot="fixed" (click)="addAuto()">
     <ion-fab-button>
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>

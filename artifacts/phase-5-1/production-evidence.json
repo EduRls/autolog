@@ -1,0 +1,1333 @@
+{
+  "logs": [
+    {
+      "timestamp": "2026-09-08T20:42:42.625697Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/c9dce266a0568a972ca7da5e3c660047",
+      "http": {
+        "method": "OPTIONS",
+        "status": 204,
+        "latency": "1.857234020s"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:42:42.668150Z",
+      "severity": "INFO",
+      "text": "Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic."
+    },
+    {
+      "timestamp": "2026-09-08T20:42:44.605873Z",
+      "severity": "INFO",
+      "text": "Default STARTUP TCP probe succeeded after 1 attempt for container \"worker\" on port 8080."
+    },
+    {
+      "timestamp": "2026-09-08T20:42:44.814690Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/e61886a7d09578df2ca7da5e3c660f2e",
+      "http": {
+        "method": "POST",
+        "status": 200,
+        "latency": "1.458298385s"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:42:44.895544Z",
+      "severity": "DEBUG",
+      "trace": "projects/autolog-13584/traces/e61886a7d09578df2ca7da5e3c660f2e",
+      "details": {
+        "verifications": {
+          "auth": "VALID",
+          "app": "MISSING"
+        },
+        "message": "Callable request verification passed"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:42:46.272005Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/e61886a7d09578df2ca7da5e3c660f2e",
+      "details": {
+        "durationMs": 1374,
+        "affectedUid": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2",
+        "result": "SUCCESS",
+        "tipoPersonal": "DISTRIBUIDOR",
+        "operation": "registerAttendance",
+        "pointId": "p3X3saC05afSuINOY7WK",
+        "attendanceType": "CHECK_IN",
+        "message": "Attendance registration completed",
+        "actorUid": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:42:53.725025Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/e270815171f90ce6938dae0ae87f478e",
+      "http": {
+        "method": "OPTIONS",
+        "status": 204,
+        "latency": "0.009975707s"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:42:53.834989Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/585c121246d3e6c7938dae0ae87f4bd5",
+      "http": {
+        "method": "POST",
+        "status": 200,
+        "latency": "0.388299723s"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:42:53.842886Z",
+      "severity": "DEBUG",
+      "trace": "projects/autolog-13584/traces/585c121246d3e6c7938dae0ae87f4bd5",
+      "details": {
+        "verifications": {
+          "auth": "VALID",
+          "app": "MISSING"
+        },
+        "message": "Callable request verification passed"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:42:54.223998Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/585c121246d3e6c7938dae0ae87f4bd5",
+      "details": {
+        "durationMs": 381,
+        "affectedUid": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2",
+        "tipoPersonal": "DISTRIBUIDOR",
+        "result": "DUPLICATE_IGNORED",
+        "attendanceType": "CHECK_IN",
+        "pointId": "p3X3saC05afSuINOY7WK",
+        "operation": "registerAttendance",
+        "message": "Attendance registration completed",
+        "actorUid": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:44:38.067934Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/b7a8a20e14bcc428c6e625c13d8c9272",
+      "http": {
+        "method": "OPTIONS",
+        "status": 204,
+        "latency": "0.004269295s"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:44:38.147558Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/3136d0ce1f3ec801c6e625c13d8c9278",
+      "http": {
+        "method": "POST",
+        "status": 200,
+        "latency": "0.410731287s"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:44:38.154261Z",
+      "severity": "DEBUG",
+      "trace": "projects/autolog-13584/traces/3136d0ce1f3ec801c6e625c13d8c9278",
+      "details": {
+        "verifications": {
+          "auth": "VALID",
+          "app": "MISSING"
+        },
+        "message": "Callable request verification passed"
+      }
+    },
+    {
+      "timestamp": "2026-09-08T20:44:38.558344Z",
+      "severity": "INFO",
+      "trace": "projects/autolog-13584/traces/3136d0ce1f3ec801c6e625c13d8c9278",
+      "details": {
+        "attendanceType": "CHECK_OUT",
+        "affectedUid": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2",
+        "operation": "registerAttendance",
+        "result": "SUCCESS",
+        "tipoPersonal": "DISTRIBUIDOR",
+        "message": "Attendance registration completed",
+        "actorUid": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2",
+        "durationMs": 404,
+        "pointId": "p3X3saC05afSuINOY7WK"
+      }
+    }
+  ],
+  "releases": {
+    "releases": [
+      {
+        "name": "sites/autolog-13584/releases/1788787568136000",
+        "version": {
+          "name": "sites/autolog-13584/versions/4cef2621b631dafd",
+          "status": "FINALIZED",
+          "config": {
+            "rewrites": [
+              {
+                "glob": "**",
+                "path": "/index.html"
+              }
+            ]
+          },
+          "labels": {
+            "deployment-tool": "cli-firebase"
+          },
+          "createTime": "2026-09-07T13:26:02.547704Z",
+          "createUser": {
+            "email": "monitoreo.gas.gbzac@gmail.com",
+            "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+          },
+          "finalizeTime": "2026-09-07T13:26:08.444413Z",
+          "finalizeUser": {
+            "email": "monitoreo.gas.gbzac@gmail.com",
+            "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+          },
+          "fileCount": "1469",
+          "versionBytes": "3153051"
+        },
+        "type": "DEPLOY",
+        "releaseTime": "2026-09-07T13:26:08.136Z",
+        "releaseUser": {
+          "email": "monitoreo.gas.gbzac@gmail.com",
+          "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+        }
+      },
+      {
+        "name": "sites/autolog-13584/releases/1787668357139000",
+        "version": {
+          "name": "sites/autolog-13584/versions/4b9a3550f3b73bbe",
+          "status": "FINALIZED",
+          "config": {
+            "rewrites": [
+              {
+                "glob": "**",
+                "path": "/index.html"
+              }
+            ]
+          },
+          "labels": {
+            "deployment-tool": "cli-firebase"
+          },
+          "createTime": "2026-08-25T14:32:29.510908Z",
+          "createUser": {
+            "email": "monitoreo.gas.gbzac@gmail.com",
+            "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+          },
+          "finalizeTime": "2026-08-25T14:32:37.449102Z",
+          "finalizeUser": {
+            "email": "monitoreo.gas.gbzac@gmail.com",
+            "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+          },
+          "fileCount": "1466",
+          "versionBytes": "3104209"
+        },
+        "type": "DEPLOY",
+        "releaseTime": "2026-08-25T14:32:37.139Z",
+        "releaseUser": {
+          "email": "monitoreo.gas.gbzac@gmail.com",
+          "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+        }
+      },
+      {
+        "name": "sites/autolog-13584/releases/1786766403110000",
+        "version": {
+          "name": "sites/autolog-13584/versions/9b4a8edd45f78272",
+          "status": "FINALIZED",
+          "config": {
+            "rewrites": [
+              {
+                "glob": "**",
+                "path": "/index.html"
+              }
+            ]
+          },
+          "labels": {
+            "deployment-tool": "cli-firebase"
+          },
+          "createTime": "2026-08-15T03:59:56.749019Z",
+          "createUser": {
+            "email": "monitoreo.gas.gbzac@gmail.com",
+            "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+          },
+          "finalizeTime": "2026-08-15T04:00:02.857178Z",
+          "finalizeUser": {
+            "email": "monitoreo.gas.gbzac@gmail.com",
+            "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+          },
+          "fileCount": "1466",
+          "versionBytes": "3104173"
+        },
+        "type": "DEPLOY",
+        "releaseTime": "2026-08-15T04:00:03.110Z",
+        "releaseUser": {
+          "email": "monitoreo.gas.gbzac@gmail.com",
+          "imageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIOP2Bgtpr_dKbqnvmt87B_YzuM667a4PQ5qBRkWYWi0LE6pw=mo"
+        }
+      }
+    ],
+    "nextPageToken": "Cg1hdXRvbG9nLTEzNTg0EPCIhMbfoZYD"
+  },
+  "events": [
+    {
+      "document": {
+        "name": "projects/autolog-13584/databases/(default)/documents/asistencias/DqDL0KMLRUgXbSgYSsAe",
+        "fields": {
+          "uid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "usuarioUid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "tipoPersonal": {
+            "stringValue": "DISTRIBUIDOR"
+          },
+          "personalId": {
+            "stringValue": "0FAihED2Rm8DgdOGi04I"
+          },
+          "distribuidorId": {
+            "stringValue": "0FAihED2Rm8DgdOGi04I"
+          },
+          "nombreSnapshot": {
+            "stringValue": "EDUARDO RUELAS CORTÉS"
+          },
+          "identificadorSnapshot": {
+            "stringValue": "VGBZ-0192"
+          },
+          "tipo": {
+            "stringValue": "SALIDA"
+          },
+          "fechaHoraServidor": {
+            "timestampValue": "2026-09-08T20:44:38.351Z"
+          },
+          "fechaLocal": {
+            "stringValue": "2026-09-08"
+          },
+          "timezone": {
+            "stringValue": "America/Mexico_City"
+          },
+          "origen": {
+            "stringValue": "APP"
+          },
+          "punto": {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "p3X3saC05afSuINOY7WK"
+                },
+                "name": {
+                  "stringValue": "Gas Butano de Guadalupe"
+                },
+                "radiusMeters": {
+                  "integerValue": "55"
+                }
+              }
+            }
+          },
+          "ubicacion": {
+            "mapValue": {
+              "fields": {
+                "latitude": {
+                  "doubleValue": 22.7365933
+                },
+                "longitude": {
+                  "doubleValue": -102.5279183
+                },
+                "accuracy": {
+                  "integerValue": "5"
+                },
+                "distanceMeters": {
+                  "doubleValue": 21.39
+                },
+                "insideGeofence": {
+                  "booleanValue": true
+                }
+              }
+            }
+          },
+          "dispositivo": {
+            "mapValue": {
+              "fields": {
+                "platform": {
+                  "stringValue": "android"
+                }
+              }
+            }
+          },
+          "verificacion": {
+            "mapValue": {
+              "fields": {
+                "metodo": {
+                  "stringValue": "FACE_MOCK"
+                },
+                "estado": {
+                  "stringValue": "MOCK_VERIFIED"
+                },
+                "ubicacionValida": {
+                  "booleanValue": true
+                }
+              }
+            }
+          },
+          "createdAt": {
+            "timestampValue": "2026-09-08T20:44:38.351Z"
+          }
+        },
+        "createTime": "2026-09-08T20:44:38.546045Z",
+        "updateTime": "2026-09-08T20:44:38.546045Z"
+      },
+      "readTime": "2026-09-08T20:53:28.477709Z"
+    },
+    {
+      "document": {
+        "name": "projects/autolog-13584/databases/(default)/documents/asistencias/vLLALAkMJFob1rIMLB2t",
+        "fields": {
+          "uid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "usuarioUid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "tipoPersonal": {
+            "stringValue": "DISTRIBUIDOR"
+          },
+          "personalId": {
+            "stringValue": "0FAihED2Rm8DgdOGi04I"
+          },
+          "distribuidorId": {
+            "stringValue": "0FAihED2Rm8DgdOGi04I"
+          },
+          "nombreSnapshot": {
+            "stringValue": "EDUARDO RUELAS CORTÉS"
+          },
+          "identificadorSnapshot": {
+            "stringValue": "VGBZ-0192"
+          },
+          "tipo": {
+            "stringValue": "ENTRADA"
+          },
+          "fechaHoraServidor": {
+            "timestampValue": "2026-09-08T20:42:46.033Z"
+          },
+          "fechaLocal": {
+            "stringValue": "2026-09-08"
+          },
+          "timezone": {
+            "stringValue": "America/Mexico_City"
+          },
+          "origen": {
+            "stringValue": "APP"
+          },
+          "punto": {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "p3X3saC05afSuINOY7WK"
+                },
+                "name": {
+                  "stringValue": "Gas Butano de Guadalupe"
+                },
+                "radiusMeters": {
+                  "integerValue": "55"
+                }
+              }
+            }
+          },
+          "ubicacion": {
+            "mapValue": {
+              "fields": {
+                "latitude": {
+                  "doubleValue": 22.7365933
+                },
+                "longitude": {
+                  "doubleValue": -102.5279183
+                },
+                "accuracy": {
+                  "integerValue": "5"
+                },
+                "distanceMeters": {
+                  "doubleValue": 21.39
+                },
+                "insideGeofence": {
+                  "booleanValue": true
+                }
+              }
+            }
+          },
+          "dispositivo": {
+            "mapValue": {
+              "fields": {
+                "platform": {
+                  "stringValue": "android"
+                }
+              }
+            }
+          },
+          "verificacion": {
+            "mapValue": {
+              "fields": {
+                "metodo": {
+                  "stringValue": "FACE_MOCK"
+                },
+                "estado": {
+                  "stringValue": "MOCK_VERIFIED"
+                },
+                "ubicacionValida": {
+                  "booleanValue": true
+                }
+              }
+            }
+          },
+          "createdAt": {
+            "timestampValue": "2026-09-08T20:42:46.033Z"
+          }
+        },
+        "createTime": "2026-09-08T20:42:46.256883Z",
+        "updateTime": "2026-09-08T20:42:46.256883Z"
+      },
+      "readTime": "2026-09-08T20:53:28.477709Z"
+    }
+  ],
+  "states": [
+    {
+      "document": {
+        "name": "projects/autolog-13584/databases/(default)/documents/attendanceState/e6612ade8401c8b27c2b8e4c23dca6927dec0e4c23679efb694d75255da0e807",
+        "fields": {
+          "uid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "personalId": {
+            "stringValue": "0FAihED2Rm8DgdOGi04I"
+          },
+          "distribuidorId": {
+            "stringValue": "0FAihED2Rm8DgdOGi04I"
+          },
+          "nombreSnapshot": {
+            "stringValue": "EDUARDO RUELAS CORTÉS"
+          },
+          "identificadorSnapshot": {
+            "stringValue": "VGBZ-0192"
+          },
+          "fechaLocal": {
+            "stringValue": "2026-09-08"
+          },
+          "timezone": {
+            "stringValue": "America/Mexico_City"
+          },
+          "status": {
+            "stringValue": "COMPLETED"
+          },
+          "checkIn": {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "vLLALAkMJFob1rIMLB2t"
+                },
+                "type": {
+                  "stringValue": "CHECK_IN"
+                },
+                "eventTime": {
+                  "timestampValue": "2026-09-08T20:42:46.033Z"
+                },
+                "point": {
+                  "mapValue": {
+                    "fields": {
+                      "id": {
+                        "stringValue": "p3X3saC05afSuINOY7WK"
+                      },
+                      "name": {
+                        "stringValue": "Gas Butano de Guadalupe"
+                      },
+                      "radiusMeters": {
+                        "integerValue": "55"
+                      }
+                    }
+                  }
+                },
+                "location": {
+                  "mapValue": {
+                    "fields": {
+                      "accuracy": {
+                        "integerValue": "5"
+                      },
+                      "distanceMeters": {
+                        "doubleValue": 21.39
+                      }
+                    }
+                  }
+                },
+                "verification": {
+                  "mapValue": {
+                    "fields": {
+                      "method": {
+                        "stringValue": "FACE_MOCK"
+                      },
+                      "status": {
+                        "stringValue": "MOCK_VERIFIED"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "checkOut": {
+            "mapValue": {
+              "fields": {
+                "id": {
+                  "stringValue": "DqDL0KMLRUgXbSgYSsAe"
+                },
+                "type": {
+                  "stringValue": "CHECK_OUT"
+                },
+                "eventTime": {
+                  "timestampValue": "2026-09-08T20:44:38.351Z"
+                },
+                "point": {
+                  "mapValue": {
+                    "fields": {
+                      "id": {
+                        "stringValue": "p3X3saC05afSuINOY7WK"
+                      },
+                      "name": {
+                        "stringValue": "Gas Butano de Guadalupe"
+                      },
+                      "radiusMeters": {
+                        "integerValue": "55"
+                      }
+                    }
+                  }
+                },
+                "location": {
+                  "mapValue": {
+                    "fields": {
+                      "accuracy": {
+                        "integerValue": "5"
+                      },
+                      "distanceMeters": {
+                        "doubleValue": 21.39
+                      }
+                    }
+                  }
+                },
+                "verification": {
+                  "mapValue": {
+                    "fields": {
+                      "method": {
+                        "stringValue": "FACE_MOCK"
+                      },
+                      "status": {
+                        "stringValue": "MOCK_VERIFIED"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "workedMinutes": {
+            "integerValue": "1"
+          },
+          "lastAttendanceId": {
+            "stringValue": "DqDL0KMLRUgXbSgYSsAe"
+          },
+          "lastType": {
+            "stringValue": "SALIDA"
+          },
+          "lastRegisteredAt": {
+            "timestampValue": "2026-09-08T20:44:38.351Z"
+          },
+          "lastResult": {
+            "mapValue": {
+              "fields": {
+                "asistenciaId": {
+                  "stringValue": "DqDL0KMLRUgXbSgYSsAe"
+                },
+                "tipo": {
+                  "stringValue": "SALIDA"
+                },
+                "fechaLocal": {
+                  "stringValue": "2026-09-08"
+                },
+                "registradoEn": {
+                  "stringValue": "2026-09-08T20:44:38.351Z"
+                },
+                "duplicado": {
+                  "booleanValue": false
+                },
+                "eventType": {
+                  "stringValue": "CHECK_OUT"
+                },
+                "status": {
+                  "stringValue": "REGISTERED"
+                },
+                "eventTime": {
+                  "stringValue": "2026-09-08T20:44:38.351Z"
+                },
+                "point": {
+                  "mapValue": {
+                    "fields": {
+                      "id": {
+                        "stringValue": "p3X3saC05afSuINOY7WK"
+                      },
+                      "name": {
+                        "stringValue": "Gas Butano de Guadalupe"
+                      },
+                      "radiusMeters": {
+                        "integerValue": "55"
+                      },
+                      "distanceMeters": {
+                        "doubleValue": 21.39
+                      }
+                    }
+                  }
+                },
+                "verification": {
+                  "mapValue": {
+                    "fields": {
+                      "method": {
+                        "stringValue": "FACE_MOCK"
+                      },
+                      "status": {
+                        "stringValue": "MOCK_VERIFIED"
+                      }
+                    }
+                  }
+                },
+                "today": {
+                  "mapValue": {
+                    "fields": {
+                      "date": {
+                        "stringValue": "2026-09-08"
+                      },
+                      "status": {
+                        "stringValue": "COMPLETED"
+                      },
+                      "nextEventType": {
+                        "nullValue": null
+                      },
+                      "checkIn": {
+                        "mapValue": {
+                          "fields": {
+                            "id": {
+                              "stringValue": "vLLALAkMJFob1rIMLB2t"
+                            },
+                            "type": {
+                              "stringValue": "CHECK_IN"
+                            },
+                            "eventTime": {
+                              "stringValue": "2026-09-08T20:42:46.033Z"
+                            },
+                            "point": {
+                              "mapValue": {
+                                "fields": {
+                                  "id": {
+                                    "stringValue": "p3X3saC05afSuINOY7WK"
+                                  },
+                                  "name": {
+                                    "stringValue": "Gas Butano de Guadalupe"
+                                  },
+                                  "radiusMeters": {
+                                    "integerValue": "55"
+                                  }
+                                }
+                              }
+                            },
+                            "location": {
+                              "mapValue": {
+                                "fields": {
+                                  "accuracy": {
+                                    "integerValue": "5"
+                                  },
+                                  "distanceMeters": {
+                                    "doubleValue": 21.39
+                                  }
+                                }
+                              }
+                            },
+                            "verification": {
+                              "mapValue": {
+                                "fields": {
+                                  "method": {
+                                    "stringValue": "FACE_MOCK"
+                                  },
+                                  "status": {
+                                    "stringValue": "MOCK_VERIFIED"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "checkOut": {
+                        "mapValue": {
+                          "fields": {
+                            "id": {
+                              "stringValue": "DqDL0KMLRUgXbSgYSsAe"
+                            },
+                            "type": {
+                              "stringValue": "CHECK_OUT"
+                            },
+                            "eventTime": {
+                              "stringValue": "2026-09-08T20:44:38.351Z"
+                            },
+                            "point": {
+                              "mapValue": {
+                                "fields": {
+                                  "id": {
+                                    "stringValue": "p3X3saC05afSuINOY7WK"
+                                  },
+                                  "name": {
+                                    "stringValue": "Gas Butano de Guadalupe"
+                                  },
+                                  "radiusMeters": {
+                                    "integerValue": "55"
+                                  }
+                                }
+                              }
+                            },
+                            "location": {
+                              "mapValue": {
+                                "fields": {
+                                  "accuracy": {
+                                    "integerValue": "5"
+                                  },
+                                  "distanceMeters": {
+                                    "doubleValue": 21.39
+                                  }
+                                }
+                              }
+                            },
+                            "verification": {
+                              "mapValue": {
+                                "fields": {
+                                  "method": {
+                                    "stringValue": "FACE_MOCK"
+                                  },
+                                  "status": {
+                                    "stringValue": "MOCK_VERIFIED"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "workedMinutes": {
+                        "integerValue": "1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "createTime": "2026-09-08T20:42:46.256883Z",
+        "updateTime": "2026-09-08T20:44:38.546045Z"
+      },
+      "readTime": "2026-09-08T20:53:28.615136Z"
+    }
+  ],
+  "idempotency": [
+    {
+      "document": {
+        "name": "projects/autolog-13584/databases/(default)/documents/attendanceIdempotency/23957cdbc132bafad617c7b7963a50d77a71b4d51763dcba7c101b6e5ccce92f",
+        "fields": {
+          "uid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "response": {
+            "mapValue": {
+              "fields": {
+                "asistenciaId": {
+                  "stringValue": "vLLALAkMJFob1rIMLB2t"
+                },
+                "tipo": {
+                  "stringValue": "ENTRADA"
+                },
+                "fechaLocal": {
+                  "stringValue": "2026-09-08"
+                },
+                "registradoEn": {
+                  "stringValue": "2026-09-08T20:42:46.033Z"
+                },
+                "duplicado": {
+                  "booleanValue": true
+                },
+                "eventType": {
+                  "stringValue": "CHECK_IN"
+                },
+                "status": {
+                  "stringValue": "IDEMPOTENT"
+                },
+                "eventTime": {
+                  "stringValue": "2026-09-08T20:42:46.033Z"
+                },
+                "point": {
+                  "mapValue": {
+                    "fields": {
+                      "id": {
+                        "stringValue": "p3X3saC05afSuINOY7WK"
+                      },
+                      "name": {
+                        "stringValue": "Gas Butano de Guadalupe"
+                      },
+                      "radiusMeters": {
+                        "integerValue": "55"
+                      },
+                      "distanceMeters": {
+                        "doubleValue": 21.39
+                      }
+                    }
+                  }
+                },
+                "verification": {
+                  "mapValue": {
+                    "fields": {
+                      "method": {
+                        "stringValue": "FACE_MOCK"
+                      },
+                      "status": {
+                        "stringValue": "MOCK_VERIFIED"
+                      }
+                    }
+                  }
+                },
+                "today": {
+                  "mapValue": {
+                    "fields": {
+                      "date": {
+                        "stringValue": "2026-09-08"
+                      },
+                      "status": {
+                        "stringValue": "OPEN"
+                      },
+                      "nextEventType": {
+                        "stringValue": "CHECK_OUT"
+                      },
+                      "checkIn": {
+                        "mapValue": {
+                          "fields": {
+                            "id": {
+                              "stringValue": "vLLALAkMJFob1rIMLB2t"
+                            },
+                            "type": {
+                              "stringValue": "CHECK_IN"
+                            },
+                            "eventTime": {
+                              "stringValue": "2026-09-08T20:42:46.033Z"
+                            },
+                            "point": {
+                              "mapValue": {
+                                "fields": {
+                                  "id": {
+                                    "stringValue": "p3X3saC05afSuINOY7WK"
+                                  },
+                                  "name": {
+                                    "stringValue": "Gas Butano de Guadalupe"
+                                  },
+                                  "radiusMeters": {
+                                    "integerValue": "55"
+                                  }
+                                }
+                              }
+                            },
+                            "location": {
+                              "mapValue": {
+                                "fields": {
+                                  "accuracy": {
+                                    "integerValue": "5"
+                                  },
+                                  "distanceMeters": {
+                                    "doubleValue": 21.39
+                                  }
+                                }
+                              }
+                            },
+                            "verification": {
+                              "mapValue": {
+                                "fields": {
+                                  "method": {
+                                    "stringValue": "FACE_MOCK"
+                                  },
+                                  "status": {
+                                    "stringValue": "MOCK_VERIFIED"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "workedMinutes": {
+                        "integerValue": "0"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "createdAt": {
+            "timestampValue": "2026-09-08T20:42:54.058Z"
+          }
+        },
+        "createTime": "2026-09-08T20:42:54.213908Z",
+        "updateTime": "2026-09-08T20:42:54.213908Z"
+      },
+      "readTime": "2026-09-08T20:53:28.739764Z"
+    },
+    {
+      "document": {
+        "name": "projects/autolog-13584/databases/(default)/documents/attendanceIdempotency/879ce5e7e14a6da94f1ae50a6b482a3facf6d27cc3ea39043d31fe8b9edcaacb",
+        "fields": {
+          "uid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "response": {
+            "mapValue": {
+              "fields": {
+                "asistenciaId": {
+                  "stringValue": "DqDL0KMLRUgXbSgYSsAe"
+                },
+                "tipo": {
+                  "stringValue": "SALIDA"
+                },
+                "fechaLocal": {
+                  "stringValue": "2026-09-08"
+                },
+                "registradoEn": {
+                  "stringValue": "2026-09-08T20:44:38.351Z"
+                },
+                "duplicado": {
+                  "booleanValue": false
+                },
+                "eventType": {
+                  "stringValue": "CHECK_OUT"
+                },
+                "status": {
+                  "stringValue": "REGISTERED"
+                },
+                "eventTime": {
+                  "stringValue": "2026-09-08T20:44:38.351Z"
+                },
+                "point": {
+                  "mapValue": {
+                    "fields": {
+                      "id": {
+                        "stringValue": "p3X3saC05afSuINOY7WK"
+                      },
+                      "name": {
+                        "stringValue": "Gas Butano de Guadalupe"
+                      },
+                      "radiusMeters": {
+                        "integerValue": "55"
+                      },
+                      "distanceMeters": {
+                        "doubleValue": 21.39
+                      }
+                    }
+                  }
+                },
+                "verification": {
+                  "mapValue": {
+                    "fields": {
+                      "method": {
+                        "stringValue": "FACE_MOCK"
+                      },
+                      "status": {
+                        "stringValue": "MOCK_VERIFIED"
+                      }
+                    }
+                  }
+                },
+                "today": {
+                  "mapValue": {
+                    "fields": {
+                      "date": {
+                        "stringValue": "2026-09-08"
+                      },
+                      "status": {
+                        "stringValue": "COMPLETED"
+                      },
+                      "nextEventType": {
+                        "nullValue": null
+                      },
+                      "checkIn": {
+                        "mapValue": {
+                          "fields": {
+                            "id": {
+                              "stringValue": "vLLALAkMJFob1rIMLB2t"
+                            },
+                            "type": {
+                              "stringValue": "CHECK_IN"
+                            },
+                            "eventTime": {
+                              "stringValue": "2026-09-08T20:42:46.033Z"
+                            },
+                            "point": {
+                              "mapValue": {
+                                "fields": {
+                                  "id": {
+                                    "stringValue": "p3X3saC05afSuINOY7WK"
+                                  },
+                                  "name": {
+                                    "stringValue": "Gas Butano de Guadalupe"
+                                  },
+                                  "radiusMeters": {
+                                    "integerValue": "55"
+                                  }
+                                }
+                              }
+                            },
+                            "location": {
+                              "mapValue": {
+                                "fields": {
+                                  "accuracy": {
+                                    "integerValue": "5"
+                                  },
+                                  "distanceMeters": {
+                                    "doubleValue": 21.39
+                                  }
+                                }
+                              }
+                            },
+                            "verification": {
+                              "mapValue": {
+                                "fields": {
+                                  "method": {
+                                    "stringValue": "FACE_MOCK"
+                                  },
+                                  "status": {
+                                    "stringValue": "MOCK_VERIFIED"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "checkOut": {
+                        "mapValue": {
+                          "fields": {
+                            "id": {
+                              "stringValue": "DqDL0KMLRUgXbSgYSsAe"
+                            },
+                            "type": {
+                              "stringValue": "CHECK_OUT"
+                            },
+                            "eventTime": {
+                              "stringValue": "2026-09-08T20:44:38.351Z"
+                            },
+                            "point": {
+                              "mapValue": {
+                                "fields": {
+                                  "id": {
+                                    "stringValue": "p3X3saC05afSuINOY7WK"
+                                  },
+                                  "name": {
+                                    "stringValue": "Gas Butano de Guadalupe"
+                                  },
+                                  "radiusMeters": {
+                                    "integerValue": "55"
+                                  }
+                                }
+                              }
+                            },
+                            "location": {
+                              "mapValue": {
+                                "fields": {
+                                  "accuracy": {
+                                    "integerValue": "5"
+                                  },
+                                  "distanceMeters": {
+                                    "doubleValue": 21.39
+                                  }
+                                }
+                              }
+                            },
+                            "verification": {
+                              "mapValue": {
+                                "fields": {
+                                  "method": {
+                                    "stringValue": "FACE_MOCK"
+                                  },
+                                  "status": {
+                                    "stringValue": "MOCK_VERIFIED"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "workedMinutes": {
+                        "integerValue": "1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "createdAt": {
+            "timestampValue": "2026-09-08T20:44:38.351Z"
+          }
+        },
+        "createTime": "2026-09-08T20:44:38.546045Z",
+        "updateTime": "2026-09-08T20:44:38.546045Z"
+      },
+      "readTime": "2026-09-08T20:53:28.739764Z"
+    },
+    {
+      "document": {
+        "name": "projects/autolog-13584/databases/(default)/documents/attendanceIdempotency/dbd45e541626db205865e9a546bbccf4d827f20977eb067a2ecc71318eef9d64",
+        "fields": {
+          "uid": {
+            "stringValue": "sIOMdDcVixTzFvM8Fb7D9uZ1NFF2"
+          },
+          "response": {
+            "mapValue": {
+              "fields": {
+                "asistenciaId": {
+                  "stringValue": "vLLALAkMJFob1rIMLB2t"
+                },
+                "tipo": {
+                  "stringValue": "ENTRADA"
+                },
+                "fechaLocal": {
+                  "stringValue": "2026-09-08"
+                },
+                "registradoEn": {
+                  "stringValue": "2026-09-08T20:42:46.033Z"
+                },
+                "duplicado": {
+                  "booleanValue": false
+                },
+                "eventType": {
+                  "stringValue": "CHECK_IN"
+                },
+                "status": {
+                  "stringValue": "REGISTERED"
+                },
+                "eventTime": {
+                  "stringValue": "2026-09-08T20:42:46.033Z"
+                },
+                "point": {
+                  "mapValue": {
+                    "fields": {
+                      "id": {
+                        "stringValue": "p3X3saC05afSuINOY7WK"
+                      },
+                      "name": {
+                        "stringValue": "Gas Butano de Guadalupe"
+                      },
+                      "radiusMeters": {
+                        "integerValue": "55"
+                      },
+                      "distanceMeters": {
+                        "doubleValue": 21.39
+                      }
+                    }
+                  }
+                },
+                "verification": {
+                  "mapValue": {
+                    "fields": {
+                      "method": {
+                        "stringValue": "FACE_MOCK"
+                      },
+                      "status": {
+                        "stringValue": "MOCK_VERIFIED"
+                      }
+                    }
+                  }
+                },
+                "today": {
+                  "mapValue": {
+                    "fields": {
+                      "date": {
+                        "stringValue": "2026-09-08"
+                      },
+                      "status": {
+                        "stringValue": "OPEN"
+                      },
+                      "nextEventType": {
+                        "stringValue": "CHECK_OUT"
+                      },
+                      "checkIn": {
+                        "mapValue": {
+                          "fields": {
+                            "id": {
+                              "stringValue": "vLLALAkMJFob1rIMLB2t"
+                            },
+                            "type": {
+                              "stringValue": "CHECK_IN"
+                            },
+                            "eventTime": {
+                              "stringValue": "2026-09-08T20:42:46.033Z"
+                            },
+                            "point": {
+                              "mapValue": {
+                                "fields": {
+                                  "id": {
+                                    "stringValue": "p3X3saC05afSuINOY7WK"
+                                  },
+                                  "name": {
+                                    "stringValue": "Gas Butano de Guadalupe"
+                                  },
+                                  "radiusMeters": {
+                                    "integerValue": "55"
+                                  }
+                                }
+                              }
+                            },
+                            "location": {
+                              "mapValue": {
+                                "fields": {
+                                  "accuracy": {
+                                    "integerValue": "5"
+                                  },
+                                  "distanceMeters": {
+                                    "doubleValue": 21.39
+                                  }
+                                }
+                              }
+                            },
+                            "verification": {
+                              "mapValue": {
+                                "fields": {
+                                  "method": {
+                                    "stringValue": "FACE_MOCK"
+                                  },
+                                  "status": {
+                                    "stringValue": "MOCK_VERIFIED"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "workedMinutes": {
+                        "integerValue": "0"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "createdAt": {
+            "timestampValue": "2026-09-08T20:42:46.033Z"
+          }
+        },
+        "createTime": "2026-09-08T20:42:46.256883Z",
+        "updateTime": "2026-09-08T20:42:46.256883Z"
+      },
+      "readTime": "2026-09-08T20:53:28.739764Z"
+    }
+  ]
+}

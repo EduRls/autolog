@@ -17,9 +17,9 @@
         <div class="selector-layout">
           <div class="selector-control">
             <label for="device-search">Expendio</label>
-            <ion-searchbar id="device-search" [(ngModel)]="searchTerm" (ionInput)="applyDeviceFilter()" placeholder="Buscar por alias, unidad o IMEI" aria-label="Buscar expendio"></ion-searchbar>
+            <ion-searchbar id="device-search" [(ngModel)]="searchTerm" (ionInput)="applyDeviceFilter()" placeholder="Buscar por municipio, ciudad o calle" aria-label="Buscar expendio"></ion-searchbar>
             <select *ngIf="devicesState === 'ready'" [(ngModel)]="selectedImei" (ngModelChange)="selectDevice($event)" aria-label="Seleccionar expendio">
-              <option *ngFor="let device of filteredDevices" [value]="imeiOf(device)">{{ deviceName(device) }} · {{ imeiOf(device) }} · {{ isActive(device) ? 'Activo' : 'Inactivo' }}</option>
+              <option *ngFor="let device of filteredDevices" [value]="imeiOf(device)">{{ deviceOptionLabel(device) }}</option>
             </select>
             <p class="no-match" *ngIf="devicesState === 'ready' && !filteredDevices.length">No hay coincidencias para la búsqueda.</p>
           </div>
@@ -43,7 +43,7 @@
 
     <ng-container *ngIf="selectedImei">
       <section class="context-strip" *ngIf="detailState === 'ready' && detail">
-        <div class="context-title"><span class="metric-icon"><ion-icon name="business-outline"></ion-icon></span><div><h2>{{ detailName(detail) }}</h2><p *ngIf="text(detail.alias)">Alias: {{ text(detail.alias) }}</p></div></div>
+        <div class="context-title"><span class="metric-icon"><ion-icon name="business-outline"></ion-icon></span><div><h2>AT - 31</h2><p *ngIf="text(detail.alias)">Alias: {{ text(detail.alias) }}</p></div></div>
         <dl>
           <div><dt>IMEI</dt><dd>{{ imeiOf(detail) }}</dd></div>
           <div><dt>Estado</dt><dd><ion-badge [color]="isActive(detail) ? 'success' : 'medium'">{{ isActive(detail) ? 'Activo' : 'Inactivo' }}</ion-badge></dd></div>

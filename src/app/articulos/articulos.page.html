@@ -36,7 +36,7 @@
               <td>{{ registro.desc }}</td>
               <td>
                 <ion-row class="ion-justify-content-center ion-align-items-center">
-                  <ion-button fill="clear" color="danger" size="large" (click)="borrarArticulo(registro)" *ngIf="userRole == 'admin'">
+                  <ion-button fill="clear" color="danger" size="large" (click)="borrarArticulo(registro)" *ngIf="userRole === 'admin'">
                     <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
                   </ion-button>
                   <ion-button fill="clear" color="primary" size="large" (click)="editarArticulo(registro)">

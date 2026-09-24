@@ -1,0 +1,70 @@
+<app-menu titulo="registroVentas"></app-menu>
+<ion-content id="main-content">
+  <main class="page-stack sales-page">
+    <section class="page-toolbar" aria-labelledby="sales-heading">
+      <div><h2 id="sales-heading" class="toolbar-title">Registro de ventas</h2><p>Consulta y analiza las ventas registradas en los expendios.</p></div>
+      <ion-button fill="outline" color="primary" (click)="exportSales()" [disabled]="!canExport" aria-label="Exportar ventas filtradas a Excel">
+        <ion-spinner *ngIf="exporting" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!exporting" name="download-outline" slot="start" aria-hidden="true"></ion-icon>{{ exporting ? 'Generando Excel' : 'Exportar Excel' }}
+      </ion-button>
+    </section>
+    <p class="export-message" *ngIf="exportMessage" role="status">{{ exportMessage }}</p>
+
+    <section class="filter-card" aria-labelledby="filters-heading">
+      <div class="section-heading"><div><h3 id="filters-heading">Filtros</h3><p>Periodo, folio exacto y vendedor se aplican juntos.</p></div></div>
+      <div class="presets" role="group" aria-label="Periodo">
+        <button type="button" [class.active]="preset === 'all'" (click)="selectPreset('all')">Año actual</button>
+        <button type="button" [class.active]="preset === 'today'" (click)="selectPreset('today')">Hoy</button>
+        <button type="button" [class.active]="preset === '7days'" (click)="selectPreset('7days')">Últimos 7 días</button>
+        <button type="button" [class.active]="preset === '30days'" (click)="selectPreset('30days')">Últimos 30 días</button>
+        <button type="button" [class.active]="preset === 'custom'" (click)="selectPreset('custom', false)">Personalizado</button>
+      </div>
+      <div class="filter-grid">
+        <label>Fecha inicial<input type="date" [(ngModel)]="draftFilters.startDate" (click)="openDatePicker($event)" aria-label="Abrir fecha inicial"></label>
+        <label>Fecha final<input type="date" [(ngModel)]="draftFilters.endDate" (click)="openDatePicker($event)" aria-label="Abrir fecha final"></label>
+        <label>Folio exacto<input type="text" [(ngModel)]="draftFilters.folio" placeholder="GL-2026-V026-00036" autocomplete="off"></label>
+        <label>Vendedor<select [(ngModel)]="draftFilters.vendedor" aria-label="Vendedor"><option value="">Todos los vendedores</option><option *ngFor="let vendor of vendorOptions" [value]="vendor">{{ vendor }}</option></select></label>
+        <div class="filter-actions"><ion-button fill="outline" color="medium" (click)="clearFilters()">Limpiar</ion-button><ion-button (click)="applyFilters()">Aplicar filtros</ion-button></div>
+      </div>
+      <p class="validation" *ngIf="validationMessage" role="alert">{{ validationMessage }}</p>
+    </section>
+
+    <section class="metrics-grid" aria-label="Resumen del periodo">
+      <article class="metric-card autolog-card" *ngFor="let metric of [
+        {label:'Ventas del periodo', icon:'receipt-outline', value: integer.format(summary.count)},
+        {label:'Litros vendidos', icon:'water-outline', value: formatLiters(summary.liters)},
+        {label:'Importe total', icon:'cash-outline', value: formatMxn(summary.total)},
+        {label:'Ticket promedio', icon:'calculator-outline', value: formatMxn(summary.average)}]">
+        <div class="metric-icon"><ion-icon [name]="metric.icon" aria-hidden="true"></ion-icon></div>
+        <div><p>{{ metric.label }}</p><ion-skeleton-text *ngIf="analyticsState === 'loading'" animated></ion-skeleton-text><h3 *ngIf="analyticsState !== 'loading'">{{ metric.value }}</h3></div>
+      </article>
+    </section>
+
+    <section class="charts-section" aria-label="Análisis gráfico">
+      <article class="chart-card chart-wide"><div class="chart-heading"><div><h3>Comportamiento de ventas</h3><p>Importe y litros vendidos por día</p></div></div>
+        <div class="chart-skeleton" *ngIf="analyticsState === 'loading'"><ion-skeleton-text animated></ion-skeleton-text></div>
+        <div class="chart-empty" *ngIf="analyticsState !== 'loading' && !dailyPointCount">No hay información suficiente para generar esta gráfica.</div>
+        <apx-chart *ngIf="analyticsState === 'ready' && dailyPointCount" [series]="dailyChart.series!" [chart]="dailyChart.chart!" [xaxis]="dailyChart.xaxis!" [yaxis]="dailyChart.yaxis!" [stroke]="dailyChart.stroke!" [dataLabels]="dailyChart.dataLabels!" [tooltip]="dailyChart.tooltip!" [grid]="dailyChart.grid!" [plotOptions]="dailyChart.plotOptions!" [colors]="dailyChart.colors!" [legend]="dailyChart.legend!"></apx-chart>
+      </article>
+      <div class="charts-grid">
+        <article class="chart-card"><div class="chart-heading"><div><h3>Ventas por vendedor</h3><p *ngIf="vendorGroupCount > 10">Top 10 por importe</p></div></div>
+          <div class="chart-skeleton" *ngIf="analyticsState === 'loading'"><ion-skeleton-text animated></ion-skeleton-text></div><div class="chart-empty" *ngIf="analyticsState !== 'loading' && !vendorPointCount">No hay información suficiente para generar esta gráfica.</div>
+          <apx-chart *ngIf="analyticsState === 'ready' && vendorPointCount" [series]="vendorChart.series!" [chart]="vendorChart.chart!" [xaxis]="vendorChart.xaxis!" [yaxis]="vendorChart.yaxis!" [stroke]="vendorChart.stroke!" [dataLabels]="vendorChart.dataLabels!" [tooltip]="vendorChart.tooltip!" [grid]="vendorChart.grid!" [plotOptions]="vendorChart.plotOptions!" [colors]="vendorChart.colors!" [legend]="vendorChart.legend!"></apx-chart>
+        </article>
+        <article class="chart-card"><div class="chart-heading"><div><h3>Formas de pago</h3><p>Participación por importe</p></div></div>
+          <div class="chart-skeleton" *ngIf="analyticsState === 'loading'"><ion-skeleton-text animated></ion-skeleton-text></div><div class="chart-empty" *ngIf="analyticsState !== 'loading' && !paymentPointCount">No hay información suficiente para generar esta gráfica.</div>
+          <apx-chart *ngIf="analyticsState === 'ready' && paymentPointCount" [series]="paymentChart.series!" [chart]="paymentChart.chart!" [labels]="paymentChart.labels!" [colors]="paymentChart.colors!" [legend]="paymentChart.legend!" [dataLabels]="paymentChart.dataLabels!" [tooltip]="paymentChart.tooltip!" [plotOptions]="paymentChart.plotOptions!" [stroke]="paymentChart.stroke!"></apx-chart>
+        </article>
+      </div>
+    </section>
+
+    <section class="table-card" aria-labelledby="results-heading">
+      <div class="table-heading"><div><h3 id="results-heading">Resultados</h3><p>Página {{ page }}</p></div><label>Filas <select [(ngModel)]="pageSize" (change)="changePageSize()" aria-label="Filas por página"><option [ngValue]="25">25</option><option [ngValue]="50">50</option></select></label></div>
+      <div class="table-skeleton" *ngIf="state === 'loading' && !sales.length" aria-label="Cargando ventas"><ion-skeleton-text animated *ngFor="let row of [1,2,3,4,5]"></ion-skeleton-text></div>
+      <div class="state-panel" *ngIf="state === 'error'" role="alert"><ion-icon name="alert-circle-outline"></ion-icon><h3>No fue posible consultar el registro de ventas.</h3><ion-button fill="outline" (click)="retry()">Reintentar</ion-button></div>
+      <div class="state-panel" *ngIf="state === 'empty'"><ion-icon name="receipt-outline"></ion-icon><h3>No se encontraron ventas para el periodo seleccionado.</h3><p>Modifica el periodo o limpia los filtros para consultar otros resultados.</p></div>
+      <div class="table-container" *ngIf="sales.length"><table><thead><tr><th>Folio</th><th>Fecha</th><th>Empresa</th><th>Vendedor</th><th>Cliente</th><th>Forma de pago</th><th class="numeric">Litros</th><th class="numeric">Total</th></tr></thead><tbody><tr *ngFor="let sale of sales; trackBy: trackById"><td class="folio" [title]="sale.folio || ''">{{ sale.folio || '—' }}</td><td>{{ formatDate(sale.fechaVenta) }}</td><td class="truncate" [title]="sale.empresa || ''">{{ sale.empresa || '—' }}</td><td class="truncate" [title]="sale.vendedor || ''">{{ sale.vendedor || '—' }}</td><td class="truncate" [title]="sale.cliente || ''">{{ sale.cliente || '—' }}</td><td><ion-badge>{{ sale.formaPago || '—' }}</ion-badge></td><td class="numeric">{{ formatLiters(sale.litros) }}</td><td class="numeric">{{ formatMxn(sale.total) }}</td></tr></tbody></table></div>
+      <div class="pagination" *ngIf="sales.length"><ion-button fill="outline" (click)="previousPage()" [disabled]="page === 1">Anterior</ion-button><span>Página {{ page }}</span><ion-button fill="outline" (click)="nextPage()" [disabled]="!hasMore">Siguiente</ion-button></div>
+    </section>
+  </main>
+</ion-content>

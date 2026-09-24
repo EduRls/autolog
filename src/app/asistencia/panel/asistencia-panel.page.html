@@ -1,0 +1,37 @@
+<app-menu></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack attendance-page">
+    <section class="attendance-intro">
+      <div><span class="attendance-eyebrow">Resumen del día</span><h2>Estado de asistencia</h2><p>Actividad real registrada por ASISTIA{{ date ? ' · ' + date : '' }}.</p></div>
+      <ion-button fill="outline" size="small" (click)="load()" [disabled]="state === 'loading'"><ion-icon slot="start" name="refresh-outline"></ion-icon>Actualizar</ion-button>
+    </section>
+
+    <section class="attendance-grid" aria-label="Métricas de asistencia" *ngIf="state === 'data' || state === 'empty'">
+      <ion-card class="metric-card attendance-metric" *ngFor="let metric of metrics" [ngClass]="metric.className">
+        <ion-card-content>
+          <span class="metric-icon"><ion-icon [name]="metric.icon" aria-hidden="true"></ion-icon></span>
+          <div class="metric-copy"><p>{{ metric.label }}</p><h3>{{ metric.value }}</h3></div>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
+    <ion-card class="attendance-card" *ngIf="state === 'error'">
+      <ion-card-content><div class="attendance-state" role="alert"><ion-icon name="alert-circle-outline"></ion-icon><strong>No fue posible cargar la asistencia.</strong><p>Verifica tu conexión e intenta nuevamente.</p><ion-button size="small" (click)="load()">Reintentar</ion-button></div></ion-card-content>
+    </ion-card>
+
+    <ion-card class="attendance-card">
+      <ion-card-content>
+        <div class="section-heading"><div><h2>Actividad reciente</h2><p>Entradas y salidas registradas durante el día.</p></div></div>
+        <div class="attendance-state" *ngIf="state === 'loading'" role="status"><ion-spinner name="crescent"></ion-spinner><strong>Cargando actividad…</strong></div>
+        <div class="table-container" *ngIf="state === 'data' && recentActivity.length">
+          <table class="attendance-table attendance-activity-table">
+            <thead><tr><th>Distribuidor</th><th>VGBZ</th><th>Tipo</th><th>Hora</th><th>Punto</th></tr></thead>
+            <tbody><tr *ngFor="let activity of recentActivity"><td><strong>{{ activity.distributorName }}</strong></td><td>{{ activity.identifier || '—' }}</td><td><span class="attendance-event" [class.event-exit]="activity.eventType === 'CHECK_OUT'">{{ eventLabel(activity.eventType) }}</span></td><td>{{ formatTime(activity.eventTime) }}</td><td>{{ activity.pointName }}</td></tr></tbody>
+          </table>
+        </div>
+        <div class="attendance-empty" *ngIf="state === 'empty'" role="status"><ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon><strong>No hay movimientos hoy.</strong><p>Las entradas y salidas aparecerán aquí al ser registradas por ASISTIA.</p></div>
+      </ion-card-content>
+    </ion-card>
+  </main>
+</ion-content>

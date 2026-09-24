@@ -1,0 +1,76 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Agregar documento</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()" aria-label="Cerrar"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="documentoForm" (ngSubmit)="upload()" class="document-form">
+    <div class="modal-intro">
+      <span class="intro-icon"><ion-icon name="cloud-upload-outline"></ion-icon></span>
+      <div><h2>Nuevo documento</h2><p>Completa los datos y adjunta un archivo al expediente.</p></div>
+    </div>
+
+    <div class="personal-context">
+      <span class="person-avatar">{{ target.nombreCompleto.charAt(0) }}</span>
+      <div><small>Expediente de</small><strong>{{ target.nombreCompleto }}</strong><span>{{ target.detalle }}</span></div>
+    </div>
+
+    <section class="form-section">
+      <div class="section-label"><span>1</span><div><strong>Clasificación</strong><small>Indica qué tipo de documento integrarás.</small></div></div>
+      <ion-select label="Tipo de documento *" label-placement="stacked" fill="outline" formControlName="tipo">
+        <ion-select-option *ngFor="let tipo of tiposDocumento" [value]="tipo.value">{{ tipo.label }}</ion-select-option>
+      </ion-select>
+      <ion-note *ngIf="documentoForm.controls.tipo.touched && documentoForm.controls.tipo.invalid">Selecciona un tipo de documento.</ion-note>
+    </section>
+
+    <section class="form-section">
+      <div class="section-label"><span>2</span><div><strong>Archivo</strong><small>Selecciona o arrastra el documento.</small></div></div>
+      <input #fileInput class="file-input" type="file" accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event)">
+      <button
+        type="button"
+        class="drop-zone"
+        [class.dragging]="isDragging"
+        [class.has-file]="selectedFile"
+        [disabled]="saving"
+        (click)="fileInput.click()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+        <span class="drop-icon"><ion-icon [name]="selectedFile ? 'document-attach-outline' : 'cloud-upload-outline'"></ion-icon></span>
+        <strong>{{ selectedFile ? 'Archivo listo para subir' : 'Arrastra y suelta el archivo aquí' }}</strong>
+        <span>{{ selectedFile ? 'Puedes cambiarlo seleccionando otro archivo.' : 'o haz clic para buscarlo en tu equipo' }}</span>
+        <small>PDF, JPG, JPEG o PNG · Máximo {{ maxSizeMb }} MB</small>
+      </button>
+
+      <div class="selected-file" *ngIf="selectedFile">
+        <span class="file-type"><ion-icon name="document-text-outline"></ion-icon></span>
+        <div><strong>{{ selectedFile.name }}</strong><small>{{ formatFileSize(selectedFile.size) }} · Listo para cargar</small></div>
+        <ion-button type="button" fill="clear" color="medium" (click)="clearSelectedFile($event)" aria-label="Quitar archivo" title="Quitar archivo">
+          <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-label"><span>3</span><div><strong>Detalles</strong><small>Agrega fechas y una descripción para facilitar su consulta.</small></div></div>
+      <ion-input label="Nombre o descripción" label-placement="stacked" fill="outline" formControlName="nombre" placeholder="Ej. Contrato firmado 2026"></ion-input>
+      <div class="date-grid">
+        <ion-input label="Fecha del documento" label-placement="stacked" fill="outline" type="date" formControlName="fechaDocumento"></ion-input>
+        <ion-input label="Fecha de vencimiento" label-placement="stacked" fill="outline" type="date" formControlName="fechaVencimiento"></ion-input>
+      </div>
+      <ion-textarea label="Notas" label-placement="stacked" fill="outline" [autoGrow]="true" rows="3" formControlName="notas" placeholder="Observaciones opcionales"></ion-textarea>
+    </section>
+
+    <div class="form-actions">
+      <ion-button type="button" fill="outline" color="medium" (click)="close()">Cancelar</ion-button>
+      <ion-button type="submit" color="primary" [disabled]="saving || documentoForm.invalid || !selectedFile">
+        <ion-spinner *ngIf="saving" name="crescent"></ion-spinner>
+        <ng-container *ngIf="!saving"><ion-icon slot="start" name="cloud-upload-outline"></ion-icon>Subir documento</ng-container>
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

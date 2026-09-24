@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-politicas',
   templateUrl: './politicas.page.html',
   styleUrls: ['./politicas.page.scss'],
 })
-export class PoliticasPage implements OnInit {
+export class PoliticasPage {
 
   constructor() { }
-
-  ngOnInit() {
-  }
 
 }

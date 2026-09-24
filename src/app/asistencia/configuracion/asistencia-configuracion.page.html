@@ -1,0 +1,33 @@
+<app-menu></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack attendance-page">
+    <section class="attendance-intro">
+      <div><span class="attendance-eyebrow">Administración</span><h2>Configuración de asistencia</h2><p>Administra las reglas y ubicaciones utilizadas por ASISTIA.</p></div>
+    </section>
+
+    <section aria-labelledby="authorized-points-title">
+      <span class="attendance-eyebrow">Prioridad</span>
+      <ion-card class="attendance-card">
+        <ion-card-content class="settings-primary">
+          <div class="settings-primary-copy">
+            <span class="settings-primary-icon"><ion-icon name="location-outline" aria-hidden="true"></ion-icon></span>
+            <div><h3 id="authorized-points-title">Puntos autorizados</h3><p>Define las ubicaciones desde las que los trabajadores podrán registrar asistencia.</p></div>
+          </div>
+          <div class="settings-primary-action">
+            <ion-button (click)="configurePoints()">Configurar puntos</ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
+    <section aria-labelledby="future-settings-title">
+      <div class="section-heading"><div><h2 id="future-settings-title">Configuraciones futuras</h2><p>Opciones previstas para las siguientes fases de ASISTIA.</p></div></div>
+      <div class="future-grid">
+        <ion-card class="future-card" *ngFor="let setting of futureSettings">
+          <ion-card-content><span class="future-icon"><ion-icon [name]="setting.icon" aria-hidden="true"></ion-icon></span><div><h3>{{ setting.title }}</h3><p>{{ setting.description }}</p></div><span class="coming-soon">Próximamente</span></ion-card-content>
+        </ion-card>
+      </div>
+    </section>
+  </main>
+</ion-content>

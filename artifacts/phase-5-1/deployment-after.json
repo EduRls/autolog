@@ -1,0 +1,53 @@
+{
+  "functions": [
+    {
+      "name": "registerAttendance",
+      "updateTime": "2026-09-08T21:09:18.514716496Z",
+      "state": "ACTIVE",
+      "revision": "registerattendance-00002-bep",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/registerAttendance"
+    },
+    {
+      "name": "getMyAttendance",
+      "updateTime": "2026-09-08T15:48:10.241237697Z",
+      "state": "ACTIVE",
+      "revision": "getmyattendance-00001-huw",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/getMyAttendance"
+    },
+    {
+      "name": "getAttendanceDashboard",
+      "updateTime": "2026-09-08T15:48:10.401592517Z",
+      "state": "ACTIVE",
+      "revision": "getattendancedashboard-00001-zim",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/getAttendanceDashboard"
+    },
+    {
+      "name": "listAttendanceRecords",
+      "updateTime": "2026-09-08T15:48:09.969629065Z",
+      "state": "ACTIVE",
+      "revision": "listattendancerecords-00001-loj",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/listAttendanceRecords"
+    },
+    {
+      "name": "externalDeviceApi",
+      "updateTime": "2026-08-14T01:24:05.887485293Z",
+      "state": "ACTIVE",
+      "revision": "externaldeviceapi-00003-mas",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/externalDeviceApi"
+    },
+    {
+      "name": "syncGaslinkSales",
+      "state": "NOT_FOUND_IN_US_CENTRAL1"
+    }
+  ],
+  "hosting": {
+    "name": "sites/autolog-13584/releases/1788901686418000",
+    "releaseTime": "2026-09-08T21:08:06.418Z",
+    "version": "sites/autolog-13584/versions/3174b79de0376941"
+  }
+}

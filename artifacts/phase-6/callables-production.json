@@ -1,0 +1,57 @@
+[
+  {
+    "name": "acceptAsistiaPolicies",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "setMyAsistiaVerificationMode",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "linkMyAsistiaDevice",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "resetAsistiaDevice",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "getDistributorAsistiaStatus",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "beginMyFacePresenceChallenge",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "completeMyFacePresenceSetup",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "getMyAsistiaBootstrap",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "registerAttendance",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "getMyAttendance",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  },
+  {
+    "name": "listAttendanceRecords",
+    "httpStatus": 401,
+    "error": "UNAUTHENTICATED"
+  }
+]

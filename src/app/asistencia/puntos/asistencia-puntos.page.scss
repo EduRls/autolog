@@ -1,0 +1,61 @@
+.points-page { min-width: 0; }
+.points-workspace { display: grid; grid-template-columns: minmax(230px, 310px) minmax(0, 1fr); gap: 16px; min-width: 0; }
+.points-workspace > *, .point-editor form, .attendance-intro > div { min-width: 0; }
+.attendance-intro p, .editor-prompt strong, .editor-prompt p { overflow-wrap: anywhere; }
+.points-list, .point-editor, .editor-prompt { margin: 0; overflow: hidden; }
+.points-list { align-self: start; }
+.points-list-heading, .editor-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px; border-bottom: 1px solid var(--autolog-border); }
+.points-list-heading h3, .editor-heading h3 { margin: 0; color: var(--autolog-text); font-size: 15px; }
+.points-list-heading small { color: var(--autolog-text-secondary); }
+.point-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; padding: 14px 16px; border: 0; border-bottom: 1px solid var(--autolog-border); color: var(--autolog-text); background: #fff; text-align: left; cursor: pointer; }
+.point-row:hover, .point-row.is-selected { background: var(--autolog-primary-soft); }
+.point-row strong, .point-row small { display: block; }
+.point-row small { margin-top: 3px; color: var(--autolog-text-secondary); font-size: 10px; }
+.point-status { width: 9px; height: 9px; border-radius: 50%; background: var(--autolog-success); }
+.point-status.inactive { background: var(--autolog-text-muted); }
+.point-row > ion-icon { color: var(--autolog-text-muted); }
+.list-empty { padding: 24px 16px; color: var(--autolog-text-secondary); font-size: 12px; text-align: center; }
+.point-editor form { display: grid; gap: 18px; padding: 18px; }
+.icon-button { display: grid; width: 36px; height: 36px; border: 0; border-radius: 9px; place-items: center; color: var(--autolog-text-secondary); background: transparent; font-size: 20px; cursor: pointer; }
+.icon-button:hover { background: var(--autolog-bg); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: grid; gap: 6px; color: var(--autolog-text-secondary); font-size: 11px; font-weight: 700; }
+.field input, .distributor-search input { width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); outline: none; color: var(--autolog-text); background: #fff; font: inherit; }
+.field input:focus, .distributor-search:focus-within { border-color: var(--autolog-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.field small { font-weight: 400; }
+.map-instructions { display: flex; align-items: center; gap: 8px; color: var(--autolog-text-secondary); font-size: 12px; }
+.map-instructions ion-icon { color: var(--autolog-primary); font-size: 18px; }
+.attendance-map { width: 100%; min-height: 410px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-md); background: #e8eef4; }
+:host ::ng-deep .attendance-map-marker { background: transparent; border: 0; }
+:host ::ng-deep .attendance-map-marker span { display: block; width: 26px; height: 26px; border: 4px solid #fff; border-radius: 50% 50% 50% 0; background: var(--autolog-primary); box-shadow: 0 3px 10px rgba(15, 23, 42, .28); transform: rotate(-45deg); }
+.coordinates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.coordinates div { padding: 11px 12px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); background: #f8fafc; }
+.coordinates span, .coordinates strong { display: block; }
+.coordinates span { color: var(--autolog-text-secondary); font-size: 10px; text-transform: uppercase; }
+.coordinates strong { margin-top: 3px; color: var(--autolog-text); font-size: 12px; }
+.input-suffix { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+.input-suffix input { border-radius: var(--autolog-radius-sm) 0 0 var(--autolog-radius-sm); }
+.input-suffix b { display: grid; min-height: 42px; padding: 0 13px; border: 1px solid var(--autolog-border); border-left: 0; border-radius: 0 var(--autolog-radius-sm) var(--autolog-radius-sm) 0; place-items: center; background: #f8fafc; }
+.status-control { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); }
+.status-control strong, .status-control small { display: block; }
+.status-control small { margin-top: 3px; color: var(--autolog-text-secondary); font-size: 10px; }
+.assignment-section { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--autolog-border); }
+.assignment-heading { display: flex; justify-content: space-between; gap: 12px; }
+.assignment-heading h4 { margin: 0; color: var(--autolog-text); font-size: 13px; }
+.assignment-heading p { margin: 3px 0 0; color: var(--autolog-text-secondary); font-size: 10px; }
+.assignment-heading > span { align-self: start; padding: 5px 8px; border-radius: 999px; color: var(--autolog-primary); background: var(--autolog-primary-soft); font-size: 10px; font-weight: 700; }
+.distributor-search { display: grid; grid-template-columns: auto 1fr; align-items: center; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); }
+.distributor-search ion-icon { margin-left: 12px; color: var(--autolog-text-muted); }
+.distributor-search input { border: 0; }
+.distributor-options { display: grid; max-height: 210px; overflow-y: auto; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); }
+.distributor-options label { display: flex; align-items: center; gap: 9px; min-height: 42px; padding: 0 12px; border-bottom: 1px solid var(--autolog-border); color: var(--autolog-text); font-size: 12px; cursor: pointer; }
+.distributor-options label:last-of-type { border-bottom: 0; }
+.distributor-options p { padding: 12px; color: var(--autolog-text-secondary); font-size: 11px; text-align: center; }
+.editor-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }
+.editor-prompt { display: grid; min-height: 480px; place-content: center; justify-items: center; padding: 24px; color: var(--autolog-text-secondary); text-align: center; }
+.editor-prompt ion-icon { margin-bottom: 12px; color: var(--autolog-primary); font-size: 42px; }
+.editor-prompt strong { color: var(--autolog-text); }
+.editor-prompt p { max-width: 360px; margin: 6px 0 0; font-size: 12px; }
+
+@media (max-width: 960px) { .points-workspace { grid-template-columns: 1fr; } .points-list { max-height: 300px; overflow-y: auto; } }
+@media (max-width: 600px) { .form-grid, .coordinates { grid-template-columns: 1fr; } .attendance-map { min-height: 320px; } .editor-actions { align-items: stretch; flex-direction: column; } .editor-actions ion-button { margin: 0; } }

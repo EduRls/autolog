@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  firebaseFunctionsRegion: 'us-central1',
   externalDeviceApiUrl: "https://us-central1-autolog-13584.cloudfunctions.net/externalDeviceApi",
   firebaseConfig: {
     apiKey: "AIzaSyDHNLqcTwcxh_VU212_h9wbOfQ9wuyw0u8",

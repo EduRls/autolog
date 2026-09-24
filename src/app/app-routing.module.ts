@@ -1,14 +1,33 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { redirectUnauthorizedTo, redirectLoggedInTo, canActivate } from '@angular/fire/auth-guard';
+import { redirectLoggedInTo, canActivate } from '@angular/fire/auth-guard';
+import { adminGuard } from './guards/admin.guard';
+import { attendanceGuard } from './guards/attendance.guard';
+import { autologAccessGuard } from './guards/autolog-access.guard';
+import { navigationSectionGuard } from './guards/navigation-section.guard';
 
-const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/login']);
 const redirectLoggedInToHome = () => redirectLoggedInTo(['panel-control']);
-const routes: Routes = [
+export const APP_ROUTES: Routes = [
+  {
+    path: 'plantas',
+    loadComponent: () => import('./plantas/plantas.page').then(m => m.PlantasPage),
+    canActivate: [adminGuard, navigationSectionGuard],
+    data: { navigationSection: 'administration' }
+  },
+  {
+    path: 'reloj/login',
+    loadComponent: () => import('./reloj/reloj-login.page').then(m => m.RelojLoginPage)
+  },
+  {
+    path: 'reloj',
+    loadComponent: () => import('./reloj/reloj.page').then(m => m.RelojPage),
+    canActivate: [attendanceGuard]
+  },
   {
     path: 'home',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'general' }
   },
   {
     path: '',
@@ -18,22 +37,25 @@ const routes: Routes = [
   {
     path: 'autos',
     loadChildren: () => import('./autos/autos.module').then( m => m.AutosPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'fleet' }
   },
   {
     path: 'articulos',
     loadChildren: () => import('./articulos/articulos.module').then( m => m.ArticulosPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'fleet' }
   },
   {
     path: 'usuarios',
     loadChildren: () => import('./usuarios/usuarios.module').then( m => m.UsuariosPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [adminGuard, navigationSectionGuard],
+    data: { navigationSection: 'administration' }
   },
   {
     path: 'mi-perfil',
     loadChildren: () => import('./mi-perfil/mi-perfil.module').then( m => m.MiPerfilPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard]
   },
   {
     path: 'login',
@@ -43,50 +65,74 @@ const routes: Routes = [
   {
     path: 'prueba',
     loadChildren: () => import('./prueba/prueba.module').then( m => m.PruebaPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'panel-control',
     loadChildren: () => import('./ventas/panel-control/panel-control.module').then( m => m.PanelControlPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'distribuidores',
     loadChildren: () => import('./ventas/distribuidores/distribuidores.module').then( m => m.DistribuidoresPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'fleet' }
   },
   {
     path: 'incidentes',
     loadChildren: () => import('./ventas/incidentes/incidentes.module').then( m => m.IncidentesPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'productos',
     loadChildren: () => import('./ventas/productos/productos.module').then( m => m.ProductosPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'historial',
     loadChildren: () => import('./ventas/historial/historial.module').then( m => m.HistorialPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'generar-codigos',
     loadChildren: () => import('./ventas/generar-codigos/generar-codigos.module').then( m => m.GenerarCodigosPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'convertidor-dictamen',
-    loadChildren: () => import('./herramientas/convertidor-dictamen/convertidor-dictamen.module').then( m => m.ConvertidorDictamenPageModule)
+    loadChildren: () => import('./herramientas/convertidor-dictamen/convertidor-dictamen.module').then( m => m.ConvertidorDictamenPageModule),
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'sorteos',
-    loadChildren: () => import('./ventas/sorteos/sorteos.module').then( m => m.SorteosPageModule)
+    loadChildren: () => import('./ventas/sorteos/sorteos.module').then( m => m.SorteosPageModule),
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sales' }
   },
   {
     path: 'panel-expendio',
     loadChildren: () => import('./expendio/panel-expendio/panel-expendio.module').then(m => m.PanelExpendioPageModule),
-    ...canActivate(redirectUnauthorizedToLogin)
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'station' }
+  },
+  {
+    path: 'registro-ventas',
+    loadChildren: () => import('./expendio/registro-ventas/registro-ventas.module').then(m => m.RegistroVentasPageModule),
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'station' }
+  },
+  {
+    path: 'asistencia',
+    loadChildren: () => import('./asistencia/asistencia.module').then(m => m.AsistenciaModule),
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'attendance' }
   },
   {
     path: 'politicas',
@@ -100,7 +146,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
+    RouterModule.forRoot(APP_ROUTES, { preloadingStrategy: PreloadAllModules })
   ],
   exports: [RouterModule]
 })

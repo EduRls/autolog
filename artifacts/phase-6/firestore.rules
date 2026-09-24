@@ -1,0 +1,129 @@
+rules_version = '2';
+
+// PROPUESTA LOCAL: no desplegar hasta comparar con las reglas activas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userProfile() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function hasUserProfile() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+
+    function activeUser() {
+      return hasUserProfile()
+        && (!('activo' in userProfile()) || userProfile().activo == true);
+    }
+
+    function canAccessAutolog() {
+      return activeUser()
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN', 'capturista', 'Capturista', 'CAPTURISTA']
+        && (!('tipoPersonal' in userProfile()) || userProfile().tipoPersonal != 'DISTRIBUIDOR')
+        && (!('accesoAutolog' in userProfile()) || userProfile().accesoAutolog == true);
+    }
+
+    function isAdmin() {
+      return canAccessAutolog()
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN'];
+    }
+
+    function validPersonalDocument(personalType, collectionName, personalId, documentoId) {
+      let data = request.resource.data;
+      let newPath = '^personal/' + collectionName + '/' + personalId
+        + '/expediente/' + documentoId + '/[^/]+$';
+      let current = data.tipoPersonal == personalType
+        && data.personalId == personalId
+        && data.storagePath.matches(newPath);
+      return data.keys().hasOnly([
+          'personalId', 'tipoPersonal', 'distribuidorId', 'tipo',
+          'empleadoId', // Legacy null metadata on distributor documents only.
+          'nombre', 'nombreArchivo', 'storagePath', 'mimeType', 'size',
+          'fechaDocumento', 'fechaVencimiento', 'estadoManual', 'notas',
+          'uploadedAt', 'uploadedByUid', 'updatedAt', 'version',
+          'esVersionActual', 'replacedDocumentId', 'replacedByDocumentId'
+        ])
+        && (current)
+        && (!('empleadoId' in data) || data.empleadoId == null)
+        && data.mimeType in ['application/pdf', 'image/jpeg', 'image/png']
+        && data.size is int
+        && data.size > 0
+        && data.size <= 10 * 1024 * 1024
+        && data.uploadedAt is timestamp
+        && data.uploadedByUid is string
+        && data.updatedAt is timestamp;
+    }
+
+    match /usuarios/{uid} {
+      allow read: if isAdmin()
+        || (signedIn() && request.auth.uid == uid)
+        || (signedIn() && resource.data.email == request.auth.token.email);
+      allow create, update, delete: if false;
+    }
+
+    match /distribuidores/{distribuidorId} {
+      allow read: if canAccessAutolog();
+      allow create: if false; // Created exclusively by the administrative callable.
+      allow update: if canAccessAutolog()
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['usuarioUid', 'identificador'])
+        && (isAdmin()
+          || !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['activo', 'estado', 'estatus']));
+      allow delete: if false;
+
+      match /expediente/{documentoId} {
+        allow read: if isAdmin();
+        allow create, update: if isAdmin()
+          && validPersonalDocument(
+            'DISTRIBUIDOR', 'distribuidores', distribuidorId, documentoId
+          );
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /asistencias/{asistenciaId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /attendanceState/{stateId} {
+      allow read, write: if false;
+    }
+
+    match /attendanceIdempotency/{idempotencyId} {
+      allow read, write: if false;
+    }
+
+    match /asistencia_puntos/{puntoId} {
+      allow read, write: if false;
+    }
+
+    match /asistencia_punto_asignaciones/{asignacionId} {
+      allow read, write: if false;
+    }
+
+    // Compatibilidad temporal para colecciones comerciales legacy.
+    match /{rootCollection}/{document=**} {
+      allow read, write: if canAccessAutolog()
+        && rootCollection != 'distributorCounters'
+        && rootCollection != 'distributorRequests'
+        && rootCollection != 'usuarios'
+        && rootCollection != 'distribuidores'
+        && rootCollection != 'asistencias'
+        && rootCollection != 'attendanceState'
+        && rootCollection != 'attendanceIdempotency'
+        && rootCollection != 'asistencia_puntos'
+        && rootCollection != 'asistia_user_acceptances'
+        && rootCollection != 'asistia_devices'
+        && rootCollection != 'asistia_presence_challenges'
+        && rootCollection != 'asistia_audit'
+        && rootCollection != 'asistencia_punto_asignaciones';
+    }
+  }
+}

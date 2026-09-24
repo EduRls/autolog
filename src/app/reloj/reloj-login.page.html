@@ -1,0 +1,19 @@
+<ion-content class="clock-shell">
+  <main class="clock-login">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>AUTOLOG</ion-card-subtitle>
+        <ion-card-title>Reloj checador</ion-card-title>
+        <p>Inicia sesión con la cuenta proporcionada por tu administrador.</p>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="login()">
+          <ion-input label="Correo" label-placement="stacked" fill="outline" type="email" autocomplete="email" formControlName="email"></ion-input>
+          <ion-input label="Contraseña" label-placement="stacked" fill="outline" type="password" autocomplete="current-password" formControlName="password"></ion-input>
+          <ion-button expand="block" type="submit" [disabled]="loginForm.invalid || loading"><ion-spinner *ngIf="loading" name="crescent"></ion-spinner><span *ngIf="!loading">Iniciar sesión</span></ion-button>
+          <ion-button expand="block" type="button" fill="clear" [disabled]="resetting" (click)="recoverPassword()">¿Olvidaste tu contraseña?</ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </main>
+</ion-content>

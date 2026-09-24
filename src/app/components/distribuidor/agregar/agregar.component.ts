@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { DistribuidoresService } from 'src/app/services/admVentas/distribuidores/distribuidores.service';
+import { Planta } from 'src/app/models/planta.model';
+import { PlantScopeService } from 'src/app/services/plants/plant-scope.service';
 
 @Component({
   selector: 'app-agregar',
@@ -17,26 +19,40 @@ import { DistribuidoresService } from 'src/app/services/admVentas/distribuidores
   ],
 })
 export class AgregarComponent implements OnInit {
-  @Input() operadores: any;
 
-  operadorNuevo: FormGroup;
+  operadorNuevo!: FormGroup;
+  saving = false;
+  readonly idempotencyKey = crypto.randomUUID();
+  plants: Planta[] = [];
+  showPlantSelector = false;
 
   constructor(
     private fb: FormBuilder,
     private modalController: ModalController,
     private toastController: ToastController,
     private loadController: LoadingController,
-    private ditribuidresService: DistribuidoresService
+    private ditribuidresService: DistribuidoresService,
+    private readonly plantScope: PlantScopeService
   ) { }
 
   ngOnInit() {
     this.operadorNuevo = this.fb.group({
-      nombre: ['', Validators.required],
-      identificador: ['VGBZ-00', Validators.required],
-      ruta: ['', Validators.required],
-      zona: ['', Validators.required]
-    })
+      nombre: ['', [Validators.required, Validators.maxLength(160)]],
+      ruta: ['', [Validators.required, Validators.maxLength(50)]],
+      zona: ['', Validators.required],
+      plantaId: ['']
+    });
+    void this.initializeScope();
+  }
 
+  private async initializeScope(): Promise<void> {
+    await this.plantScope.initialize();
+    this.plants = this.plantScope.snapshot().plants;
+    this.showPlantSelector = this.plantScope.isGlobal() && !this.plantScope.getActivePlantId();
+    const control = this.operadorNuevo.controls['plantaId'];
+    if (this.showPlantSelector) control.addValidators(Validators.required);
+    else control.setValue(this.plantScope.getActivePlantId() || this.plantScope.getPrincipalPlantId() || '');
+    control.updateValueAndValidity();
   }
 
   async presentToast(msg: string, position: 'top' | 'middle' | 'bottom', cl: 'danger' | 'success' | 'warning') {
@@ -50,44 +66,47 @@ export class AgregarComponent implements OnInit {
     await toast.present();
   }
 
-  async cancel() {
-    await this.modalController.dismiss();
-    this.operadorNuevo.reset();
+  async cancel(): Promise<void> {
+    if (this.saving) return;
+    await this.modalController.dismiss({ changed: false });
   }
 
-  async agregar() {
-    const inOperador = this.operadores.find((data:any) => data.identificador == this.operadorNuevo.get('identificador').value.toUpperCase()) 
-
-    if(inOperador){
-      this.presentToast('Favor de cambiar el número de identificación', 'bottom', 'warning')
-      return
+  async agregar(): Promise<void> {
+    if (this.saving) return;
+    this.normalizeForm();
+    if (this.operadorNuevo.invalid) {
+      this.operadorNuevo.markAllAsTouched();
+      await this.presentToast('Completa los campos obligatorios correctamente.', 'bottom', 'warning');
+      return;
     }
-    
-    this.operadorNuevo.get('nombre').setValue((this.operadorNuevo.get('nombre').value).toUpperCase());
-    this.operadorNuevo.get('identificador').setValue((this.operadorNuevo.get('identificador').value).toUpperCase());
-    this.operadorNuevo.get('ruta').setValue((this.operadorNuevo.get('ruta').value).toUpperCase());
-    console.log(this.operadorNuevo.value)
 
-    
-    if (this.operadorNuevo.valid) {
-      const loading = await this.loadController.create({
-        message: 'Editando operador...',
-        duration: 2000
-      });
-      await loading.present();
-
-      try {
-        await this.ditribuidresService.addDistribuidor(this.operadorNuevo.value).then((val) => {
-          this.presentToast('Operador agregado exitosamente', 'bottom', 'success');
-          this.operadorNuevo.reset();
-          this.modalController.dismiss();
-        })
-      } catch (error) {
-        this.presentToast('Error al agregar operador', 'bottom', 'danger');
-      }
-    } else {
-      this.presentToast('Favor de completar todos los camos', 'bottom', 'warning')
+    const formValue = this.operadorNuevo.getRawValue();
+    this.saving = true;
+    const loading = await this.loadController.create({ message: 'Guardando distribuidor…' });
+    await loading.present();
+    try {
+      await this.ditribuidresService.addDistribuidor({ ...formValue, idempotencyKey: this.idempotencyKey });
+      await this.presentToast('Distribuidor agregado correctamente.', 'bottom', 'success');
+      await this.modalController.dismiss({ changed: true });
+    } catch {
+      await this.presentToast('No fue posible agregar el distribuidor.', 'bottom', 'danger');
+    } finally {
+      this.saving = false;
+      await loading.dismiss();
     }
+  }
+
+  private normalizeForm(): void {
+    const value = this.operadorNuevo.getRawValue();
+    this.operadorNuevo.patchValue({
+      nombre: this.normalizeUppercase(value.nombre),
+      ruta: this.normalizeUppercase(value.ruta),
+      zona: String(value.zona || '').trim().toLowerCase(),
+    }, { emitEvent: false });
+  }
+
+  private normalizeUppercase(value: unknown): string {
+    return String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
   }
 
 }

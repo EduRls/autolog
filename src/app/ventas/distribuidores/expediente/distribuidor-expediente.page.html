@@ -1,0 +1,39 @@
+<app-menu titulo="distribuidorExpediente"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <div class="page-stack expediente-page">
+    <div class="page-toolbar expediente-toolbar">
+      <div class="title-group">
+        <ion-button fill="clear" color="medium" (click)="goBack()" aria-label="Volver a distribuidores" title="Volver a distribuidores">
+          <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+        </ion-button>
+        <div>
+          <h2 class="toolbar-title">Expediente digital</h2>
+          <p>Administra documentos, vencimientos y versiones del distribuidor.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-state" *ngIf="state === 'loading'" role="status">
+      <ion-spinner name="crescent"></ion-spinner><span>Cargando distribuidor…</span>
+    </div>
+    <div class="page-state" *ngIf="state === 'error'" role="alert">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <strong>No fue posible abrir el expediente</strong>
+      <span>Comprueba tu conexión e intenta nuevamente.</span>
+      <ion-button fill="outline" (click)="loadDistribuidor()">Reintentar</ion-button>
+    </div>
+    <div class="page-state" *ngIf="state === 'not-found'">
+      <ion-icon name="folder-open-outline"></ion-icon>
+      <strong>Distribuidor no encontrado</strong>
+      <span>El registro pudo haber cambiado o ya no está disponible.</span>
+      <ion-button fill="outline" (click)="goBack()">Volver al directorio</ion-button>
+    </div>
+
+    <app-expediente-personal
+      *ngIf="state === 'ready' && distribuidor"
+      [distribuidor]="distribuidor"
+      [pageMode]="true">
+    </app-expediente-personal>
+  </div>
+</ion-content>

@@ -1,0 +1,119 @@
+{
+  "functions": [
+    {
+      "name": "registerAttendance",
+      "updateTime": "2026-09-09T13:51:20.685435188Z",
+      "state": "ACTIVE",
+      "revision": "registerattendance-00003-puz",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/registerAttendance"
+    },
+    {
+      "name": "getMyAttendance",
+      "updateTime": "2026-09-09T13:51:18.853781454Z",
+      "state": "ACTIVE",
+      "revision": "getmyattendance-00002-qal",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/getMyAttendance"
+    },
+    {
+      "name": "getMyAsistiaBootstrap",
+      "updateTime": "2026-09-09T13:51:20.979352808Z",
+      "state": "ACTIVE",
+      "revision": "getmyasistiabootstrap-00002-nag",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/getMyAsistiaBootstrap"
+    },
+    {
+      "name": "getAttendanceDashboard",
+      "updateTime": "2026-09-08T15:48:10.401592517Z",
+      "state": "ACTIVE",
+      "revision": "getattendancedashboard-00001-zim",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/getAttendanceDashboard"
+    },
+    {
+      "name": "listAttendanceRecords",
+      "updateTime": "2026-09-09T13:51:18.615029456Z",
+      "state": "ACTIVE",
+      "revision": "listattendancerecords-00002-xes",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/listAttendanceRecords"
+    },
+    {
+      "name": "acceptAsistiaPolicies",
+      "updateTime": "2026-09-09T13:51:03.514998961Z",
+      "state": "ACTIVE",
+      "revision": "acceptasistiapolicies-00001-lew",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/acceptAsistiaPolicies"
+    },
+    {
+      "name": "setMyAsistiaVerificationMode",
+      "updateTime": "2026-09-09T13:51:03.773446465Z",
+      "state": "ACTIVE",
+      "revision": "setmyasistiaverificationmode-00001-gav",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/setMyAsistiaVerificationMode"
+    },
+    {
+      "name": "linkMyAsistiaDevice",
+      "updateTime": "2026-09-09T13:51:03.718431597Z",
+      "state": "ACTIVE",
+      "revision": "linkmyasistiadevice-00001-fik",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/linkMyAsistiaDevice"
+    },
+    {
+      "name": "resetAsistiaDevice",
+      "updateTime": "2026-09-09T13:51:04.015617999Z",
+      "state": "ACTIVE",
+      "revision": "resetasistiadevice-00001-sok",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/resetAsistiaDevice"
+    },
+    {
+      "name": "getDistributorAsistiaStatus",
+      "updateTime": "2026-09-09T13:51:03.570660875Z",
+      "state": "ACTIVE",
+      "revision": "getdistributorasistiastatus-00001-yac",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/getDistributorAsistiaStatus"
+    },
+    {
+      "name": "beginMyFacePresenceChallenge",
+      "updateTime": "2026-09-09T13:51:03.629559934Z",
+      "state": "ACTIVE",
+      "revision": "beginmyfacepresencechallenge-00001-vaz",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/beginMyFacePresenceChallenge"
+    },
+    {
+      "name": "completeMyFacePresenceSetup",
+      "updateTime": "2026-09-09T13:51:03.125868591Z",
+      "state": "ACTIVE",
+      "revision": "completemyfacepresencesetup-00001-raz",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/completeMyFacePresenceSetup"
+    },
+    {
+      "name": "externalDeviceApi",
+      "updateTime": "2026-08-14T01:24:05.887485293Z",
+      "state": "ACTIVE",
+      "revision": "externaldeviceapi-00003-mas",
+      "runtime": "nodejs22",
+      "uri": "https://us-central1-autolog-13584.cloudfunctions.net/externalDeviceApi"
+    },
+    {
+      "name": "syncGaslinkSales",
+      "updateTime": "2026-08-28T03:19:01.418366261Z",
+      "state": "ACTIVE",
+      "revision": "syncgaslinksales-00007-gow"
+    }
+  ],
+  "hosting": {
+    "name": "sites/autolog-13584/releases/1788986411062000",
+    "releaseTime": "2026-09-09T20:40:11.062Z",
+    "version": "sites/autolog-13584/versions/c1f2ad2101a61c45"
+  }
+}

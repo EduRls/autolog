@@ -5,7 +5,9 @@ import {
   collectionData,
   docData,
   Firestore,
-  updateDoc
+  updateDoc,
+  serverTimestamp,
+  runTransaction
 } from '@angular/fire/firestore';
 import {
   deleteDoc,
@@ -15,10 +17,9 @@ import {
   getDocs,
   getDoc
 } from 'firebase/firestore';
-import {
-  Auth
-} from '@angular/fire/auth';
-import { Observable } from 'rxjs';
+import { Observable, distinctUntilChanged, filter, from, map, switchMap } from 'rxjs';
+import { Auth } from '@angular/fire/auth';
+import { PlantScopeService } from '../plants/plant-scope.service';
 
 
 @Injectable({
@@ -27,28 +28,10 @@ import { Observable } from 'rxjs';
 export class FirebaseService {
 
   constructor(
-    private firestore: Firestore
+    private firestore: Firestore,
+    private readonly auth: Auth,
+    private readonly plantScope: PlantScopeService
   ) { }
-
-  /*
-    A D M I N I S T R A C I Ó N      D  E    U S U A R I O S
-  */
-  getUsuarios(): Observable<any[]> {
-    const registroRef = collection(this.firestore, 'usuarios');
-    return collectionData(registroRef, { idField: 'id' }) as Observable<any[]>;
-  }
-
-  // Eliminar un usuario
-  deleteUsuario(id: string) {
-    const usuarioRef = doc(this.firestore, `usuarios/${id}`);
-    return deleteDoc(usuarioRef);
-  }
-
-  // Actualizar un usuario
-  updateUsuario(data: any) {
-    const usuarioRef = doc(this.firestore, `usuarios/${data.id}`);
-    return updateDoc(usuarioRef, data);
-  }
 
   async getUserByEmail(email: string) {
     const usersRef = collection(this.firestore, 'usuarios');
@@ -77,8 +60,7 @@ export class FirebaseService {
       A D M I N I S T R A C I Ó N    D E     E V E N T O S
   */
   getEvento(): Observable<any[]> {
-    const registroRef = collection(this.firestore, 'eventos');
-    return collectionData(registroRef, { idField: 'id' }) as Observable<any[]>;
+    return this.scopedCollection('eventos', 'plantaId');
   }
 
   getEventoById(id: string): Observable<any> {
@@ -87,7 +69,7 @@ export class FirebaseService {
   }
 
   addEvento(reporte: any): Promise<any> {
-    return addDoc(collection(this.firestore, 'eventos'), reporte);
+    return this.createEventAndUpdateAuto(reporte);
   }
 
   deleteEvento(id: string) {
@@ -104,7 +86,9 @@ export class FirebaseService {
       articulos: reporte.articulos, // Campo actualizado para incluir el array de artículos
       costo: reporte.costo,
       fecha: reporte.fecha,
-      autUser: reporte.autUser // Usuario que autorizó la operación
+      autUser: reporte.autUser, // Usuario que autorizó la operación
+      updatedAt: serverTimestamp(),
+      updatedByUid: this.auth.currentUser?.uid || null
     });
   }
 
@@ -114,8 +98,7 @@ export class FirebaseService {
   */
 
   getAutos(): Observable<any[]> {
-    const registroRef = collection(this.firestore, 'autos');
-    return collectionData(registroRef, { idField: 'id' }) as Observable<any[]>;
+    return this.scopedCollection('autos', 'plantaId');
   }
 
   getAutoById(id: string): Observable<any> {
@@ -123,8 +106,17 @@ export class FirebaseService {
     return docData(registroRef) as Observable<any>;
   }
 
-  addAuto(reporte: any): Promise<any> {
-    return addDoc(collection(this.firestore, 'autos'), reporte);
+  async addAuto(reporte: any): Promise<any> {
+    await this.plantScope.initialize();
+    const plantaId = this.plantScope.resolveWritePlantId(reporte.plantaId);
+    return addDoc(collection(this.firestore, 'autos'), {
+      ...reporte,
+      plantaId,
+      createdAt: serverTimestamp(),
+      createdByUid: this.auth.currentUser?.uid || null,
+      updatedAt: serverTimestamp(),
+      updatedByUid: this.auth.currentUser?.uid || null
+    });
   }
 
   deleteAuto(id: string) {
@@ -137,10 +129,13 @@ export class FirebaseService {
     return updateDoc(registroRef, {
       unidad: reporte.unidad,
       operador: reporte.operador,
+      operadorId: reporte.operadorId || null,
       kilometraje: reporte.kilometraje,
       km_actual: reporte.km_actual,
       km_proximo_servicio: reporte.km_proximo_servicio,
-      desc: reporte.desc
+      desc: reporte.desc,
+      updatedAt: serverTimestamp(),
+      updatedByUid: this.auth.currentUser?.uid || null
     });
   }
 
@@ -184,8 +179,54 @@ export class FirebaseService {
   */
 
   getDistribuidores(): Observable<any[]> {
-    const registroRef = collection(this.firestore, 'distribuidores');
-    return collectionData(registroRef, { idField: 'id' }) as Observable<any[]>;
+    return this.scopedCollection('distribuidores', 'plantaIdPrincipal');
+  }
+
+  async createEventAndUpdateAuto(reporte: any): Promise<string> {
+    await this.plantScope.initialize();
+    const autoId = typeof reporte?.unidad?.id === 'string' ? reporte.unidad.id : reporte?.unidad;
+    if (!autoId) throw new Error('AUTO_REQUIRED');
+    const autoRef = doc(this.firestore, `autos/${autoId}`);
+    const eventRef = doc(collection(this.firestore, 'eventos'));
+    await runTransaction(this.firestore, async transaction => {
+      const auto = await transaction.get(autoRef);
+      if (!auto.exists()) throw new Error('AUTO_NOT_FOUND');
+      const autoData = auto.data() as any;
+      const plantaId = autoData.plantaId;
+      if (!plantaId || !this.plantScope.canWritePlant(plantaId)) throw new Error('PLANT_WRITE_DENIED');
+      const uid = this.auth.currentUser?.uid || null;
+      transaction.set(eventRef, {
+        ...reporte,
+        unidad: { id: auto.id, unidad: autoData.unidad },
+        plantaId,
+        createdAt: serverTimestamp(), createdByUid: uid,
+        updatedAt: serverTimestamp(), updatedByUid: uid
+      });
+      transaction.update(autoRef, {
+        km_actual: reporte.kilometraje,
+        km_proximo_servicio: Number(reporte.kilometraje) >= Number(autoData.km_proximo_servicio || 0)
+          ? Number(reporte.kilometraje) + 10000 : autoData.km_proximo_servicio,
+        updatedAt: serverTimestamp(), updatedByUid: uid
+      });
+    });
+    return eventRef.id;
+  }
+
+  private scopedCollection(collectionName: string, plantField: string): Observable<any[]> {
+    return from(this.plantScope.initialize()).pipe(
+      switchMap(() => this.plantScope.state$),
+      filter(state => state.ready && Boolean(state.profile)),
+      map(state => state.activePlantId),
+      distinctUntilChanged(),
+      switchMap(plantId => {
+        const reference = collection(this.firestore, collectionName);
+        if (plantId) {
+          return collectionData(query(reference, where(plantField, '==', plantId)), { idField: 'id' }) as Observable<any[]>;
+        }
+        if (!this.plantScope.isGlobal()) throw new Error('PLANT_CONTEXT_REQUIRED');
+        return collectionData(reference, { idField: 'id' }) as Observable<any[]>;
+      })
+    );
   }
 
 }

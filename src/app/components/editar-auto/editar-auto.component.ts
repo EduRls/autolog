@@ -3,6 +3,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { FirebaseService } from 'src/app/services/firebase/firebase.service';
+import { Distribuidor } from 'src/app/models/distribuidor.model';
+import { DistribuidoresService } from 'src/app/services/admVentas/distribuidores/distribuidores.service';
 
 @Component({
   selector: 'app-editar-auto',
@@ -16,13 +18,15 @@ export class EditarAutoComponent implements OnInit {
   @Input() auto:any;
 
   public editarAuto: FormGroup
+  operadoresDisponibles: Distribuidor[] = [];
 
   constructor(
     private modalController: ModalController,
     private loadcontroller: LoadingController,
     private firebaseService: FirebaseService,
     private toastController: ToastController,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private distribuidoresService: DistribuidoresService
   ) { }
 
   ngOnInit() {
@@ -33,9 +37,24 @@ export class EditarAutoComponent implements OnInit {
       km_actual: [this.auto.km_actual, Validators.required],
       km_proximo_servicio: [this.auto.km_proximo_servicio, Validators.required],
       operador: [this.auto.operador, Validators.required],
+      operadorId: [this.auto.operadorId ?? null, Validators.required],
       desc: [this.auto.desc, Validators.required]
     });
     this.mitigarCamposFaltantes();
+    void this.loadOperadores();
+  }
+
+  seleccionarOperador(distribuidorId: string | null): void {
+    const distribuidor = this.operadoresDisponibles.find(item => item.id === distribuidorId);
+    if (distribuidor) this.editarAuto.patchValue({ operador: distribuidor.nombre });
+  }
+
+  private async loadOperadores(): Promise<void> {
+    try {
+      this.operadoresDisponibles = await this.distribuidoresService.getActivos();
+    } catch {
+      this.operadoresDisponibles = [];
+    }
   }
 
   async mitigarCamposFaltantes() {

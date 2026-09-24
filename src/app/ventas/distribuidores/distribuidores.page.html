@@ -1,72 +1,171 @@
 <app-menu titulo="distribu"></app-menu>
 
-<ion-content id="main-content" [fullscreen]="true" class="ion-padding">
-  <div class="page-toolbar">
-    <div><h2 class="toolbar-title">Directorio de distribuidores</h2><p>Consulta identificadores, rutas y zonas asignadas.</p></div>
-    <ion-button color="primary" (click)="addDistribuidor()"><ion-icon slot="start" name="add-outline"></ion-icon>Nuevo distribuidor</ion-button>
-  </div>
-  <h3 style="margin: 1% 2% 0% 2%">
-    <b>Administración</b> || <span style="font-size:medium;"><ion-icon size="medium" name="people-outline"></ion-icon>
-      Distribuidores</span>
-  </h3>
-  <h5 style="text-align: center;">Busqueda por ID ó nombre del distribuidor</h5>
-  <div style="width: 98%; margin: 1%;">
-    <ion-searchbar style="--border-radius: 8px; transform: scale(1.2);  width: 83%; margin: 0 auto;"
-      placeholder="ID ó nombre del distribuidor" 
-      [debounce]="50" 
-      showCancelButton="focus"
-      [(ngModel)]="busqueda"
-      (ionInput)="filtrarDistribuidores()"
-      ></ion-searchbar>
-  </div>
-  <div>
-    <ion-card>
+<ion-content id="main-content" [fullscreen]="true">
+  <div class="page-stack distributors-page">
+    <div class="page-toolbar">
+      <div>
+        <h2 class="toolbar-title">Directorio de distribuidores</h2>
+        <p>Consulta la operación, el acceso digital y el avance de cada expediente.</p>
+      </div>
+      <ion-button *ngIf="canCreate && canWrite" color="primary" (click)="addDistribuidor()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Nuevo distribuidor
+      </ion-button>
+    </div>
+
+    <section class="summary-grid" aria-label="Resumen de distribuidores">
+      <article class="summary-card total-card">
+        <span class="summary-icon"><ion-icon name="people-outline"></ion-icon></span>
+        <div><small>Total</small><strong>{{ totalDistribuidores }}</strong><span>Distribuidores registrados</span></div>
+      </article>
+      <article class="summary-card active-card">
+        <span class="summary-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></span>
+        <div><small>Activos</small><strong>{{ activeCount }}</strong><span>En operación actualmente</span></div>
+      </article>
+      <article class="summary-card inactive-card">
+        <span class="summary-icon"><ion-icon name="pause-circle-outline"></ion-icon></span>
+        <div><small>Inactivos</small><strong>{{ inactiveCount }}</strong><span>Conservados en historial</span></div>
+      </article>
+      <article class="summary-card access-card">
+        <span class="summary-icon"><ion-icon name="key-outline"></ion-icon></span>
+        <div><small>Con cuenta</small><strong>{{ accountCount }}</strong><span>Con acceso digital vinculado</span></div>
+      </article>
+      <article class="summary-card warning-card" *ngIf="canAdminister">
+        <span class="summary-icon"><ion-icon name="folder-open-outline"></ion-icon></span>
+        <div>
+          <small>Expedientes incompletos</small>
+          <strong>{{ documentInsightsState === 'ready' ? incompleteFileCount : '—' }}</strong>
+          <span>Entre distribuidores activos</span>
+        </div>
+      </article>
+    </section>
+
+    <ion-card class="document-insights-card" *ngIf="canAdminister">
       <ion-card-content>
-        <!-- Aquí va la tabla -->
-        <div class="table-container">
-          <table class="responsive-table">
+        <div class="section-heading">
+          <div>
+            <h3>Documentos que más faltan</h3>
+            <p>Prioriza los requisitos con menor cobertura entre distribuidores activos.</p>
+          </div>
+          <ion-button fill="clear" size="small" (click)="loadDocumentInsights()"
+            [disabled]="documentInsightsState === 'loading'" title="Actualizar resumen documental">
+            <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        <div class="insight-state" *ngIf="documentInsightsState === 'loading' || documentInsightsState === 'idle'">
+          <ion-spinner name="crescent"></ion-spinner><span>Calculando cobertura documental…</span>
+        </div>
+        <div class="insight-state error" *ngIf="documentInsightsState === 'error'">
+          <ion-icon name="alert-circle-outline"></ion-icon><span>No se pudo obtener el resumen documental.</span>
+          <ion-button fill="outline" size="small" (click)="loadDocumentInsights()">Reintentar</ion-button>
+        </div>
+        <div class="insight-state complete" *ngIf="documentInsightsState === 'ready' && !topMissingDocuments.length">
+          <ion-icon name="shield-checkmark-outline"></ion-icon><span>Los expedientes activos tienen todos los documentos requeridos.</span>
+        </div>
+        <div class="missing-documents" *ngIf="documentInsightsState === 'ready' && topMissingDocuments.length">
+          <article *ngFor="let documentType of topMissingDocuments">
+            <div class="missing-document-copy">
+              <span>{{ documentType.label }}</span>
+              <strong>{{ documentType.missingCount }} faltante{{ documentType.missingCount === 1 ? '' : 's' }}</strong>
+            </div>
+            <div class="coverage-track" role="progressbar" [attr.aria-label]="'Cobertura de ' + documentType.label"
+              [attr.aria-valuenow]="documentType.completionPercent" aria-valuemin="0" aria-valuemax="100">
+              <span [style.width.%]="documentType.completionPercent"></span>
+            </div>
+            <small>{{ documentType.completionPercent }}% de cobertura</small>
+          </article>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="directory-card">
+      <ion-card-content>
+        <div class="directory-header">
+          <div><h3>Distribuidores</h3><p>{{ distribuidoresFiltrados.length }} resultado{{ distribuidoresFiltrados.length === 1 ? '' : 's' }}</p></div>
+          <ion-searchbar
+            aria-label="Buscar distribuidor por identificador o nombre"
+            placeholder="Buscar por ID o nombre"
+            [debounce]="100"
+            showCancelButton="focus"
+            [(ngModel)]="busqueda"
+            (ionInput)="filtrarDistribuidores()">
+          </ion-searchbar>
+        </div>
+
+        <div class="state-panel" *ngIf="state === 'loading'" role="status">
+          <ion-spinner name="crescent"></ion-spinner><span>Cargando distribuidores…</span>
+        </div>
+        <div class="state-panel" *ngIf="state === 'error'" role="alert">
+          <ion-icon name="alert-circle-outline"></ion-icon><span>{{ errorMessage }}</span>
+          <ion-button fill="outline" (click)="getInfo()">Reintentar</ion-button>
+        </div>
+        <div class="state-panel empty" *ngIf="state === 'empty' || (state === 'ready' && !distribuidoresFiltrados.length)">
+          <ion-icon name="search-outline"></ion-icon>
+          <strong>{{ busqueda ? 'No encontramos coincidencias' : 'Aún no hay distribuidores' }}</strong>
+          <span>{{ busqueda ? 'Prueba con otro identificador o nombre.' : 'Registra el primer distribuidor para comenzar.' }}</span>
+        </div>
+
+        <div class="table-container" *ngIf="state === 'ready' && distribuidoresFiltrados.length">
+          <table class="responsive-table distributor-table">
             <thead>
               <tr>
-                <th>Identificador</th>
-                <th>Nombre</th>
+                <th>Distribuidor</th>
                 <th>Ruta</th>
                 <th>Zona</th>
-                <th style="text-align: center;">Acciones</th>
+                <th>Acceso</th>
+                <th *ngIf="canAdminister">Expediente</th>
+                <th>Estado</th>
+                <th class="actions-cell">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let distribuidor of distribuidoresPaginados">
-                <td>{{ distribuidor.identificador }}</td>
-                <td>{{ distribuidor.nombre }}</td>
-                <td>{{ distribuidor.ruta }}</td>
+                <td>
+                  <div class="distributor-identity">
+                    <span class="table-avatar">{{ distribuidor.nombre.charAt(0) }}</span>
+                    <div><strong>{{ distribuidor.nombre }}</strong><small>{{ distribuidor.identificador }}</small></div>
+                  </div>
+                </td>
+                <td><span class="route-value">{{ distribuidor.ruta || 'Sin ruta' }}</span></td>
                 <td>{{ transformarZona(distribuidor.zona) }}</td>
-                <td style="text-align: center;">
-                  <ion-button fill="clear" color="primary" (click)="editarDistribuidor(distribuidor)">
-                    <ion-icon name="create-outline" slot="icon-only"></ion-icon>
-                  </ion-button>
-                  <ion-button fill="clear" color="danger" (click)="eliminarDistribuidor(distribuidor.id)">
-                    <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-                  </ion-button>
+                <td>
+                  <span class="access-status" [class.has-access]="distribuidor.usuarioUid || accessByDistributorId[distribuidor.id]">
+                    <ion-icon [name]="distribuidor.usuarioUid || accessByDistributorId[distribuidor.id] ? 'checkmark-circle-outline' : 'remove-circle-outline'"></ion-icon>
+                    {{ accessLabel(distribuidor) }}
+                  </span>
+                </td>
+                <td *ngIf="canAdminister">
+                  <ion-badge [color]="documentStatusColor(distribuidor)">{{ documentStatusLabel(distribuidor) }}</ion-badge>
+                </td>
+                <td><ion-badge [color]="isActive(distribuidor) ? 'success' : 'medium'">{{ isActive(distribuidor) ? 'Activo' : 'Inactivo' }}</ion-badge></td>
+                <td class="actions-cell">
+                  <div class="row-actions">
+                    <ion-button *ngIf="canWrite" fill="clear" color="primary" (click)="editarDistribuidor(distribuidor)" title="Editar distribuidor" aria-label="Editar distribuidor">
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button *ngIf="canAdminister" fill="clear" color="secondary" (click)="openExpediente(distribuidor)" title="Abrir expediente" aria-label="Abrir expediente">
+                      <ion-icon name="folder-open-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button *ngIf="canAdminister" fill="clear" color="primary" (click)="manageAccess(distribuidor)" title="Administrar acceso digital" aria-label="Administrar acceso digital">
+                      <ion-icon name="key-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button *ngIf="canAdminister" fill="clear" color="danger" (click)="eliminarDistribuidor(distribuidor.id)" [disabled]="!isActive(distribuidor)" title="Desactivar distribuidor" aria-label="Desactivar distribuidor">
+                      <ion-icon name="person-remove-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- Paginación -->
-        <div class="pagination">
-          <ion-button (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
+        <div class="pagination" *ngIf="state === 'ready' && distribuidoresFiltrados.length">
+          <ion-button fill="outline" (click)="paginaAnterior()" [disabled]="paginaActual === 1">Anterior</ion-button>
           <span>Página {{ paginaActual }} de {{ getTotalPaginas() }}</span>
-          <ion-button (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
+          <ion-button fill="outline" (click)="paginaSiguiente()" [disabled]="paginaActual === getTotalPaginas()">Siguiente</ion-button>
         </div>
       </ion-card-content>
     </ion-card>
-
   </div>
-
-  <ion-fab horizontal="end" vertical="bottom" slot="fixed" (click)="addDistribuidor()">
-    <ion-fab-button>
-      <ion-icon name="add-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 </ion-content>

@@ -2,52 +2,40 @@
 
 <ion-content id="main-content">
   <div class="page-toolbar">
-    <div><h2 class="toolbar-title">Cuentas del sistema</h2><p>Usuarios con acceso a las herramientas de Autolog.</p></div>
+    <div><h2 class="toolbar-title">Cuentas del sistema</h2><p>Cuentas administrativas con acceso a AUTOLOG.</p></div>
+    <ion-button color="primary" (click)="agregarUsuario()"><ion-icon slot="start" name="person-add-outline"></ion-icon>Nuevo usuario</ion-button>
   </div>
-  <ion-grid>
-    <!-- Botón para agregar un nuevo usuario -->
-    <ion-row>
-      <ion-col size="12" style="text-align: right; margin-bottom: 10px;">
-        <ion-button style="color: white;" color="success" (click)="agregarUsuario()">
-          <ion-icon slot="start" name="person-add-outline"></ion-icon>
-          Nuevo Usuario
-        </ion-button>
-      </ion-col>
-    </ion-row>
 
-    <!-- Tabla de Usuarios -->
-    <ion-card class="custom-card-table">
-      <ion-card-content>
-        <div class="table-container">
-          <table class="responsive-table">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th style="text-align: center;">Opciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let usuario of usuarios">
-                <td>{{ usuario.usuario }}</td>
-                <td>{{ usuario.email }}</td>
-                <td>{{ usuario.rol == 'admin' ? 'Administrador' : 'Capturista' }}</td>
-                <td style="text-align: center;">
-                  <!-- Botón Editar -->
-                  <ion-button fill="clear" color="primary" (click)="editarUsuario(usuario)">
-                    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-                  </ion-button>
-                  <!-- Botón Eliminar -->
-                  <ion-button fill="clear" color="danger" (click)="eliminarUsuario(usuario)">
-                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-                  </ion-button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </ion-grid>
+  <ion-card class="custom-card-table users-card">
+    <ion-card-content>
+      <div class="users-state" *ngIf="state === 'loading'" role="status"><ion-spinner name="crescent"></ion-spinner><span>Cargando usuarios…</span></div>
+      <div class="users-state" *ngIf="state === 'error'" role="alert"><ion-icon name="alert-circle-outline"></ion-icon><span>No fue posible cargar los usuarios.</span><ion-button fill="outline" (click)="loadInitialPage()">Reintentar</ion-button></div>
+      <div class="users-state empty" *ngIf="state === 'empty'"><ion-icon name="people-outline"></ion-icon><strong>No hay usuarios en esta página</strong></div>
+
+      <div class="table-container" *ngIf="state === 'ready'">
+        <table class="responsive-table users-table">
+          <thead><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>Planta principal</th><th>Estado</th><th class="actions-cell">Acciones</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let usuario of usuarios">
+              <td><strong>{{ usuario.usuario }}</strong></td>
+              <td>{{ usuario.email }}</td>
+              <td>{{ roleLabel(usuario) }}</td>
+              <td>{{ usuario.plantaIdPrincipal || 'Global' }}</td>
+              <td><ion-badge [color]="usuario.activo ? 'success' : 'medium'">{{ usuario.activo ? 'Activo' : 'Inactivo' }}</ion-badge></td>
+              <td class="actions-cell"><div class="row-actions">
+                <ion-button fill="clear" color="primary" (click)="editarUsuario(usuario)" aria-label="Editar usuario" title="Editar usuario"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-button>
+                <ion-button fill="clear" color="danger" (click)="confirmarDesactivacion(usuario)" [disabled]="!usuario.activo" aria-label="Desactivar usuario" title="Desactivar usuario"><ion-icon slot="icon-only" name="person-remove-outline"></ion-icon></ion-button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" *ngIf="state === 'ready'">
+        <ion-button fill="outline" (click)="previousPage()" [disabled]="pageNumber === 1">Anterior</ion-button>
+        <span>Página {{ pageNumber }} · hasta {{ pageSize }} registros</span>
+        <ion-button fill="outline" (click)="nextPage()" [disabled]="!hasNext">Siguiente</ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

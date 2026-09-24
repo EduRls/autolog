@@ -1,88 +1,40 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title style="text-align: center;">Registrar Nuevo Usuario</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cancel()">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<form class="administrative-form user-access-form" [formGroup]="registroForm" (ngSubmit)="registerUser()" [attr.aria-busy]="saving">
+  <header class="modal-header"><div class="modal-title-block"><span class="modal-title-icon"><ion-icon name="person-add-outline"></ion-icon></span><div><h1>Registrar nuevo usuario</h1><p>Configura su identidad, alcance y permisos en AUTOLOG.</p></div></div><button class="modal-close" type="button" (click)="cancel()" [disabled]="saving" aria-label="Cerrar formulario"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></button></header>
+  <div class="modal-body user-access-body"><div class="user-access-layout"><section class="identity-panel"><div class="panel-heading"><span>01</span><div><h2>Información del usuario</h2><p>Datos de acceso y alcance operativo.</p></div></div><fieldset class="form-fields" [disabled]="saving">
+<div class="form-section-title">Datos de acceso</div><div class="field">
+  <label for="field-email">Correo electrónico *</label>
+  <input id="field-email" type="email" formControlName="email" autocomplete="off"
+    [attr.aria-invalid]="registroForm.controls['email'].touched && registroForm.controls['email'].invalid"
+    aria-describedby="field-email-error">
 
-<ion-content>
-  <form (ngSubmit)="registerUser()" [formGroup]="registroForm" style="margin: 5%;">
-    <!-- Email -->
-    <ion-item>
-      <ion-input
-        labelPlacement="floating"
-        label="Correo Electrónico"
-        type="email"
-        formControlName="email"
-        placeholder="usuario@email.com"
-        required
-      ></ion-input>
-    </ion-item>
-    <ion-note *ngIf="registroForm.get('email')?.hasError('required') && registroForm.get('email')?.touched">
-      El correo es obligatorio.
-    </ion-note>
-    <ion-note *ngIf="registroForm.get('email')?.hasError('email') && registroForm.get('email')?.touched">
-      El correo no es válido.
-    </ion-note>
- <br>
-    <!-- Contraseña -->
-    <ion-item>
-      <ion-input
-        labelPlacement="floating"
-        label="Contraseña"
-        type="text"
-        formControlName="password"
-        placeholder="********"
-        required
-      ></ion-input>
-    </ion-item>
-    <ion-note *ngIf="registroForm.get('password')?.hasError('required') && registroForm.get('password')?.touched">
-      La contraseña es obligatoria.
-    </ion-note>
-    <ion-note *ngIf="registroForm.get('password')?.hasError('minlength') && registroForm.get('password')?.touched">
-      La contraseña debe tener al menos 6 caracteres.
-    </ion-note>
- <br>
-    <!-- Nombre de Usuario -->
-    <ion-item>
-      <ion-input
-        labelPlacement="floating"
-        label="Nombre de Usuario"
-        type="text"
-        formControlName="usuario"
-        placeholder="Nombre del usuario"
-        required
-      ></ion-input>
-    </ion-item>
-    <ion-note *ngIf="registroForm.get('usuario')?.hasError('required') && registroForm.get('usuario')?.touched">
-      El nombre de usuario es obligatorio.
-    </ion-note>
- <br>    
-    <!-- Rol -->
-    <ion-item>
-      <ion-select label="Rol" label-placement="floating" formControlName="rol" placeholder="Selecciona un rol">
-        <ion-select-option value="admin">Administrador</ion-select-option>
-        <ion-select-option value="capturista">capturista</ion-select-option>
-      </ion-select>
-    </ion-item>
-    <ion-note *ngIf="registroForm.get('rol')?.hasError('required') && registroForm.get('rol')?.touched">
-      El rol es obligatorio.
-    </ion-note>
+  <p id="field-email-error" class="field-error" aria-live="polite"><ng-container *ngIf="registroForm.controls['email'].touched && registroForm.controls['email'].invalid">Ingresa un correo válido.</ng-container></p>
+</div><div class="field">
+  <label for="field-password">Contraseña temporal *</label>
+  <input id="field-password" type="password" formControlName="password" autocomplete="new-password" maxlength="128"
+    [attr.aria-invalid]="registroForm.controls['password'].touched && registroForm.controls['password'].invalid"
+    aria-describedby="field-password-error">
 
-    <br />
-    <!-- Botón de Registro -->
-    <ion-button
-      type="submit"
-      expand="block"
-      fill="solid"
-      color="success"
-      [disabled]="registroForm.invalid"
-    >
-      Registrar Usuario
-    </ion-button>
-  </form>
-</ion-content>
+  <p id="field-password-error" class="field-error" aria-live="polite"><ng-container *ngIf="registroForm.controls['password'].touched && registroForm.controls['password'].invalid">Usa entre 6 y 128 caracteres.</ng-container></p>
+</div><div class="field">
+  <label for="field-usuario">Nombre de usuario *</label>
+  <input id="field-usuario" type="text" formControlName="usuario" autocomplete="off" maxlength="120"
+    [attr.aria-invalid]="registroForm.controls['usuario'].touched && registroForm.controls['usuario'].invalid"
+    aria-describedby="field-usuario-error">
+
+  <p id="field-usuario-error" class="field-error" aria-live="polite"><ng-container *ngIf="registroForm.controls['usuario'].touched && registroForm.controls['usuario'].invalid">Ingresa nombre de usuario (máximo 120 caracteres).</ng-container></p>
+</div><fieldset class="role-fieldset"><legend>Rol *</legend><div class="form-grid role-options">
+<label class="role-card" [class.selected]="registroForm.controls.rol.value === 'admin'"><input type="radio" formControlName="rol" value="admin" aria-describedby="role-error"><ion-icon name="shield-checkmark-outline"></ion-icon><span><strong>Administrador</strong><small>Control completo</small></span></label>
+<label class="role-card" [class.selected]="registroForm.controls.rol.value === 'capturista'"><input type="radio" formControlName="rol" value="capturista" aria-describedby="role-error"><ion-icon name="create-outline"></ion-icon><span><strong>Capturista</strong><small>Operación diaria</small></span></label>
+<label class="role-card" [class.selected]="registroForm.controls.rol.value === 'planta'"><input type="radio" formControlName="rol" value="planta" aria-describedby="role-error"><ion-icon name="business-outline"></ion-icon><span><strong>Planta</strong><small>Alcance asignado</small></span></label>
+</div><p id="role-error" class="field-error" aria-live="polite"><ng-container *ngIf="registroForm.controls.rol.touched && registroForm.controls.rol.invalid">Selecciona un rol.</ng-container></p></fieldset>
+<div *ngIf="registroForm.controls.rol.value === 'planta'" class="form-grid plant-scope-fields">
+  <div class="field"><label for="plant-principal">Planta principal *</label><select id="plant-principal" formControlName="plantaIdPrincipal"><option value="" disabled>Selecciona una planta</option><option *ngFor="let plant of plants" [value]="plant.id">{{ plant.nombre }}</option></select><p class="field-error" *ngIf="registroForm.controls.plantaIdPrincipal.touched && registroForm.controls.plantaIdPrincipal.invalid">Selecciona una planta principal.</p></div>
+  <div class="field"><label for="plant-read">Plantas adicionales de consulta</label><select id="plant-read" formControlName="plantasLectura" multiple><option *ngFor="let plant of plants" [value]="plant.id" [disabled]="plant.id === registroForm.controls.plantaIdPrincipal.value">{{ plant.nombre }}</option></select><small>Las plantas adicionales son exclusivamente de lectura.</small></div>
+</div>
+  </fieldset></section><aside class="permissions-panel"><div class="panel-heading"><span>02</span><div><h2>Acceso al menú</h2><p>Elige las áreas visibles en el sidebar.</p></div></div>
+  <div class="permission-empty" *ngIf="!registroForm.controls.rol.value"><ion-icon name="options-outline"></ion-icon><strong>Selecciona un rol</strong><p>Los permisos disponibles dependen del rol.</p></div>
+  <div class="permission-list" *ngIf="registroForm.controls.rol.value"><label class="permission-card" *ngFor="let group of permissionGroups" [class.selected]="isSectionSelected(group.id)" [class.required]="group.id === 'general'"><input type="checkbox" [checked]="isSectionSelected(group.id)" [disabled]="saving || group.id === 'general'" (change)="toggleSection(group.id, $event)"><span class="permission-icon"><ion-icon [name]="group.icon"></ion-icon></span><span class="permission-copy"><strong>{{ group.label }}</strong><small>{{ groupItemLabels(group) }}</small></span><span class="permission-state"><small>{{ group.id === 'general' ? 'Obligatorio' : 'Opcional' }}</small><ion-icon [name]="isSectionSelected(group.id) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon></span></label></div>
+  <div class="permission-note"><ion-icon name="information-circle-outline"></ion-icon><span>Los permisos solo reducen el alcance del rol. General es obligatorio.</span></div>
+  </aside></div></div>
+  <footer class="modal-footer"><button class="form-button" type="button" (click)="cancel()" [disabled]="saving">Cancelar</button><button class="form-button primary" type="submit" [disabled]="saving || registroForm.invalid"><ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>{{ saving ? 'Guardando…' : 'Registrar usuario' }}</button></footer>
+</form>

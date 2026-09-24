@@ -1,3 +1,7 @@
-.custom-card-table { width: 100%; margin: 0; }
-.table-container { overflow-x: auto; }
-.legacy-action-row { display: none; }
+.users-card { width: 100%; margin: 0; }
+.users-table { min-width: 820px; }
+.users-state { display: flex; min-height: 180px; align-items: center; justify-content: center; gap: 10px; color: var(--autolog-text-secondary); }
+.users-state.empty { flex-direction: column; }
+.users-state.empty ion-icon { font-size: 34px; }
+.row-actions { display: flex; justify-content: center; }
+.actions-cell { text-align: center; }

@@ -1,0 +1,16 @@
+[
+  {
+    "name": "index.html",
+    "status": 200,
+    "localSha256": "f927ffd9b2c837841753313cd67aa340e50ccc3e3d254247b48025d7f8cccea8",
+    "remoteSha256": "f927ffd9b2c837841753313cd67aa340e50ccc3e3d254247b48025d7f8cccea8",
+    "matches": true
+  },
+  {
+    "name": "5154.95e437d0f27a781a.js",
+    "status": 200,
+    "localSha256": "aa5edb29b14c5520297ae739b71f51ee3a1bf81c78cf015433588843d7bd541d",
+    "remoteSha256": "aa5edb29b14c5520297ae739b71f51ee3a1bf81c78cf015433588843d7bd541d",
+    "matches": true
+  }
+]

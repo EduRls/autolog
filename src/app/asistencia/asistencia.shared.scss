@@ -1,0 +1,61 @@
+.attendance-page { gap: 20px; }
+.attendance-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.attendance-intro h2 { margin: 0; color: var(--autolog-text); font-size: 18px; }
+.attendance-intro p { max-width: 720px; margin: 5px 0 0; color: var(--autolog-text-secondary); font-size: 13px; }
+.attendance-eyebrow { display: block; margin-bottom: 6px; color: var(--autolog-primary); font-size: 10px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+.attendance-card { margin: 0; }
+.attendance-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.attendance-metric { min-height: 126px; margin: 0; }
+.attendance-metric ion-card-content { display: flex; align-items: center; gap: 14px; height: 100%; }
+.attendance-metric .metric-copy { min-width: 0; }
+.attendance-metric h3 { margin: 4px 0 0; color: var(--autolog-text); font-size: 30px; line-height: 1; }
+.attendance-metric p { margin: 0; color: var(--autolog-text-secondary); font-size: 12px; }
+.attendance-empty, .attendance-state { display: grid; min-height: 230px; place-items: center; align-content: center; padding: 28px; color: var(--autolog-text-secondary); text-align: center; }
+.attendance-empty ion-icon, .attendance-state ion-icon { margin-bottom: 10px; color: var(--autolog-text-muted); font-size: 38px; }
+.attendance-empty strong, .attendance-state strong { color: var(--autolog-text); font-size: 14px; }
+.attendance-empty p, .attendance-state p { max-width: 520px; margin: 6px 0 0; font-size: 12px; }
+.attendance-filter-grid { display: grid; grid-template-columns: minmax(220px, 1.4fr) repeat(2, minmax(170px, .8fr)); gap: 12px; }
+.attendance-field { display: grid; gap: 6px; }
+.attendance-field label { color: var(--autolog-text-secondary); font-size: 11px; font-weight: 700; }
+.attendance-field input, .attendance-field select { width: 100%; min-height: var(--autolog-control-height); padding: 0 12px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); outline: none; color: var(--autolog-text); background: #fff; font: inherit; font-size: 13px; }
+.attendance-field input:focus, .attendance-field select:focus { border-color: var(--autolog-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.attendance-table { min-width: 860px; }
+.attendance-table td strong, .attendance-table td small { display: block; }
+.attendance-table td small { margin-top: 3px; color: var(--autolog-text-muted); font-size: 10px; }
+.attendance-activity-table { min-width: 680px; }
+.attendance-event, .attendance-status { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; color: #166534; background: #dcfce7; font-size: 10px; font-weight: 750; }
+.attendance-event.event-exit { color: #1d4ed8; background: #dbeafe; }
+.attendance-status.status-open { color: #9a5b00; background: var(--autolog-warning-soft); }
+.attendance-filter-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+.attendance-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 16px; color: var(--autolog-text-secondary); font-size: 11px; }
+.coming-soon { display: inline-flex; align-items: center; min-height: 26px; padding: 0 9px; border-radius: 999px; color: #9a5b00; background: var(--autolog-warning-soft); font-size: 10px; font-weight: 700; }
+.settings-primary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 20px; padding: 24px; }
+.settings-primary-icon, .future-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; color: var(--autolog-primary); background: var(--autolog-primary-soft); font-size: 23px; }
+.settings-primary-copy { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 14px; }
+.settings-primary h3, .future-card h3 { margin: 0; color: var(--autolog-text); font-size: 15px; }
+.settings-primary p, .future-card p { margin: 5px 0 0; color: var(--autolog-text-secondary); font-size: 12px; }
+.settings-primary-action { display: grid; justify-items: end; gap: 7px; }
+.settings-primary ion-button { margin: 0; }
+.future-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.future-card { min-height: 170px; margin: 0; }
+.future-card ion-card-content { display: grid; align-content: start; gap: 12px; height: 100%; }
+
+@media (max-width: 1050px) {
+  .attendance-grid, .future-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .attendance-filter-grid { grid-template-columns: 1fr 1fr; }
+  .attendance-field:first-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .attendance-page { gap: 14px; }
+  .attendance-intro { align-items: stretch; flex-direction: column; }
+  .attendance-grid, .future-grid, .attendance-filter-grid { grid-template-columns: 1fr; }
+  .attendance-field:first-child { grid-column: auto; }
+  .attendance-metric { min-height: 96px; }
+  .attendance-metric h3 { font-size: 26px; }
+  .settings-primary { grid-template-columns: 1fr; padding: 18px; }
+  .settings-primary-action { justify-items: stretch; }
+  .settings-primary-action .coming-soon { justify-self: start; }
+  .settings-primary ion-button { width: 100%; }
+  .attendance-empty, .attendance-state { min-height: 190px; padding: 22px 14px; }
+}

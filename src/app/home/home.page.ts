@@ -13,6 +13,7 @@ import { AgregarEventoComponent } from '../components/agregar-evento/agregar-eve
 import { EditarEventoComponent } from '../components/editar-evento/editar-evento.component';
 import { DetallesEventoUnidadComponent } from '../components/detalles-evento-unidad/detalles-evento-unidad.component';
 import { StorageService } from '../services/storage/storage.service';
+import { PlantScopeService } from '../services/plants/plant-scope.service';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -33,6 +34,7 @@ export type ChartOptions = {
 export class HomePage implements OnInit {
 
   public userRole: string = ''
+  canWrite = true;
   public autos: any = [];
   estadoSeleccionado: string = '';
   busquedaUnidad: string = ''; // Texto de búsqueda ingresado
@@ -67,10 +69,16 @@ export class HomePage implements OnInit {
     private modalController: ModalController,
     private toastController: ToastController,
     private alertController: AlertController,
-    private loadcontroller: LoadingController
+    private loadcontroller: LoadingController,
+    private readonly plantScope: PlantScopeService
   ) { }
 
   ngOnInit() {
+    void this.plantScope.initialize();
+    this.plantScope.state$.subscribe(state => {
+      this.canWrite = !this.plantScope.isReadOnly();
+      this.userRole = state.profile?.rol || '';
+    });
     this.obtenerDatos();
 
   }
@@ -129,7 +137,6 @@ export class HomePage implements OnInit {
   async getEventos() {
     this.firebaseSerive.getEvento().subscribe({
       next: (data) => {
-        this.storageService.get('currentUser').then((user: any) => { this.userRole = user.rol; });
         const registrosOrdenados = data.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
         this.registros = registrosOrdenados;
         this.registrosOriginales = [...registrosOrdenados];
@@ -332,6 +339,7 @@ export class HomePage implements OnInit {
   // EVENTOS
   // Agregar evento
   async agregarEvento() {
+    if (!this.canWrite) return;
     const modalAddEvento = await this.modalController.create({
       component: AgregarEventoComponent,
       cssClass: 'autolog-service-modal'
@@ -342,6 +350,7 @@ export class HomePage implements OnInit {
 
   // Eliminar evento
   async borrarEvento(item: any) {
+    if (!this.canWrite) return;
     const alert = await this.alertController.create({
       header: 'Confirmar eliminación',
       message: `¿Estás seguro de que deseas eliminar el registro?`,
@@ -381,6 +390,7 @@ export class HomePage implements OnInit {
 
   // Editar un evento
   async editarEvento(item: any) {
+    if (!this.canWrite) return;
     const modalEditEvento = await this.modalController.create({
       component: EditarEventoComponent,
       cssClass: 'my-custom-class-agregar-evento',
@@ -394,8 +404,8 @@ export class HomePage implements OnInit {
 
   // Exportar todos los eventos a la vez
   async exportarTodosLosEventos() {
-    if (this.registrosOriginales.length > 0) {
-      const registrosTransformados = this.registrosOriginales.map((registro) => {
+    if (this.registros.length > 0) {
+      const registrosTransformados = this.registros.map((registro) => {
         const { id, articulos, ...resto } = registro;
 
         // Transformar los artículos en una cadena delimitada por comas

@@ -1,58 +1,33 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title style="text-align: center;">Editar Usuario</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cancel()">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<form class="administrative-form user-access-form" [formGroup]="editarForm" (ngSubmit)="editarUsuario()" [attr.aria-busy]="saving">
+  <header class="modal-header"><div class="modal-title-block"><span class="modal-title-icon"><ion-icon name="person-circle-outline"></ion-icon></span><div><h1>Editar usuario</h1><p>Actualiza su identidad, alcance y permisos en AUTOLOG.</p></div></div><button class="modal-close" type="button" (click)="cancel()" [disabled]="saving" aria-label="Cerrar formulario"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></button></header>
+  <div class="modal-body user-access-body"><div class="user-access-layout"><section class="identity-panel"><div class="panel-heading"><span>01</span><div><h2>Información del usuario</h2><p>Datos de acceso y alcance operativo.</p></div></div><fieldset class="form-fields" [disabled]="saving">
+<div class="form-section-title">Datos de acceso</div><div class="field">
+  <label for="field-email">Correo electrónico *</label>
+  <input id="field-email" type="email" formControlName="email" autocomplete="off"
+    [attr.aria-invalid]="editarForm.controls['email'].touched && editarForm.controls['email'].invalid"
+    aria-describedby="field-email-error">
 
-<ion-content>
-  <form (ngSubmit)="editarUsuario()" [formGroup]="editarForm" style="margin: 5%;">
-    <!-- Nombre de Usuario -->
-    <ion-item>
-      <ion-input
-        labelPlacement="floating"
-        label="Nombre de Usuario"
-        type="text"
-        formControlName="usuario"
-        placeholder="Nombre del usuario"
-        required
-      ></ion-input>
-    </ion-item>
-    <ion-note *ngIf="editarForm.get('usuario')?.hasError('required') && editarForm.get('usuario')?.touched">
-      El nombre de usuario es obligatorio.
-    </ion-note>
-    <br />
+  <p id="field-email-error" class="field-error" aria-live="polite"><ng-container *ngIf="editarForm.controls['email'].touched && editarForm.controls['email'].invalid">Ingresa un correo válido.</ng-container></p>
+</div><div class="field">
+  <label for="field-usuario">Nombre de usuario *</label>
+  <input id="field-usuario" type="text" formControlName="usuario" autocomplete="off" maxlength="120"
+    [attr.aria-invalid]="editarForm.controls['usuario'].touched && editarForm.controls['usuario'].invalid"
+    aria-describedby="field-usuario-error">
 
-    <!-- Rol -->
-    <ion-item>
-      <ion-select
-        label="Rol"
-        label-placement="floating"
-        formControlName="rol"
-        placeholder="Selecciona un rol"
-      >
-        <ion-select-option value="admin">Administrador</ion-select-option>
-        <ion-select-option value="capturista">Capturista</ion-select-option>
-      </ion-select>
-    </ion-item>
-    <ion-note *ngIf="editarForm.get('rol')?.hasError('required') && editarForm.get('rol')?.touched">
-      El rol es obligatorio.
-    </ion-note>
-    <br />
-
-    <!-- Botón de Guardar -->
-    <ion-button
-      type="submit"
-      expand="block"
-      fill="solid"
-      color="primary"
-      [disabled]="editarForm.invalid"
-    >
-      Guardar Cambios
-    </ion-button>
-  </form>
-</ion-content>
+  <p id="field-usuario-error" class="field-error" aria-live="polite"><ng-container *ngIf="editarForm.controls['usuario'].touched && editarForm.controls['usuario'].invalid">Ingresa nombre de usuario (máximo 120 caracteres).</ng-container></p>
+</div><fieldset class="role-fieldset"><legend>Rol *</legend><div class="form-grid role-options">
+<label class="role-card" [class.selected]="editarForm.controls.rol.value === 'admin'"><input type="radio" formControlName="rol" value="admin" aria-describedby="role-error"><ion-icon name="shield-checkmark-outline"></ion-icon><span><strong>Administrador</strong><small>Control completo</small></span></label>
+<label class="role-card" [class.selected]="editarForm.controls.rol.value === 'capturista'"><input type="radio" formControlName="rol" value="capturista" aria-describedby="role-error"><ion-icon name="create-outline"></ion-icon><span><strong>Capturista</strong><small>Operación diaria</small></span></label>
+<label class="role-card" [class.selected]="editarForm.controls.rol.value === 'planta'"><input type="radio" formControlName="rol" value="planta" aria-describedby="role-error"><ion-icon name="business-outline"></ion-icon><span><strong>Planta</strong><small>Alcance asignado</small></span></label>
+</div><p id="role-error" class="field-error" aria-live="polite"><ng-container *ngIf="editarForm.controls.rol.touched && editarForm.controls.rol.invalid">Selecciona un rol.</ng-container></p></fieldset><div class="field"><span class="form-section-title">Estado de la cuenta</span><label class="account-toggle"><input type="checkbox" role="switch" formControlName="activo">{{ editarForm.controls.activo.value ? 'Activa' : 'Inactiva' }}</label></div>
+<div *ngIf="editarForm.controls.rol.value === 'planta'" class="form-grid plant-scope-fields">
+  <div class="field"><label for="edit-plant-principal">Planta principal *</label><select id="edit-plant-principal" formControlName="plantaIdPrincipal"><option value="" disabled>Selecciona una planta</option><option *ngFor="let plant of plants" [value]="plant.id">{{ plant.nombre }}</option></select></div>
+  <div class="field"><label for="edit-plant-read">Plantas adicionales de consulta</label><select id="edit-plant-read" formControlName="plantasLectura" multiple><option *ngFor="let plant of plants" [value]="plant.id" [disabled]="plant.id === editarForm.controls.plantaIdPrincipal.value">{{ plant.nombre }}</option></select><small>Solo lectura.</small></div>
+</div>
+<div class="access-panel" *ngIf="allowDisable && usuarioData.activo"><strong>Desactivar acceso</strong><button class="form-button danger" type="button" (click)="confirmDisable()">Desactivar</button></div>
+  </fieldset></section><aside class="permissions-panel"><div class="panel-heading"><span>02</span><div><h2>Acceso al menú</h2><p>Elige las áreas visibles en el sidebar.</p></div></div>
+  <div class="permission-list"><label class="permission-card" *ngFor="let group of permissionGroups" [class.selected]="isSectionSelected(group.id)" [class.required]="group.id === 'general'"><input type="checkbox" [checked]="isSectionSelected(group.id)" [disabled]="saving || group.id === 'general'" (change)="toggleSection(group.id, $event)"><span class="permission-icon"><ion-icon [name]="group.icon"></ion-icon></span><span class="permission-copy"><strong>{{ group.label }}</strong><small>{{ groupItemLabels(group) }}</small></span><span class="permission-state"><small>{{ group.id === 'general' ? 'Obligatorio' : 'Opcional' }}</small><ion-icon [name]="isSectionSelected(group.id) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon></span></label></div>
+  <div class="permission-note"><ion-icon name="information-circle-outline"></ion-icon><span>Los permisos solo reducen el alcance del rol. General es obligatorio.</span></div>
+  </aside></div></div>
+  <footer class="modal-footer"><button class="form-button" type="button" (click)="cancel()" [disabled]="saving">Cancelar</button><button class="form-button primary" type="submit" [disabled]="saving || editarForm.invalid"><ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>{{ saving ? 'Guardando…' : 'Guardar cambios' }}</button></footer>
+</form>

@@ -1,7 +1,7 @@
 <app-menu titulo="pc"></app-menu>
 
 <ion-content id="main-content" [fullscreen]="true">
-  <div class="page-stack home-dashboard">
+  <div class="page-stack home-dashboard" id="servicios">
     <section class="page-actions" aria-label="Acciones del panel">
       <div>
         <span class="eyebrow">Resumen operativo</span>
@@ -11,7 +11,7 @@
         <ion-button fill="outline" color="primary" (click)="exportarTodosLosEventos()">
           <ion-icon slot="start" name="download-outline"></ion-icon>Exportar
         </ion-button>
-        <ion-button color="primary" (click)="agregarEvento()">
+        <ion-button color="primary" (click)="agregarEvento()" [disabled]="!canWrite">
           <ion-icon slot="start" name="add-outline"></ion-icon>Registrar servicio
         </ion-button>
       </div>
@@ -167,9 +167,9 @@
                   <td class="actions-cell">
                     <div class="row-actions">
                       <ion-button fill="clear" color="secondary" (click)="detallesEventoRegistro(registro)" aria-label="Ver detalle" title="Ver detalle"><ion-icon slot="icon-only" name="eye-outline"></ion-icon></ion-button>
-                      <ion-button fill="clear" color="primary" (click)="editarEvento(registro)" aria-label="Editar servicio" title="Editar"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-button>
+                      <ion-button *ngIf="canWrite" fill="clear" color="primary" (click)="editarEvento(registro)" aria-label="Editar servicio" title="Editar"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-button>
                       <ion-button fill="clear" color="success" (click)="exportarHisotiralEspesifico(registro)" aria-label="Exportar historial" title="Exportar"><ion-icon slot="icon-only" name="download-outline"></ion-icon></ion-button>
-                      <ion-button fill="clear" color="danger" (click)="borrarEvento(registro)" *ngIf="userRole == 'admin'" aria-label="Eliminar servicio" title="Eliminar"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+                      <ion-button fill="clear" color="danger" (click)="borrarEvento(registro)" *ngIf="canWrite" aria-label="Eliminar servicio" title="Eliminar"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
                     </div>
                   </td>
                 </tr>

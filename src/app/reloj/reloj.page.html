@@ -1,0 +1,11 @@
+<ion-header><ion-toolbar><ion-title>Reloj checador</ion-title><ion-buttons slot="end"><ion-button (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión"><ion-icon slot="icon-only" name="log-out-outline"></ion-icon></ion-button></ion-buttons></ion-toolbar></ion-header>
+<ion-content class="clock-shell">
+  <div class="clock-state" *ngIf="state === 'loading'"><ion-spinner name="crescent"></ion-spinner><span>Cargando perfil y asistencia…</span></div>
+  <div class="clock-state" *ngIf="state === 'error'"><ion-icon name="alert-circle-outline"></ion-icon><span>No fue posible validar tu sesión.</span><ion-button fill="outline" (click)="load()">Reintentar</ion-button></div>
+  <main class="clock-dashboard" *ngIf="state === 'ready' && profile">
+    <header><p>Hola,</p><h1>{{ profile.personal.nombreCompleto }}</h1><span>{{ personalDetail }}</span></header>
+    <section class="live-clock" aria-label="Hora actual"><strong>{{ now | date:'HH:mm:ss' }}</strong><span>{{ now | date:'EEEE d MMMM y' }}</span><small>La hora oficial del registro proviene del servidor.</small></section>
+    <ion-button class="attendance-action" expand="block" size="large" (click)="register()" [disabled]="submitting"><ion-spinner *ngIf="submitting" name="crescent"></ion-spinner><span *ngIf="!submitting">{{ nextLabel }}</span></ion-button>
+    <section class="history"><h2>Mi historial reciente</h2><p *ngIf="!events.length">Aún no hay registros de asistencia.</p><ion-list *ngIf="events.length"><ion-item *ngFor="let event of events"><ion-icon slot="start" [name]="event.tipo === 'ENTRADA' ? 'log-in-outline' : 'log-out-outline'"></ion-icon><ion-label><h3>{{ event.tipo === 'ENTRADA' ? 'Entrada' : 'Salida' }}</h3><p>{{ event.fechaHoraServidor ? (event.fechaHoraServidor | date:'dd/MM/yyyy HH:mm:ss') : event.fechaLocal }}</p></ion-label></ion-item></ion-list></section>
+  </main>
+</ion-content>

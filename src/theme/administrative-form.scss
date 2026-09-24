@@ -1,0 +1,84 @@
+/* Scoped to the administrative dialogs; shared AUTOLOG design tokens. */
+ion-modal.autolog-form-modal {
+  --width: min(600px, calc(100vw - 32px));
+  --height: min(660px, calc(100dvh - 48px));
+  --max-height: calc(100dvh - 48px);
+  --border-radius: var(--autolog-radius-lg);
+  --box-shadow: var(--autolog-shadow-md);
+  align-items: center;
+}
+ion-modal.autolog-form-modal.autolog-user-access-modal {
+  --width: min(1120px, calc(100vw - 40px));
+  --height: min(790px, calc(100dvh - 40px));
+}
+ion-modal.autolog-form-modal form.administrative-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 0;
+  color: var(--autolog-text);
+  background: var(--autolog-surface);
+  font-family: var(--ion-font-family);
+}
+.administrative-form {
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 24px; border-bottom: 1px solid var(--autolog-border); flex-shrink: 0; }
+  .modal-header h1 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 700; letter-spacing: -.025em; }
+  .modal-header p { margin: 6px 0 0; font-size: 13px; color: var(--autolog-text-secondary); }
+  .modal-close { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); background: var(--autolog-surface); color: var(--autolog-text-secondary); cursor: pointer; }
+  .modal-close ion-icon { font-size: 20px; }
+  .modal-body { min-height: 0; flex: 1; overflow-y: auto; padding: 24px; overscroll-behavior: contain; }
+  .form-fields { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 20px; }
+  .form-section-title, legend { margin: 0 0 12px; padding: 0; color: var(--autolog-text-secondary); font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+  .field { display: grid; gap: 7px; min-width: 0; }
+  .field > label { color: var(--autolog-text); font-size: 13px; font-weight: 600; }
+  .field input, .field select { width: 100%; min-width: 0; height: var(--autolog-control-height); padding: 10px 12px; color: var(--autolog-text); background: var(--autolog-surface); border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); font-size: 14px; transition: border-color 120ms; }
+  .field input::placeholder { color: var(--autolog-text-muted); }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--autolog-primary-soft); outline-offset: 2px; border-color: var(--autolog-primary); }
+  .field [aria-invalid="true"] { border-color: var(--autolog-danger); }
+  .field-error { margin: 0; font-size: 12px; color: var(--autolog-danger); }
+  .field-hint { margin: 0; color: var(--autolog-text-secondary); font-size: 12px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .role-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .role-card { display: flex; align-items: center; gap: 10px; padding: 14px 12px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); cursor: pointer; font-size: 13px; font-weight: 600; }
+  .role-card.selected { background: var(--autolog-primary-soft); border-color: var(--autolog-primary); color: var(--autolog-primary-hover); }
+  .role-card input { appearance: none; display: grid; place-content: center; border: 1.5px solid var(--autolog-text-muted); border-radius: 50%; background: var(--autolog-surface); flex-shrink: 0; }
+  .role-card input:checked { border-color: var(--autolog-primary); }
+  .role-card input:checked::before { content: ''; width: 8px; height: 8px; background: var(--autolog-primary); border-radius: 50%; }
+  .role-card input, .account-toggle input { accent-color: var(--autolog-primary); width: 18px; height: 18px; margin: 0; }
+  .system-identifier { padding: 16px; background: var(--autolog-bg); border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-md); display: grid; gap: 5px; }
+  .system-identifier small { font-size: 11px; color: var(--autolog-text-secondary); text-transform: uppercase; letter-spacing: .06em; }
+  .system-identifier strong { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+  .system-identifier p { margin: 0; font-size: 12px; color: var(--autolog-text-secondary); }
+  .account-toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+  .access-panel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--autolog-border); }
+  .access-panel div { display: grid; gap: 4px; min-width: 0; }
+  .access-panel strong { font-size: 13px; }
+  .access-panel span { font-size: 12px; color: var(--autolog-text-secondary); overflow-wrap: anywhere; }
+  .modal-footer { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--autolog-border); background: var(--autolog-bg); flex-shrink: 0; }
+  .form-button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 42px; padding: 10px 16px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); background: var(--autolog-surface); color: var(--autolog-text); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .form-button.primary { background: var(--autolog-primary); color: var(--ion-color-primary-contrast); border-color: var(--autolog-primary); }
+  .form-button.primary:hover:not(:disabled) { background: var(--autolog-primary-hover); }
+  .form-button.danger { color: var(--autolog-danger); }
+  button:disabled, fieldset:disabled { opacity: .6; cursor: not-allowed; }
+  ion-spinner { width: 17px; height: 17px; color: inherit; }
+}
+@media (max-width: 600px) {
+  ion-modal.autolog-form-modal { --width: calc(100vw - 24px); --height: min(660px, calc(100dvh - 24px)); --max-height: calc(100dvh - 24px); --border-radius: var(--autolog-radius-lg); align-items: center; }
+  .administrative-form {
+    .modal-header, .modal-body { padding: 20px; }
+    .modal-header h1 { font-size: 18px; }
+    .form-grid { grid-template-columns: 1fr; gap: 16px; }
+    .role-options { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .role-card { padding: 12px 8px; gap: 6px; font-size: 12px; }
+    .modal-footer { padding: 16px 20px; }
+    .form-button { padding: 10px 12px; }
+  }
+}
+@media (max-width: 900px) {
+  ion-modal.autolog-form-modal.autolog-user-access-modal {
+    --width: calc(100vw - 24px);
+    --height: calc(100dvh - 24px);
+    --max-height: calc(100dvh - 24px);
+  }
+}

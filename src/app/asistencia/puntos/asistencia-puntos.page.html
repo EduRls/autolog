@@ -1,0 +1,59 @@
+<app-menu titulo="attendancePoints"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack attendance-page points-page">
+    <section class="attendance-intro">
+      <div><span class="attendance-eyebrow">Asistencia</span><h2>Puntos autorizados</h2><p>Define las ubicaciones desde las que los trabajadores pueden registrar asistencia mediante ASISTIA.</p></div>
+      <ion-button (click)="newPoint()"><ion-icon name="add-outline" slot="start"></ion-icon>Nuevo punto</ion-button>
+    </section>
+
+    <section class="attendance-state autolog-card" *ngIf="state === 'loading'" aria-live="polite"><ion-spinner></ion-spinner><strong>Cargando puntos autorizados…</strong></section>
+    <section class="attendance-state autolog-card" *ngIf="state === 'error'" role="alert"><ion-icon name="alert-circle-outline"></ion-icon><strong>No fue posible cargar los puntos autorizados.</strong><ion-button fill="outline" (click)="load()">Reintentar</ion-button></section>
+    <section class="attendance-state autolog-card" *ngIf="state === 'empty' && !editorOpen"><ion-icon name="location-outline"></ion-icon><strong>Aún no hay puntos autorizados.</strong><p>Crea el primer punto para definir una ubicación y su radio permitido.</p></section>
+
+    <section class="points-workspace" *ngIf="state === 'data' || editorOpen">
+      <aside class="points-list autolog-card" aria-label="Puntos autorizados">
+        <div class="points-list-heading"><div><h3>Puntos</h3><small>{{ puntos.length }} registrados</small></div></div>
+        <button *ngFor="let point of puntos" type="button" class="point-row" [class.is-selected]="selectedPoint?.id === point.id" (click)="editPoint(point)">
+          <span class="point-status" [class.inactive]="!point.activo"></span>
+          <span><strong>{{ point.nombre }}</strong><small>{{ point.radioMetros }} m · {{ point.asignados }} asignados</small></span>
+          <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+        </button>
+        <div class="list-empty" *ngIf="!puntos.length">No hay puntos registrados.</div>
+      </aside>
+
+      <section class="point-editor autolog-card" *ngIf="editorOpen; else editorPrompt">
+        <div class="editor-heading"><div><span class="attendance-eyebrow">{{ selectedPoint ? 'Edición' : 'Nuevo' }}</span><h3>{{ selectedPoint ? selectedPoint.nombre : 'Nuevo punto autorizado' }}</h3></div><button type="button" class="icon-button" (click)="cancel()" aria-label="Cerrar editor"><ion-icon name="close-outline"></ion-icon></button></div>
+        <form (ngSubmit)="save()" novalidate>
+          <div class="form-grid">
+            <label class="field"><span>Nombre *</span><input name="nombre" [(ngModel)]="form.nombre" maxlength="120" required></label>
+            <label class="field"><span>Descripción</span><input name="descripcion" [(ngModel)]="form.descripcion" maxlength="500"></label>
+          </div>
+          <div class="map-instructions"><ion-icon name="navigate-outline"></ion-icon><span>Haz clic en el mapa o arrastra el marcador para elegir la ubicación.</span></div>
+          <div #mapContainer class="attendance-map" role="application" aria-label="Mapa para seleccionar la ubicación autorizada"></div>
+          <div class="coordinates">
+            <div><span>Latitud</span><strong>{{ locationSelected ? (form.latitude | number:'1.6-6') : 'Sin seleccionar' }}</strong></div>
+            <div><span>Longitud</span><strong>{{ locationSelected ? (form.longitude | number:'1.6-6') : 'Sin seleccionar' }}</strong></div>
+          </div>
+          <div class="form-grid settings-grid">
+            <label class="field"><span>Radio permitido *</span><div class="input-suffix"><input name="radio" type="number" [min]="radiusMin" [max]="radiusMax" step="1" [ngModel]="form.radioMetros" (ngModelChange)="updateRadius($event)" required><b>m</b></div><small>Entre {{ radiusMin }} y {{ radiusMax }} metros.</small></label>
+            <label class="status-control"><span><strong>Estado</strong><small>Disponible para futuras validaciones de ASISTIA.</small></span><ion-toggle name="activo" [(ngModel)]="form.activo" aria-label="Punto activo"></ion-toggle></label>
+          </div>
+          <section class="assignment-section">
+            <div class="assignment-heading"><div><h4>Asignar distribuidores</h4><p>Solo se muestran distribuidores activos.</p></div><span>{{ selectedIds.size }} seleccionados</span></div>
+            <label class="distributor-search"><ion-icon name="search-outline"></ion-icon><input name="distributorSearch" [(ngModel)]="distributorSearch" placeholder="Buscar por nombre o VGBZ" aria-label="Buscar distribuidor"></label>
+            <div class="distributor-options">
+              <label *ngFor="let distributor of filteredDistributors">
+                <input type="checkbox" [checked]="selectedIds.has(distributor.id)" (change)="toggleDistributor(distributor.id, $any($event.target).checked)">
+                <span><strong>{{ distributor.identificador }}</strong> {{ distributor.nombre }}</span>
+              </label>
+              <p *ngIf="!filteredDistributors.length">No hay distribuidores activos que coincidan.</p>
+            </div>
+          </section>
+          <div class="editor-actions"><ion-button type="button" fill="outline" color="medium" (click)="cancel()">Cancelar</ion-button><ion-button *ngIf="selectedPoint" type="button" fill="outline" [color]="selectedPoint.activo ? 'danger' : 'success'" (click)="toggleActive(selectedPoint)">{{ selectedPoint.activo ? 'Desactivar' : 'Activar' }}</ion-button><ion-button type="submit" [disabled]="!validForm || saving"><ion-spinner *ngIf="saving" name="crescent"></ion-spinner><span *ngIf="!saving">Guardar punto</span></ion-button></div>
+        </form>
+      </section>
+      <ng-template #editorPrompt><section class="editor-prompt autolog-card"><ion-icon name="map-outline"></ion-icon><strong>Selecciona un punto o crea uno nuevo.</strong><p>Aquí podrás definir la ubicación, el radio y sus distribuidores.</p></section></ng-template>
+    </section>
+  </main>
+</ion-content>

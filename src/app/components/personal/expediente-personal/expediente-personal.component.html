@@ -1,0 +1,95 @@
+<ion-header *ngIf="!pageMode">
+  <ion-toolbar>
+    <ion-title>{{ expedienteTitle }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()" aria-label="Cerrar expediente">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="!pageMode">
+  <ng-container *ngTemplateOutlet="expedienteContent"></ng-container>
+</ion-content>
+
+<ng-container *ngIf="pageMode" [ngTemplateOutlet]="expedienteContent"></ng-container>
+
+<ng-template #expedienteContent>
+  <div class="expediente-layout" [class.page-mode]="pageMode">
+    <header class="personal-header">
+      <span class="personal-avatar">{{ target.nombreCompleto.charAt(0) }}</span>
+      <div>
+        <small class="context-label">Distribuidor</small>
+        <h2>{{ target.nombreCompleto }}</h2>
+        <p>{{ funcionPrincipal() }} · {{ target.activo ? 'Activo' : 'Inactivo' }}</p>
+      </div>
+      <ion-button color="primary" (click)="openUpload()">
+        <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+        Subir documento
+      </ion-button>
+    </header>
+
+    <section class="document-metrics" aria-label="Resumen del expediente">
+      <article><span>Documentos</span><strong>{{ documentosActuales.length }}</strong><small>Versiones actuales</small></article>
+      <article class="pending"><span>Pendientes</span><strong>{{ pendientes }}</strong><small>Requisitos por integrar</small></article>
+      <article class="warning"><span>Por vencer</span><strong>{{ porVencer }}</strong><small>Próximos 30 días</small></article>
+      <article class="danger"><span>Vencidos</span><strong>{{ vencidos }}</strong><small>Requieren atención</small></article>
+    </section>
+
+    <section class="pending-types" *ngIf="tiposPendientes.length">
+      <div class="pending-title">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <strong>Documentación requerida pendiente</strong>
+      </div>
+      <div><ion-badge color="warning" *ngFor="let tipo of tiposPendientes">{{ tipo.label }}</ion-badge></div>
+    </section>
+
+    <div class="document-state" *ngIf="state === 'loading'" role="status">
+      <ion-spinner name="crescent"></ion-spinner><span>Cargando expediente…</span>
+    </div>
+    <div class="document-state" *ngIf="state === 'error'" role="alert">
+      <ion-icon name="alert-circle-outline"></ion-icon><span>No fue posible cargar el expediente.</span>
+      <ion-button fill="outline" (click)="loadDocumentos()">Reintentar</ion-button>
+    </div>
+    <div class="document-state empty" *ngIf="state === 'empty'">
+      <ion-icon name="folder-open-outline"></ion-icon>
+      <strong>Expediente vacío</strong>
+      <span>Sube el primer documento para comenzar a integrar el expediente.</span>
+      <ion-button fill="outline" (click)="openUpload()">Agregar documento</ion-button>
+    </div>
+
+    <section class="documents-section" *ngIf="state === 'ready'">
+      <div class="section-heading">
+        <div><h3>Documentos del expediente</h3><p>Consulta las versiones actuales y el historial de reemplazos.</p></div>
+      </div>
+      <div class="table-container">
+        <table class="responsive-table document-table">
+          <thead>
+            <tr><th>Tipo</th><th>Nombre / archivo</th><th>Carga</th><th>Documento</th><th>Vencimiento</th><th>Estado</th><th>Subido por</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let documento of documentos" [class.replaced-version]="!documento.esVersionActual">
+              <td>{{ tipoLabel(documento.tipo) }}<small class="version-label">v{{ documento.version }}</small></td>
+              <td><div class="file-copy"><strong>{{ documento.nombre }}</strong><small>{{ documento.nombreArchivo }} · {{ formatSize(documento.size) }}</small></div></td>
+              <td>{{ documento.uploadedAt.toDate() | date:'dd/MM/yyyy' }}</td>
+              <td>{{ documento.fechaDocumento ? (documento.fechaDocumento.toDate() | date:'dd/MM/yyyy') : '—' }}</td>
+              <td>{{ documento.fechaVencimiento ? (documento.fechaVencimiento.toDate() | date:'dd/MM/yyyy') : 'Sin vencimiento' }}</td>
+              <td><ion-badge [color]="estadoColor(documento)">{{ estadoLabel(documento) }}</ion-badge></td>
+              <td class="uid-cell" [title]="documento.uploadedByUid">{{ documento.uploadedByUid }}</td>
+              <td>
+                <div class="row-actions">
+                  <ion-button fill="clear" (click)="view(documento)" [disabled]="actionDocumentId === documento.id" aria-label="Ver documento" title="Ver documento"><ion-icon slot="icon-only" name="eye-outline"></ion-icon></ion-button>
+                  <ion-button fill="clear" (click)="download(documento)" [disabled]="actionDocumentId === documento.id" aria-label="Descargar documento" title="Descargar documento"><ion-icon slot="icon-only" name="download-outline"></ion-icon></ion-button>
+                  <ion-button fill="clear" color="primary" (click)="triggerReplace(documento)" [disabled]="!documento.esVersionActual || actionDocumentId === documento.id" aria-label="Reemplazar documento" title="Reemplazar documento"><ion-icon slot="icon-only" name="sync-outline"></ion-icon></ion-button>
+                  <input hidden type="file" [id]="'replace-' + documento.id" accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png" (change)="replace(documento, $event)">
+                  <ion-button fill="clear" color="danger" (click)="confirmDelete(documento)" [disabled]="actionDocumentId === documento.id" aria-label="Eliminar documento" title="Eliminar documento"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</ng-template>

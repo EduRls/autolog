@@ -1,54 +1,21 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title style="text-align: center;">
-      Operador: {{operadorData.nombre}}
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cancel()">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<form class="administrative-form" [formGroup]="editarOperadorForm" (ngSubmit)="editarOperador()" [attr.aria-busy]="saving">
+  <header class="modal-header"><div><h1>Editar distribuidor</h1><p>Actualiza los datos operativos del distribuidor.</p></div><button class="modal-close" type="button" (click)="cancel()" [disabled]="saving" aria-label="Cerrar formulario"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></button></header>
+  <div class="modal-body"><fieldset class="form-fields" [disabled]="saving">
+<div class="system-identifier"><small>Identificador del sistema</small><strong>{{ operadorData.identificador }}</strong><p>Este identificador es permanente y no se puede modificar.</p></div><div class="field">
+  <label for="field-nombre">Nombre completo *</label>
+  <input id="field-nombre" type="text" formControlName="nombre" autocomplete="off" maxlength="160"
+    [attr.aria-invalid]="editarOperadorForm.controls['nombre'].touched && editarOperadorForm.controls['nombre'].invalid"
+    aria-describedby="field-nombre-error">
 
-<ion-content>
-  <form (ngSubmit)="editarOperador()" [formGroup]="editarOperadorForm" style="padding-top: 3%;">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="12">
-          <ion-input label="Edita el nombre del operador" label-placement="floating" fill="outline"
-            placeholder="Nombre" style="--background: #ffffff; text-transform: uppercase" formControlName="nombre">
-          </ion-input>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="6">
-          <ion-input label="Identificador" label-placement="floating" fill="outline"
-            placeholder="Identificador" style="--background: #ffffff; text-transform: uppercase"
-            formControlName="identificador">
-          </ion-input>
-        </ion-col>
-        <ion-col size="6">
-          <ion-input label="Edita ruta" label-placement="floating" fill="outline" placeholder="Ruta"
-            style="--background: #ffffff; text-transform: uppercase" formControlName="ruta">
-          </ion-input>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="12">
-          <ion-select label="Edita Zona" label-placement="floating" fill="outline" placeholder="Ruta"
-            style="--background: #ffffff;" formControlName="zona" interface="popover">
-            <ion-select-option value="gpe">Guadalupe</ion-select-option>
-            <ion-select-option value="zac">Zacatecas</ion-select-option>
-            <ion-select-option value="frs">Fresnillo</ion-select-option>
-            <ion-select-option value="vn">Villa nueva</ion-select-option>
-          </ion-select>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+  <p id="field-nombre-error" class="field-error" aria-live="polite"><ng-container *ngIf="editarOperadorForm.controls['nombre'].touched && editarOperadorForm.controls['nombre'].invalid">Ingresa nombre completo (máximo 160 caracteres).</ng-container></p>
+</div><div class="form-grid"><div class="field">
+  <label for="field-ruta">Ruta *</label>
+  <input id="field-ruta" type="text" formControlName="ruta" autocomplete="off" maxlength="50"
+    [attr.aria-invalid]="editarOperadorForm.controls['ruta'].touched && editarOperadorForm.controls['ruta'].invalid"
+    aria-describedby="field-ruta-error">
 
-    <ion-button type="submit" expand="block" fill="clear" shape="round" color="success">
-      Editar operador
-    </ion-button>
-  </form>
-</ion-content>
+  <p id="field-ruta-error" class="field-error" aria-live="polite"><ng-container *ngIf="editarOperadorForm.controls['ruta'].touched && editarOperadorForm.controls['ruta'].invalid">Ingresa ruta (máximo 50 caracteres).</ng-container></p>
+</div><div class="field"><label for="field-zona">Zona *</label><select id="field-zona" formControlName="zona" aria-describedby="zone-error" [attr.aria-invalid]="editarOperadorForm.controls['zona'].touched && editarOperadorForm.controls['zona'].invalid"><option value="" disabled>Selecciona una zona</option><option value="gpe">Guadalupe</option><option value="zac">Zacatecas</option><option value="frs">Fresnillo</option><option value="vn">Villanueva</option></select><p id="zone-error" class="field-error" aria-live="polite"><ng-container *ngIf="editarOperadorForm.controls['zona'].touched && editarOperadorForm.controls['zona'].invalid">Selecciona una zona.</ng-container></p></div></div><section class="access-panel" *ngIf="canAdministerAccess"><div><strong>Acceso ASISTIA</strong><span *ngIf="accessLoading">Consultando acceso…</span><span *ngIf="!accessLoading">{{ linkedUsuario ? (linkedUsuario.activo ? 'Cuenta activa' : 'Cuenta inactiva') : 'Sin cuenta vinculada' }}</span><span *ngIf="linkedUsuario">{{ linkedUsuario.email }}</span></div><button class="form-button" type="button" (click)="manageAccess()" [disabled]="accessLoading || saving">{{ linkedUsuario ? 'Administrar acceso' : 'Crear acceso' }}</button></section>
+  </fieldset></div>
+  <footer class="modal-footer"><button class="form-button" type="button" (click)="cancel()" [disabled]="saving">Cancelar</button><button class="form-button primary" type="submit" [disabled]="saving || editarOperadorForm.invalid"><ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>{{ saving ? 'Guardando…' : 'Guardar cambios' }}</button></footer>
+</form>

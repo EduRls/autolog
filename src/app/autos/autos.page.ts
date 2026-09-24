@@ -5,6 +5,7 @@ import { AgregarAutoComponent } from '../components/agregar-auto/agregar-auto.co
 import { FirebaseService } from '../services/firebase/firebase.service';
 import { EditarAutoComponent } from '../components/editar-auto/editar-auto.component';
 import { StorageService } from '../services/storage/storage.service';
+import { PlantScopeService } from '../services/plants/plant-scope.service';
 
 
 import * as XLSX from 'xlsx';
@@ -22,6 +23,7 @@ export class AutosPage implements OnInit {
   paginaActual: number = 1; // Página actual
   registrosPorPagina: number = 5; // Número de registros por página
   registrosOriginales: any[] = []; // Lista completa sin filtrar
+  canWrite = true;
 
 
   constructor(
@@ -30,10 +32,13 @@ export class AutosPage implements OnInit {
     private alertController: AlertController,
     private loadcontroller: LoadingController,
     private toastController: ToastController,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private readonly plantScope: PlantScopeService
   ) { }
 
   ngOnInit() {
+    void this.plantScope.initialize();
+    this.plantScope.state$.subscribe(() => this.canWrite = !this.plantScope.isReadOnly());
     this.getAutos();
     this.actualizarTabla();
   }
@@ -125,6 +130,7 @@ export class AutosPage implements OnInit {
   }
 
   async addAuto(){
+    if (!this.canWrite) return;
     const modalAddAuto = await this.modalController.create({
       component: AgregarAutoComponent,
       cssClass:'my-custom-class-add-auto'
@@ -134,6 +140,7 @@ export class AutosPage implements OnInit {
   }
 
   async editarAuto(item:any){
+    if (!this.canWrite) return;
     const modalUpateAuto = await this.modalController.create({
       component: EditarAutoComponent,
       cssClass:'my-custom-class-add-auto',
@@ -146,6 +153,7 @@ export class AutosPage implements OnInit {
   }
 
   async borrarAuto(item: any) {
+    if (!this.canWrite) return;
     const alert = await this.alertController.create({
       header: 'Confirmar eliminación',
       message: `¿Estás seguro de que deseas eliminar el registro ${item.unidad}?`,

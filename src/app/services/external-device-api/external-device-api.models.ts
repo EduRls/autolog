@@ -18,6 +18,9 @@ export interface ExternalDevice {
   alias?: string | null;
   name?: string | null;
   unit?: string | null;
+  township?: string | null;
+  city?: string | null;
+  street?: string | null;
   active?: boolean | number | string | null;
   isActive?: boolean | number | string | null;
   device?: ExternalDevice | null;

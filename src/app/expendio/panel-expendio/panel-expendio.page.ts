@@ -78,6 +78,7 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
   private mapViewReady = false;
   private selectionController?: AbortController;
   private historicalController?: AbortController;
+  private labelsController?: AbortController;
   private readonly detailCache = new Map<string, ExternalDeviceDetail>();
   private readonly consumptionCache = new Map<string, PlotReading[]>();
   private readonly rechargeCache = new Map<string, PlotReading[]>();
@@ -108,6 +109,7 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.selectionController?.abort();
     this.historicalController?.abort();
+    this.labelsController?.abort();
     if (this.resizeTimer) clearTimeout(this.resizeTimer);
     this.shellObserver?.disconnect();
     this.map?.remove();
@@ -132,6 +134,7 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
       if (!stillExists) this.selectedImei = this.imeiOf(this.devices.find(device => this.isActive(device)) ?? this.devices[0]);
       if (manual) await this.refreshSelected(false);
       else await this.selectDevice(this.selectedImei);
+      void this.loadDeviceLabels();
     } catch (error: unknown) {
       this.devicesState = 'error';
       this.errors.devices = this.toSectionError(error);
@@ -142,8 +145,28 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
   applyDeviceFilter(): void {
     const term = this.searchTerm.trim().toLocaleLowerCase('es');
     this.filteredDevices = !term ? [...this.devices] : this.devices.filter(device =>
-      `${this.deviceName(device)} ${this.imeiOf(device)}`.toLocaleLowerCase('es').includes(term)
+      `${this.deviceOptionLabel(device)} ${this.deviceName(device)} ${this.imeiOf(device)}`.toLocaleLowerCase('es').includes(term)
     );
+  }
+
+  private async loadDeviceLabels(): Promise<void> {
+    this.labelsController?.abort();
+    this.labelsController = new AbortController();
+    const signal = this.labelsController.signal;
+    const missing = this.devices.filter(device => !this.detailCache.has(this.imeiOf(device)));
+    let cursor = 0;
+    const worker = async (): Promise<void> => {
+      while (cursor < missing.length && !signal.aborted) {
+        const device = missing[cursor++];
+        try {
+          await this.getDetailCached(this.imeiOf(device), signal);
+          if (!signal.aborted) this.applyDeviceFilter();
+        } catch (error: unknown) {
+          if (this.isAbort(error)) return;
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(3, missing.length) }, () => worker()));
   }
 
   async selectDevice(imei: string): Promise<void> {
@@ -394,6 +417,10 @@ export class PanelExpendioPage implements OnInit, AfterViewInit, OnDestroy {
   onMapReady(): void { setTimeout(() => this.map?.invalidateSize(), 0); }
 
   deviceName(device: ExternalDevice): string { return this.text(device.alias) || this.text(device.unit) || this.text(device.name) || `IMEI ${this.imeiOf(device)}`; }
+  deviceOptionLabel(device: ExternalDevice): string {
+    const vinculation = this.detailCache.get(this.imeiOf(device)) ?? device;
+    return ['Expendio', this.text(vinculation.township), this.text(vinculation.city), this.text(vinculation.street)].filter(Boolean).join(' · ');
+  }
   detailName(detail: ExternalDeviceDetail): string { return this.text(detail.unit) || this.text(detail.name) || this.text(detail.alias) || `IMEI ${this.imeiOf(detail)}`; }
   imeiOf(device: ExternalDevice): string { return this.text(device.imei); }
   isActive(device: ExternalDevice): boolean { return this.boolean(device.active ?? device.isActive ?? device.device?.active ?? device.device?.isActive); }

@@ -1,13 +1,75 @@
-<ion-header><ion-toolbar><ion-title>Acceso ASISTIA del distribuidor</ion-title></ion-toolbar></ion-header>
-<ion-content class="ion-padding">
-  <app-asistia-status [distribuidorId]="distribuidorId"></app-asistia-status>
-  <p>Esta cuenta permite acceder a ASISTIA. No concede acceso a AUTOLOG.</p>
-  <form [formGroup]="form" (ngSubmit)="save()">
-    <ion-input label="Correo electrónico *" label-placement="stacked" type="email" fill="outline" formControlName="email"></ion-input>
-    <ion-input label="Nombre de usuario *" label-placement="stacked" fill="outline" formControlName="usuario"></ion-input>
-    <ion-input *ngIf="!usuarioData" label="Contraseña temporal *" label-placement="stacked" type="password" autocomplete="new-password" fill="outline" formControlName="password"></ion-input>
-    <ion-toggle *ngIf="usuarioData" formControlName="activo">Cuenta activa</ion-toggle>
-    <ion-button type="button" fill="outline" (click)="cancel()" [disabled]="saving">Cancelar</ion-button>
-    <ion-button type="submit" [disabled]="form.invalid || saving">Guardar acceso</ion-button>
-  </form>
-</ion-content>
+<form class="administrative-form access-form" [formGroup]="form" (ngSubmit)="save()" [attr.aria-busy]="saving">
+  <header class="modal-header">
+    <div class="modal-title-block">
+      <span class="modal-title-icon"><ion-icon name="finger-print-outline" aria-hidden="true"></ion-icon></span>
+      <div>
+        <h1>Administrar acceso ASISTIA</h1>
+        <p>{{ editing ? 'Actualiza la cuenta y consulta su configuración.' : 'Crea la cuenta móvil para este distribuidor.' }}</p>
+      </div>
+    </div>
+    <button class="modal-close" type="button" (click)="cancel()" [disabled]="saving" aria-label="Cerrar formulario">
+      <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+    </button>
+  </header>
+
+  <div class="modal-body">
+    <fieldset class="form-fields" [disabled]="saving">
+      <section class="access-notice">
+        <ion-icon name="shield-checkmark-outline" aria-hidden="true"></ion-icon>
+        <div><strong>Acceso limitado a ASISTIA</strong><p>Esta cuenta permite registrar asistencia desde el teléfono. No concede acceso al panel de AUTOLOG.</p></div>
+      </section>
+
+      <app-asistia-status [distribuidorId]="distribuidorId"></app-asistia-status>
+
+      <section class="form-section" aria-labelledby="access-account-title">
+        <div class="section-copy">
+          <span class="section-icon"><ion-icon name="person-circle-outline" aria-hidden="true"></ion-icon></span>
+          <div><h2 id="access-account-title">Datos de la cuenta</h2><p>Credenciales que utilizará el distribuidor en la aplicación móvil.</p></div>
+          <span class="account-state" *ngIf="editing" [class.inactive]="!form.controls.activo.value">
+            {{ form.controls.activo.value ? 'Activa' : 'Inactiva' }}
+          </span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="asistia-email">Correo electrónico *</label>
+            <input id="asistia-email" type="email" formControlName="email" autocomplete="email" maxlength="254" placeholder="usuario@empresa.com"
+              [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid">
+            <p class="field-error" *ngIf="form.controls.email.touched && form.controls.email.invalid">Ingresa un correo electrónico válido.</p>
+          </div>
+          <div class="field">
+            <label for="asistia-user">Nombre de usuario *</label>
+            <input id="asistia-user" type="text" formControlName="usuario" autocomplete="off" maxlength="120" placeholder="Nombre del distribuidor"
+              [attr.aria-invalid]="form.controls.usuario.touched && form.controls.usuario.invalid">
+            <p class="field-error" *ngIf="form.controls.usuario.touched && form.controls.usuario.invalid">Ingresa el nombre de usuario.</p>
+          </div>
+        </div>
+
+        <div class="field" *ngIf="!editing">
+          <label for="asistia-password">Contraseña temporal *</label>
+          <input id="asistia-password" type="password" formControlName="password" autocomplete="new-password" maxlength="128" placeholder="Mínimo 6 caracteres"
+            [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid">
+          <p class="field-hint">Compártela de forma segura. El campo se limpia al cerrar o guardar.</p>
+          <p class="field-error" *ngIf="form.controls.password.touched && form.controls.password.invalid">Usa una contraseña de entre 6 y 128 caracteres.</p>
+        </div>
+
+        <label class="account-toggle" *ngIf="editing">
+          <input type="checkbox" formControlName="activo">
+          <span><strong>Cuenta activa</strong><small>Al desactivarla, el distribuidor no podrá iniciar sesión en ASISTIA.</small></span>
+        </label>
+      </section>
+    </fieldset>
+  </div>
+
+  <footer class="modal-footer">
+    <span class="required-note">* Campos obligatorios</span>
+    <div class="footer-actions">
+      <button class="form-button" type="button" (click)="cancel()" [disabled]="saving">Cancelar</button>
+      <button class="form-button primary" type="submit" [disabled]="form.invalid || saving">
+        <ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>
+        <ion-icon *ngIf="!saving" name="save-outline" aria-hidden="true"></ion-icon>
+        {{ saving ? 'Guardando…' : (editing ? 'Guardar cambios' : 'Crear acceso') }}
+      </button>
+    </div>
+  </footer>
+</form>

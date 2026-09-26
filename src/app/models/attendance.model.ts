@@ -97,6 +97,7 @@ export interface AttendanceRecordsRequest {
   dateFrom?: string;
   dateTo?: string;
   status?: AttendanceDayStatus | '';
+  plantId?: string | null;
 }
 
 export interface AttendanceRecordsResponse {

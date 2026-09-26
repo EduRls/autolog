@@ -1,57 +1,91 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title style="text-align: center;">
-      Editar el auto - {{auto.unidad}}
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cancel()">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<form class="administrative-form fleet-form" [formGroup]="editarAuto" (ngSubmit)="editarAutoFirebase()" [attr.aria-busy]="saving">
+  <header class="modal-header">
+    <div class="modal-title-block">
+      <span class="modal-title-icon"><ion-icon name="car-sport-outline" aria-hidden="true"></ion-icon></span>
+      <div><h1>Editar unidad</h1><p>Actualiza la información operativa del número económico {{ auto.unidad }}.</p></div>
+    </div>
+    <button class="modal-close" type="button" (click)="cancel()" [disabled]="saving" aria-label="Cerrar formulario"><ion-icon name="close-outline" aria-hidden="true"></ion-icon></button>
+  </header>
 
-<ion-content>
-  <form (ngSubmit)="editarAutoFirebase()" [formGroup]="editarAuto" style="margin: 5%;">
-    <ion-input label="Agrega las placas de la unidad" label-placement="floating" fill="outline" placeholder="Placas"
-      style="--background: #ffffff;" formControlName="unidad">
-    </ion-input>
-    <br>
-    <ion-select label="Distribuidor operador *" label-placement="floating" fill="outline"
-      formControlName="operadorId" interface="popover" (ionChange)="seleccionarOperador($event.detail.value)">
-      <ion-select-option [value]="null">Selecciona un distribuidor activo</ion-select-option>
-      <ion-select-option *ngFor="let distribuidor of operadoresDisponibles" [value]="distribuidor.id">{{ distribuidor.nombre }}</ion-select-option>
-    </ion-select>
-    <br>
-    <ion-input label="Nombre del operador (compatibilidad histórica)" label-placement="floating" fill="outline" placeholder="Operador"
-      style="--background: #ffffff;" formControlName="operador" [readonly]="true">
-    </ion-input>
-    <br>
-    <br>
-    <ion-row>
-      <ion-col size="4">
-        <ion-input label="Establece el Kilometraje inicial" type="number" label-placement="floating" fill="outline"
-          placeholder="Kilometraje" style="--background: #ffffff;" formControlName="kilometraje" (ionChange)="establecerKilometraje()">
-        </ion-input>
-      </ion-col>
-      <ion-col size="4">
-        <ion-input label="Establece el kilometraje actual" type="number" label-placement="floating" fill="outline"
-          placeholder="Kilometraje" style="--background: #ffffff;" formControlName="km_actual" (ionChange)="verificarCambioServicio()">
-        </ion-input>
-      </ion-col>
-      <ion-col size="4">
-        <ion-input label="Establece el Kilometraje proximo servicio" type="number" label-placement="floating" fill="outline"
-          placeholder="Kilometraje" style="--background: #ffffff;" formControlName="km_proximo_servicio">
-        </ion-input>
-      </ion-col>
-    </ion-row>
-    <br>
-    <ion-textarea label="Outline textarea" labelPlacement="floating" fill="outline" placeholder="Enter text"
-      [autoGrow]="true" rows="10" style="--background: #ffffff;" formControlName="desc">
-    </ion-textarea>
-    <br>
-    <ion-button type="submit" expand="block" fill="clear" shape="round" color="success">
-      Editar auto
-    </ion-button>
-  </form>
-</ion-content>
+  <div class="modal-body">
+    <fieldset class="form-fields" [disabled]="saving">
+      <section class="form-section" aria-labelledby="vehicle-edit-identity">
+        <div class="section-copy">
+          <span class="section-icon"><ion-icon name="car-outline" aria-hidden="true"></ion-icon></span>
+          <div><h2 id="vehicle-edit-identity">Identificación de la unidad</h2><p>Número económico y distribuidor responsable.</p></div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="edit-vehicle-number">Número económico *</label>
+            <input id="edit-vehicle-number" type="text" formControlName="unidad" placeholder="Ej. 08" autocomplete="off" maxlength="30"
+              [attr.aria-invalid]="editarAuto.controls['unidad'].touched && editarAuto.controls['unidad'].invalid">
+            <p class="field-error" *ngIf="editarAuto.controls['unidad'].touched && editarAuto.controls['unidad'].invalid">Ingresa el número económico de la unidad.</p>
+          </div>
+          <div class="field operator-field">
+            <label id="edit-vehicle-operators-label">Distribuidores de la ruta *</label>
+            <div class="operator-options" role="group" aria-labelledby="edit-vehicle-operators-label"
+              [class.invalid]="editarAuto.controls['operadorIds'].touched && editarAuto.controls['operadorIds'].invalid">
+              <label class="operator-option" *ngFor="let distribuidor of operadoresDisponibles"
+                [class.selected]="operadorSeleccionado(distribuidor.id)">
+                <input type="checkbox" [checked]="operadorSeleccionado(distribuidor.id)"
+                  (change)="toggleOperador(distribuidor.id, $any($event.target).checked)">
+                <span><strong>{{ distribuidor.nombre }}</strong><small>{{ distribuidor.identificador }}</small></span>
+                <ion-icon *ngIf="operadorSeleccionado(distribuidor.id)" name="checkmark-circle" aria-hidden="true"></ion-icon>
+              </label>
+              <p class="empty-options" *ngIf="!operadoresDisponibles.length">No hay distribuidores activos disponibles.</p>
+            </div>
+            <p class="field-hint">Puedes seleccionar de 1 a 9. El primero se conserva como principal.</p>
+            <p class="field-error" *ngIf="editarAuto.controls['operadorIds'].touched && editarAuto.controls['operadorIds'].hasError('required')">Selecciona al menos un distribuidor.</p>
+            <p class="field-error" *ngIf="editarAuto.controls['operadorIds'].touched && editarAuto.controls['operadorIds'].hasError('maxlength')">Puedes asignar como máximo 9 distribuidores.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="vehicle-edit-mileage">
+        <div class="section-copy">
+          <span class="section-icon"><ion-icon name="speedometer-outline" aria-hidden="true"></ion-icon></span>
+          <div><h2 id="vehicle-edit-mileage">Control de kilometraje</h2><p>Al cambiar el kilometraje actual, el próximo servicio se programa 10,000 km después.</p></div>
+        </div>
+        <div class="mileage-grid">
+          <div class="field">
+            <label for="edit-initial-km">Kilometraje inicial *</label>
+            <div class="input-suffix"><input id="edit-initial-km" type="number" min="0" step="1" formControlName="kilometraje"><span>km</span></div>
+          </div>
+          <div class="field">
+            <label for="edit-current-km">Kilometraje actual *</label>
+            <div class="input-suffix"><input id="edit-current-km" type="number" min="0" step="1" formControlName="km_actual" (input)="establecerProximoServicio()"><span>km</span></div>
+          </div>
+          <div class="field">
+            <label for="edit-service-km">Próximo servicio *</label>
+            <div class="input-suffix calculated"><input id="edit-service-km" type="number" formControlName="km_proximo_servicio" readonly aria-readonly="true"><span>km</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="vehicle-edit-notes">
+        <div class="section-copy compact">
+          <span class="section-icon"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon></span>
+          <div><h2 id="vehicle-edit-notes">Descripción</h2><p>Características o notas para reconocer la unidad.</p></div>
+        </div>
+        <div class="field">
+          <label for="edit-description">Notas de la unidad *</label>
+          <textarea id="edit-description" formControlName="desc" rows="3" maxlength="500" placeholder="Ej. Camioneta de reparto, color blanco…"
+            [attr.aria-invalid]="editarAuto.controls['desc'].touched && editarAuto.controls['desc'].invalid"></textarea>
+          <p class="field-error" *ngIf="editarAuto.controls['desc'].touched && editarAuto.controls['desc'].invalid">Agrega una descripción breve.</p>
+        </div>
+      </section>
+    </fieldset>
+  </div>
+
+  <footer class="modal-footer">
+    <span class="required-note">* Campos obligatorios</span>
+    <div class="footer-actions">
+      <button class="form-button" type="button" (click)="cancel()" [disabled]="saving">Cancelar</button>
+      <button class="form-button primary" type="submit" [disabled]="saving || editarAuto.invalid">
+        <ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>
+        <ion-icon *ngIf="!saving" name="save-outline" aria-hidden="true"></ion-icon>
+        {{ saving ? 'Guardando…' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </footer>
+</form>

@@ -109,14 +109,50 @@ export class FirebaseService {
   async addAuto(reporte: any): Promise<any> {
     await this.plantScope.initialize();
     const plantaId = this.plantScope.resolveWritePlantId(reporte.plantaId);
-    return addDoc(collection(this.firestore, 'autos'), {
-      ...reporte,
-      plantaId,
-      createdAt: serverTimestamp(),
-      createdByUid: this.auth.currentUser?.uid || null,
-      updatedAt: serverTimestamp(),
-      updatedByUid: this.auth.currentUser?.uid || null
+    const operadorIds = this.normalizeOperatorIds(reporte);
+    const unidad = typeof reporte.unidad === 'string' ? reporte.unidad.trim() : '';
+    if (!unidad) throw new Error('AUTO_NUMBER_REQUIRED');
+    const autoRef = doc(collection(this.firestore, 'autos'));
+    const distributorRefs = operadorIds.map(id => doc(this.firestore, `distribuidores/${id}`));
+    const uid = this.auth.currentUser?.uid || null;
+    await runTransaction(this.firestore, async transaction => {
+      const distributors = [];
+      for (const distributorRef of distributorRefs) {
+        distributors.push(await transaction.get(distributorRef));
+      }
+      for (const distributor of distributors) {
+        if (!distributor.exists()) throw new Error('DISTRIBUTOR_NOT_FOUND');
+        const data = distributor.data() as any;
+        if (data.plantaIdPrincipal !== plantaId || data.activo === false) {
+          throw new Error('DISTRIBUTOR_PLANT_MISMATCH');
+        }
+      }
+      const operadores = distributors.map(item => String(item.data()?.['nombre'] || ''));
+      transaction.set(autoRef, {
+        unidad,
+        operadorId: operadorIds[0],
+        operador: operadores[0],
+        operadorIds,
+        operadores,
+        kilometraje: Number(reporte.kilometraje),
+        km_actual: Number(reporte.km_actual),
+        km_proximo_servicio: Number(reporte.km_proximo_servicio),
+        desc: reporte.desc,
+        plantaId,
+        createdAt: serverTimestamp(),
+        createdByUid: uid,
+        updatedAt: serverTimestamp(),
+        updatedByUid: uid
+      });
+      for (const distributorRef of distributorRefs) {
+        transaction.update(distributorRef, {
+          ruta: unidad,
+          updatedAt: serverTimestamp(),
+          updatedByUid: uid
+        });
+      }
     });
+    return autoRef;
   }
 
   deleteAuto(id: string) {
@@ -124,19 +160,75 @@ export class FirebaseService {
     return deleteDoc(registroRef);
   }
 
-  updateAuto(reporte: any): Promise<any> {
+  async updateAuto(reporte: any): Promise<any> {
+    await this.plantScope.initialize();
     const registroRef = doc(this.firestore, `autos/${reporte.id}`);
-    return updateDoc(registroRef, {
-      unidad: reporte.unidad,
-      operador: reporte.operador,
-      operadorId: reporte.operadorId || null,
-      kilometraje: reporte.kilometraje,
-      km_actual: reporte.km_actual,
-      km_proximo_servicio: reporte.km_proximo_servicio,
-      desc: reporte.desc,
-      updatedAt: serverTimestamp(),
-      updatedByUid: this.auth.currentUser?.uid || null
+    const operadorIds = this.normalizeOperatorIds(reporte);
+    const unidad = typeof reporte.unidad === 'string' ? reporte.unidad.trim() : '';
+    if (!unidad) throw new Error('AUTO_NUMBER_REQUIRED');
+    const uid = this.auth.currentUser?.uid || null;
+    return runTransaction(this.firestore, async transaction => {
+      const currentAuto = await transaction.get(registroRef);
+      if (!currentAuto.exists()) throw new Error('AUTO_NOT_FOUND');
+      const currentData = currentAuto.data() as any;
+      const plantaId = currentData.plantaId;
+      if (!plantaId || !this.plantScope.canWritePlant(plantaId)) throw new Error('PLANT_WRITE_DENIED');
+      const previousIds = this.normalizeOperatorIds(currentData);
+      const allIds = [...new Set([...operadorIds, ...previousIds])];
+      const distributorRefs = allIds.map(id => doc(this.firestore, `distribuidores/${id}`));
+      const distributors = [];
+      for (const distributorRef of distributorRefs) {
+        distributors.push(await transaction.get(distributorRef));
+      }
+      const distributorById = new Map(distributors.map(item => [item.id, item]));
+      const selected = operadorIds.map(id => distributorById.get(id));
+      for (const distributor of selected) {
+        if (!distributor?.exists()) throw new Error('DISTRIBUTOR_NOT_FOUND');
+        const data = distributor.data() as any;
+        if (data.plantaIdPrincipal !== plantaId || data.activo === false) {
+          throw new Error('DISTRIBUTOR_PLANT_MISMATCH');
+        }
+      }
+      const operadores = selected.map(item => String(item?.data()?.['nombre'] || ''));
+      transaction.update(registroRef, {
+        unidad,
+        operador: operadores[0],
+        operadorId: operadorIds[0],
+        operadorIds,
+        operadores,
+        kilometraje: Number(reporte.kilometraje),
+        km_actual: Number(reporte.km_actual),
+        km_proximo_servicio: Number(reporte.km_proximo_servicio),
+        desc: reporte.desc,
+        updatedAt: serverTimestamp(),
+        updatedByUid: uid
+      });
+      for (const distributorId of operadorIds) {
+        transaction.update(distributorById.get(distributorId)!.ref, {
+          ruta: unidad, updatedAt: serverTimestamp(), updatedByUid: uid
+        });
+      }
+      for (const distributorId of previousIds.filter(id => !operadorIds.includes(id))) {
+        const distributor = distributorById.get(distributorId);
+        if (distributor?.exists() && distributor.data()?.['ruta'] === currentData.unidad) {
+          transaction.update(distributor.ref, {
+            ruta: '', updatedAt: serverTimestamp(), updatedByUid: uid
+          });
+        }
+      }
     });
+  }
+
+  private normalizeOperatorIds(reporte: any): string[] {
+    const rawIds = Array.isArray(reporte?.operadorIds)
+      ? reporte.operadorIds
+      : [reporte?.operadorId];
+    const ids: string[] = Array.from(new Set<string>((rawIds as unknown[])
+      .filter((id: unknown): id is string => typeof id === 'string')
+      .map((id: string) => id.trim())
+      .filter(Boolean)));
+    if (!ids.length || ids.length > 9) throw new Error('AUTO_OPERATORS_REQUIRED');
+    return ids;
   }
 
 
@@ -156,8 +248,20 @@ export class FirebaseService {
     return docData(registroRef) as Observable<any>;
   }
 
-  addArticulo(reporte: any): Promise<any> {
-    return addDoc(collection(this.firestore, 'articulos'), reporte);
+  async addArticulo(reporte: any): Promise<any> {
+    await this.plantScope.initialize();
+    const activePlantId = this.plantScope.getActivePlantId();
+    const plantaId = activePlantId || !this.plantScope.isGlobal()
+      ? this.plantScope.resolveWritePlantId(activePlantId)
+      : null;
+    return addDoc(collection(this.firestore, 'articulos'), {
+      ...reporte,
+      ...(plantaId ? { plantaId } : {}),
+      createdAt: serverTimestamp(),
+      createdByUid: this.auth.currentUser?.uid || null,
+      updatedAt: serverTimestamp(),
+      updatedByUid: this.auth.currentUser?.uid || null
+    });
   }
 
   deleteArticulo(id: string) {
@@ -171,6 +275,8 @@ export class FirebaseService {
       articulo: reporte.articulo,
       precio: reporte.precio,
       desc: reporte.desc,
+      updatedAt: serverTimestamp(),
+      updatedByUid: this.auth.currentUser?.uid || null
     });
   }
 

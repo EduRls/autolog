@@ -39,7 +39,9 @@ export class ExcelService {
   buildSalesWorkbook(report: SalesExcelReport): XLSX.WorkBook {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, this.buildSummarySheet(report), 'Resumen');
-    XLSX.utils.book_append_sheet(workbook, this.buildSalesSheet(report), 'Ventas');
+    const dailySales = this.groupSalesByDay(report.sales);
+    if (!dailySales.length) XLSX.utils.book_append_sheet(workbook, this.buildSalesSheet(report, [], 'Sin ventas'), 'Sin ventas');
+    dailySales.forEach(day => XLSX.utils.book_append_sheet(workbook, this.buildSalesSheet(report, day.sales, day.label), day.sheetName));
     workbook.Workbook = { Views: [{ RTL: false }] };
     return workbook;
   }
@@ -70,18 +72,20 @@ export class ExcelService {
     return sheet;
   }
 
-  private buildSalesSheet(report: SalesExcelReport): XLSX.WorkSheet {
+  private buildSalesSheet(report: SalesExcelReport, sales: GaslinkSale[], dayLabel: string): XLSX.WorkSheet {
     const headers = ['Folio', 'Fecha', 'Empresa', 'Vendedor', 'Cliente', 'Forma de pago', 'Litros', 'Total (MXN)'];
-    const filterDescription = `Periodo: ${report.startDate} al ${report.endDate} · Vendedor: ${report.vendedor} · Folio: ${report.folio}`;
+    const filterDescription = `Fecha: ${dayLabel} · Vendedor: ${report.vendedor} · Folio: ${report.folio}`;
     const rows: unknown[][] = [['Reporte de ventas', '', '', '', '', '', '', ''], [filterDescription, '', '', '', '', '', '', ''], headers];
-    report.sales.forEach(sale => rows.push([sale.folio ?? '', sale.fechaVenta ?? '', sale.empresa ?? '', sale.vendedor ?? '', sale.cliente ?? '', sale.formaPago ?? '', sale.litros ?? '', sale.total ?? '']));
+    sales.forEach(sale => rows.push([sale.folio ?? '', sale.fechaVenta ?? '', sale.empresa ?? '', sale.vendedor ?? '', sale.cliente ?? '', sale.formaPago ?? '', sale.litros ?? '', sale.total ?? '']));
+    const dailyTotal = sales.reduce((total, sale) => total + (sale.total ?? 0), 0);
+    const dailyAverage = sales.length ? dailyTotal / sales.length : 0;
     const totalRow = rows.length + 1;
-    rows.push(['Totales', '', '', '', 'Ticket promedio', report.summary.average, { f: `SUM(G4:G${totalRow - 1})` }, { f: `SUM(H4:H${totalRow - 1})` }]);
+    rows.push(['Totales', '', '', '', 'Ticket promedio', dailyAverage, { f: `SUM(G4:G${totalRow - 1})` }, { f: `SUM(H4:H${totalRow - 1})` }]);
     const sheet = XLSX.utils.aoa_to_sheet(rows, { cellDates: true });
     sheet['!merges'] = [XLSX.utils.decode_range('A1:H1'), XLSX.utils.decode_range('A2:H2')];
     sheet['!cols'] = [{ wch: 24 }, { wch: 20 }, { wch: 24 }, { wch: 24 }, { wch: 36 }, { wch: 20 }, { wch: 15 }, { wch: 18 }];
-    sheet['!rows'] = [{ hpt: 30 }, { hpt: 24 }, { hpt: 26 }, ...report.sales.map(() => ({ hpt: 20 })), { hpt: 24 }];
-    sheet['!autofilter'] = { ref: `A3:H${totalRow - 1}` };
+    sheet['!rows'] = [{ hpt: 30 }, { hpt: 24 }, { hpt: 26 }, ...sales.map(() => ({ hpt: 20 })), { hpt: 24 }];
+    sheet['!autofilter'] = { ref: `A3:H${Math.max(3, totalRow - 1)}` };
     sheet['!freeze'] = { xSplit: 0, ySplit: 3, topLeftCell: 'A4', activePane: 'bottomLeft', state: 'frozen' };
     sheet['!pageSetup'] = { orientation: 'landscape', fitToWidth: 1, fitToHeight: 0 };
     this.styleRange(sheet, 'A1:H1', { fill: { fgColor: { rgb: NAVY } }, font: { color: { rgb: WHITE }, bold: true, sz: 18 }, alignment: { vertical: 'center' } });
@@ -99,6 +103,33 @@ export class ExcelService {
     if (sheet[`H${totalRow}`]) sheet[`H${totalRow}`].z = CURRENCY;
     if (sheet[`F${totalRow}`]) sheet[`F${totalRow}`].z = CURRENCY;
     return sheet;
+  }
+
+  private groupSalesByDay(sales: GaslinkSale[]): Array<{ key: string; label: string; sheetName: string; sales: GaslinkSale[] }> {
+    const groups = new Map<string, GaslinkSale[]>();
+    sales.forEach(sale => {
+      const key = this.mexicoCityDay(sale.fechaVenta) ?? 'sin-fecha';
+      groups.set(key, [...(groups.get(key) ?? []), sale]);
+    });
+    return [...groups.entries()]
+      .sort(([left], [right]) => left === 'sin-fecha' ? 1 : right === 'sin-fecha' ? -1 : left.localeCompare(right))
+      .map(([key, daySales]) => {
+        if (key === 'sin-fecha') return { key, label: 'Sin fecha', sheetName: 'Sin fecha', sales: daySales };
+        const [year, month, day] = key.split('-');
+        const label = `${day}/${month}/${year}`;
+        return { key, label, sheetName: `${day}-${month}-${year}`, sales: daySales };
+      });
+  }
+
+  private mexicoCityDay(date: Date | null): string | null {
+    if (!date || Number.isNaN(date.getTime())) return null;
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(date).reduce<Record<string, string>>((values, part) => {
+      if (part.type !== 'literal') values[part.type] = part.value;
+      return values;
+    }, {});
+    return `${parts['year']}-${parts['month']}-${parts['day']}`;
   }
 
   private async saveWorkbook(workbook: XLSX.WorkBook, fileName: string): Promise<ExcelExportResult> {

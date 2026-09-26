@@ -7,6 +7,8 @@ import { DistribuidoresService } from 'src/app/services/admVentas/distribuidores
 import { Distribuidor } from 'src/app/models/distribuidor.model';
 import { UsuarioAutolog } from 'src/app/models/usuario-autolog.model';
 import { UserAdminService } from 'src/app/services/auth/user-admin.service';
+import { FirebaseService } from 'src/app/services/firebase/firebase.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-editar',
@@ -28,6 +30,7 @@ export class EditarComponent  implements OnInit {
   linkedUsuario: UsuarioAutolog | null = null;
   accessLoading = false;
   saving = false;
+  unidadesDisponibles: string[] = [];
 
   constructor(
     private modalController: ModalController,
@@ -35,7 +38,8 @@ export class EditarComponent  implements OnInit {
     private loadcontroller: LoadingController,
     private toastController: ToastController,
     private fb: FormBuilder,
-    private userAdminService: UserAdminService
+    private userAdminService: UserAdminService,
+    private readonly firebaseService: FirebaseService
   ) { }
 
   ngOnInit() {
@@ -43,18 +47,34 @@ export class EditarComponent  implements OnInit {
       id: [this.operadorData.id, Validators.required],
       nombre: [this.operadorData.nombre, [Validators.required, Validators.maxLength(160)]],
       identificador: [{ value: this.operadorData.identificador, disabled: true }],
-      ruta: [this.operadorData.ruta, [Validators.required, Validators.maxLength(50)]],
+      ruta: [this.operadorData.ruta || '', Validators.maxLength(50)],
       zona: [this.operadorData.zona, Validators.required]
     });
 
     if (this.canAdministerAccess) void this.loadLinkedUser();
+    void this.loadUnidades();
+  }
+
+  private async loadUnidades(): Promise<void> {
+    try {
+      const autos = await firstValueFrom(this.firebaseService.getAutos());
+      const plantId = this.operadorData.plantaIdPrincipal;
+      const values = autos
+        .filter(auto => !plantId || auto?.plantaId === plantId)
+        .map(auto => typeof auto?.unidad === 'string' ? auto.unidad.trim() : '')
+        .filter(Boolean);
+      if (this.operadorData.ruta) values.push(this.operadorData.ruta);
+      this.unidadesDisponibles = [...new Set(values)];
+    } catch {
+      this.unidadesDisponibles = this.operadorData.ruta ? [this.operadorData.ruta] : [];
+    }
   }
 
   async manageAccess(): Promise<void> {
     if (!this.canAdministerAccess || this.accessLoading || this.saving) return;
     const component = AccesoDistribuidorComponent;
     const componentProps = { distribuidorId: this.operadorData.id, usuarioData: this.linkedUsuario };
-    const modal = await this.modalController.create({ component, componentProps, cssClass: 'usuario-modal' });
+    const modal = await this.modalController.create({ component, componentProps, cssClass: ['autolog-form-modal', 'autolog-asistia-access-modal'] });
     await modal.present();
     const result = await modal.onDidDismiss<{ changed: boolean; uid?: string }>();
     if (result.data?.uid) this.operadorData.usuarioUid = result.data.uid;

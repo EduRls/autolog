@@ -19,6 +19,7 @@ export class EditarAutoComponent implements OnInit {
 
   public editarAuto: FormGroup
   operadoresDisponibles: Distribuidor[] = [];
+  saving = false;
 
   constructor(
     private modalController: ModalController,
@@ -32,21 +33,49 @@ export class EditarAutoComponent implements OnInit {
   ngOnInit() {
     this.editarAuto = this.fb.group({
       id: [this.auto.id, Validators.required],
-      unidad: [this.auto.unidad, Validators.required],
-      kilometraje: [this.auto.kilometraje, Validators.required],
-      km_actual: [this.auto.km_actual, Validators.required],
-      km_proximo_servicio: [this.auto.km_proximo_servicio, Validators.required],
+      unidad: [this.auto.unidad, [Validators.required, Validators.maxLength(30)]],
+      kilometraje: [this.auto.kilometraje, [Validators.required, Validators.min(0)]],
+      km_actual: [this.auto.km_actual, [Validators.required, Validators.min(0)]],
+      km_proximo_servicio: [this.auto.km_proximo_servicio, [Validators.required, Validators.min(0)]],
       operador: [this.auto.operador, Validators.required],
       operadorId: [this.auto.operadorId ?? null, Validators.required],
-      desc: [this.auto.desc, Validators.required]
+      operadorIds: [this.initialOperatorIds(), [Validators.required, Validators.maxLength(9)]],
+      operadores: [this.initialOperatorNames(), [Validators.required, Validators.maxLength(9)]],
+      desc: [this.auto.desc, [Validators.required, Validators.maxLength(500)]]
     });
     this.mitigarCamposFaltantes();
     void this.loadOperadores();
   }
 
-  seleccionarOperador(distribuidorId: string | null): void {
-    const distribuidor = this.operadoresDisponibles.find(item => item.id === distribuidorId);
-    if (distribuidor) this.editarAuto.patchValue({ operador: distribuidor.nombre });
+  toggleOperador(distribuidorId: string, selected: boolean): void {
+    const currentIds = this.editarAuto.controls['operadorIds'].value as string[];
+    const operadorIds = selected
+      ? [...new Set([...currentIds, distribuidorId])]
+      : currentIds.filter(id => id !== distribuidorId);
+    const seleccionados = operadorIds
+      .map(id => this.operadoresDisponibles.find(item => item.id === id))
+      .filter((item): item is Distribuidor => Boolean(item));
+    this.editarAuto.patchValue({
+      operadorIds,
+      operadores: seleccionados.map(item => item.nombre),
+      operadorId: seleccionados[0]?.id || null,
+      operador: seleccionados[0]?.nombre || ''
+    });
+    this.editarAuto.controls['operadorIds'].markAsTouched();
+  }
+
+  operadorSeleccionado(distribuidorId: string): boolean {
+    return (this.editarAuto.controls['operadorIds'].value as string[]).includes(distribuidorId);
+  }
+
+  private initialOperatorIds(): string[] {
+    if (Array.isArray(this.auto.operadorIds) && this.auto.operadorIds.length) return this.auto.operadorIds;
+    return this.auto.operadorId ? [this.auto.operadorId] : [];
+  }
+
+  private initialOperatorNames(): string[] {
+    if (Array.isArray(this.auto.operadores) && this.auto.operadores.length) return this.auto.operadores;
+    return this.auto.operador ? [this.auto.operador] : [];
   }
 
   private async loadOperadores(): Promise<void> {
@@ -80,6 +109,7 @@ export class EditarAutoComponent implements OnInit {
   
 
   async cancel(){
+    if (this.saving) return;
     this.editarAuto.reset();
     await this.modalController.dismiss();
   }
@@ -105,45 +135,33 @@ export class EditarAutoComponent implements OnInit {
   }
 
 
-  establecerKilometraje(){
-    const actual:any = this.editarAuto.get('kilometraje').value;
-    const km_actual = this.editarAuto.get('km_actual').value;
-    const prox_Servicio = parseInt(actual) + 10000;
-
-    if(km_actual == 0 && prox_Servicio == 0){
-      this.editarAuto.get('km_actual').setValue(actual);
-      this.editarAuto.get('km_proximo_servicio').setValue(prox_Servicio);
-    }
-    
-  }
-
-  verificarCambioServicio() {
-    const km_ini = this.editarAuto.get('kilometraje')?.value || 0;
-    const km_actual = this.editarAuto.get('km_actual')?.value || 0;
-    const km_proximo_servicio = this.editarAuto.get('km_proximo_servicio')?.value || 0;
-  
-    // Si no hay kilometraje inicial pero hay un actual, actualiza ambos campos
-    if (km_ini === 0 && km_actual > 0 && km_proximo_servicio === 0) {
-      this.editarAuto.get('kilometraje')?.setValue(km_actual);
-      this.editarAuto.get('km_proximo_servicio')?.setValue(km_actual + 10000);
-    }
+  establecerProximoServicio(): void {
+    const actual = Number(this.editarAuto.get('km_actual')?.value);
+    this.editarAuto.get('km_proximo_servicio')?.setValue(
+      Number.isFinite(actual) && actual >= 0 ? actual + 10000 : ''
+    );
   }
 
   async editarAutoFirebase(){
-    this.showLoading('Editando auto...');
-    if(this.editarAuto.valid){
-      try {
-        this.firebaseService.updateAuto(this.editarAuto.value).then((res:any) => {
-          this.presentToast('Auto editado correctamente', 'bottom','success');
-          this.cancel();
-        })
-      } catch (error) {
-        this.presentToast('Hubo un error al editar el auto', 'bottom', 'danger');
-        console.error(error);
-      }
-    }else{
-      this.presentToast('Todos los campos son obligatorios', 'bottom', 'warning');
+    if (this.saving) return;
+    if (this.editarAuto.invalid) {
+      this.editarAuto.markAllAsTouched();
+      await this.presentToast('Completa correctamente los campos obligatorios.', 'bottom', 'warning');
       return;
+    }
+    this.saving = true;
+    const loading = await this.loadcontroller.create({ message: 'Guardando cambios…' });
+    await loading.present();
+    try {
+      await this.firebaseService.updateAuto(this.editarAuto.getRawValue());
+      await this.presentToast('Unidad actualizada correctamente.', 'bottom','success');
+      await this.modalController.dismiss({ changed: true });
+    } catch (error) {
+      await this.presentToast('No fue posible actualizar la unidad.', 'bottom', 'danger');
+      console.error(error);
+    } finally {
+      this.saving = false;
+      await loading.dismiss();
     }
   }
 

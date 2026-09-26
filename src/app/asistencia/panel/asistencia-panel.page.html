@@ -4,7 +4,10 @@
   <main class="page-stack attendance-page">
     <section class="attendance-intro">
       <div><span class="attendance-eyebrow">Resumen del día</span><h2>Estado de asistencia</h2><p>Actividad real registrada por ASISTIA{{ date ? ' · ' + date : '' }}.</p></div>
-      <ion-button fill="outline" size="small" (click)="load()" [disabled]="state === 'loading'"><ion-icon slot="start" name="refresh-outline"></ion-icon>Actualizar</ion-button>
+      <div class="attendance-filter-actions">
+        <ion-button fill="outline" size="small" routerLink="/distribuidores"><ion-icon slot="start" name="person-add-outline"></ion-icon>Cuentas ASISTIA</ion-button>
+        <ion-button fill="outline" size="small" (click)="load()" [disabled]="state === 'loading'"><ion-icon slot="start" name="refresh-outline"></ion-icon>Actualizar</ion-button>
+      </div>
     </section>
 
     <section class="attendance-grid" aria-label="Métricas de asistencia" *ngIf="state === 'data' || state === 'empty'">

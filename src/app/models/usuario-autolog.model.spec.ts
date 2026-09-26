@@ -21,7 +21,7 @@ describe('UsuarioAutolog multiplanta compatibility', () => {
     expect(user.plantaIdPrincipal).toBe('principal');
     expect(user.plantasLectura).toEqual(['read']);
     expect(user.accesoTodasPlantas).toBeFalse();
-    expect(user.seccionesMenu).toEqual(['general', 'fleet']);
+    expect(user.seccionesMenu).toEqual(['general', 'fleet', 'attendance']);
     expect(isAdministrativeAccount(user)).toBeTrue();
   });
 
@@ -32,7 +32,7 @@ describe('UsuarioAutolog multiplanta compatibility', () => {
       plantaIdPrincipal: 'principal', plantasLectura: [], accesoTodasPlantas: false,
       seccionesMenu: ['general', 'sales', 'fleet', 'station', 'attendance', 'administration'],
     });
-    expect(user.seccionesMenu).toEqual(['general', 'sales', 'fleet', 'station', 'attendance']);
+    expect(user.seccionesMenu).toEqual(['general', 'fleet', 'attendance', 'sales', 'station']);
   });
 
   it('does not infer AUTOLOG access for an employee', () => {

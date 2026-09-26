@@ -1,0 +1,35 @@
+:host { display: block; height: 100%; min-height: 0; }
+
+.fleet-form .form-fields { gap: 18px; }
+.form-section { display: grid; gap: 16px; padding: 18px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-md); background: #fff; }
+.section-copy { display: flex; align-items: flex-start; gap: 11px; padding-bottom: 14px; border-bottom: 1px solid var(--autolog-border); }
+.section-copy.compact { padding-bottom: 0; border-bottom: 0; }
+.section-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--autolog-primary); background: var(--autolog-primary-soft); font-size: 17px; }
+.section-copy h2 { margin: 0; color: var(--autolog-text); font-size: 14px; font-weight: 700; }
+.section-copy p { margin: 3px 0 0; color: var(--autolog-text-secondary); font-size: 11px; line-height: 1.45; }
+.mileage-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.input-suffix { position: relative; }
+.input-suffix input { padding-right: 40px; }
+.input-suffix.calculated input { color: var(--autolog-primary); background: var(--autolog-primary-soft); font-weight: 700; cursor: default; }
+.input-suffix span { position: absolute; top: 50%; right: 12px; color: var(--autolog-text-muted); font-size: 11px; transform: translateY(-50%); pointer-events: none; }
+.required-note { margin-right: auto; color: var(--autolog-text-muted); font-size: 11px; }
+.footer-actions { display: flex; gap: 10px; }
+.operator-options { display: grid; gap: 8px; max-height: 190px; padding: 8px; overflow-y: auto; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); background: var(--autolog-bg); }
+.operator-options.invalid { border-color: var(--autolog-danger); }
+.operator-option { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 9px 11px; border: 1px solid transparent; border-radius: 8px; background: #fff; cursor: pointer; transition: border-color 120ms, background 120ms; }
+.operator-option.selected { color: var(--autolog-primary-hover); border-color: var(--autolog-primary); background: var(--autolog-primary-soft); }
+.operator-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--autolog-primary); }
+.operator-option span { display: grid; flex: 1; min-width: 0; }
+.operator-option strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.operator-option small, .empty-options { color: var(--autolog-text-secondary); font-size: 11px; }
+.operator-option ion-icon { flex-shrink: 0; font-size: 18px; }
+.empty-options { margin: 8px; text-align: center; }
+
+@media (max-width: 680px) {
+  .form-section { padding: 15px; }
+  .mileage-grid { grid-template-columns: 1fr; }
+  .fleet-form .modal-footer { align-items: stretch; flex-direction: column; }
+  .required-note { margin: 0; }
+  .footer-actions { width: 100%; }
+  .footer-actions .form-button { flex: 1; }
+}

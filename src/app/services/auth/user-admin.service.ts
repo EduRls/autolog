@@ -113,6 +113,17 @@ export class UserAdminService {
     return this.preferredLinkedUser(snapshot.docs);
   }
 
+  async getManagedDistributorUser(distribuidorId: string): Promise<UsuarioAutolog | null> {
+    const callable = httpsCallable<
+      { distribuidorId: string },
+      { user: UsuarioAutologDocument | null }
+    >(this.functions, 'getManagedDistributorUser');
+    const response = await callable({ distribuidorId });
+    return response.data.user
+      ? normalizeUsuarioAutolog(response.data.user.uid, response.data.user)
+      : null;
+  }
+
   async createUser(request: CreateUsuarioAutologRequest): Promise<UsuarioAutologResult> {
     const callable = httpsCallable<CreateUsuarioAutologRequest, UsuarioAutologResult>(
       this.functions,

@@ -18,14 +18,22 @@ describe('AgregarAutoComponent: operador distribuidor', () => {
     component.ngOnInit();
     await (component as unknown as {initializeScope(): Promise<void>}).initializeScope();
   });
-  it('usa el ID documental y el nombre del distribuidor seleccionado', () => {
-    component.autoNuevo.controls['operadorId'].setValue('dist-1');
-    component.seleccionarOperador('dist-1');
+  it('usa IDs y nombres de uno o más distribuidores seleccionados', () => {
+    component.agregarOperadorSeleccionado('dist-1');
     expect(component.autoNuevo.value.operadorId).toBe('dist-1');
     expect(component.autoNuevo.value.operador).toBe('ANA');
+    expect(component.autoNuevo.value.operadorIds).toEqual(['dist-1']);
+    expect(component.autoNuevo.value.operadores).toEqual(['ANA']);
+    expect(component.operadorPorAgregar).toBe('');
+    expect(component.operadoresSeleccionados.map(item => item.id)).toEqual(['dist-1']);
   });
-  it('requiere seleccionar una identidad de operador', () => {
-    component.autoNuevo.controls['operadorId'].setValue(null);
-    expect(component.autoNuevo.controls['operadorId'].invalid).toBeTrue();
+  it('requiere seleccionar al menos un distribuidor', () => {
+    component.autoNuevo.controls['operadorIds'].setValue([]);
+    expect(component.autoNuevo.controls['operadorIds'].invalid).toBeTrue();
+  });
+  it('calcula el próximo servicio con el kilometraje actual más 10,000', () => {
+    component.autoNuevo.controls['km_actual'].setValue(42500);
+    component.establecerProximoServicio();
+    expect(component.autoNuevo.controls['km_proximo_servicio'].value).toBe(52500);
   });
 });

@@ -147,10 +147,10 @@
                     <ion-button *ngIf="canAdminister" fill="clear" color="secondary" (click)="openExpediente(distribuidor)" title="Abrir expediente" aria-label="Abrir expediente">
                       <ion-icon name="folder-open-outline" slot="icon-only"></ion-icon>
                     </ion-button>
-                    <ion-button *ngIf="canAdminister" fill="clear" color="primary" (click)="manageAccess(distribuidor)" title="Administrar acceso digital" aria-label="Administrar acceso digital">
+                    <ion-button *ngIf="canManageAsistiaAccess && canWrite" fill="clear" color="primary" (click)="manageAccess(distribuidor)" title="Administrar cuenta ASISTIA" aria-label="Administrar cuenta ASISTIA">
                       <ion-icon name="key-outline" slot="icon-only"></ion-icon>
                     </ion-button>
-                    <ion-button *ngIf="canAdminister" fill="clear" color="danger" (click)="eliminarDistribuidor(distribuidor.id)" [disabled]="!isActive(distribuidor)" title="Desactivar distribuidor" aria-label="Desactivar distribuidor">
+                    <ion-button *ngIf="canDelete && canWrite" fill="clear" color="danger" (click)="eliminarDistribuidor(distribuidor.id)" [disabled]="!isActive(distribuidor)" title="Desactivar distribuidor" aria-label="Desactivar distribuidor">
                       <ion-icon name="person-remove-outline" slot="icon-only"></ion-icon>
                     </ion-button>
                   </div>

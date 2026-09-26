@@ -109,7 +109,7 @@ export class ArticulosPage implements OnInit {
   async agregarArticulo(){
     const modalAgregarArticulos = await this.modalController.create({
       component: AgregarArticuloComponent,
-      cssClass: 'articulo-css'
+      cssClass: ['autolog-form-modal', 'autolog-article-modal']
     });
 
     modalAgregarArticulos.present();

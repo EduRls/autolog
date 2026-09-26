@@ -42,8 +42,10 @@ export class DistribuidoresPage implements OnInit, OnDestroy {
   accessByDistributorId: Record<string, UsuarioAutolog | null> = {};
   documentCoverageByDistributorId: Record<string, TipoDocumentoPersonal[]> = {};
   canAdminister = false;
+  canManageAsistiaAccess = false;
   canWrite = false;
   canCreate = false;
+  canDelete = false;
   state: DirectoryState = 'loading';
   documentInsightsState: DocumentInsightsState = 'idle';
   errorMessage = '';
@@ -229,11 +231,12 @@ export class DistribuidoresPage implements OnInit, OnDestroy {
   }
 
   async manageAccess(distribuidor: Distribuidor): Promise<void> {
+    if (!this.canManageAsistiaAccess || !this.canWrite) return;
     const linked = this.accessByDistributorId[distribuidor.id] || null;
     const modal = await this.modalController.create({
       component: AccesoDistribuidorComponent,
       componentProps: { distribuidorId: distribuidor.id, usuarioData: linked },
-      cssClass: 'usuario-modal',
+      cssClass: ['autolog-form-modal', 'autolog-asistia-access-modal'],
     });
     await modal.present();
     const result = await modal.onDidDismiss<{ changed: boolean; uid?: string }>();
@@ -242,7 +245,7 @@ export class DistribuidoresPage implements OnInit, OnDestroy {
   }
 
   async eliminarDistribuidor(id: string) {
-    if (!this.canAdminister) return;
+    if (!this.canDelete || !this.canWrite) return;
     const alert = await this.alertController.create({
       header: 'Desactivar distribuidor',
       message: 'Se conservarán sus ventas, expediente, asistencia y vínculo de cuenta.',
@@ -308,25 +311,27 @@ export class DistribuidoresPage implements OnInit, OnDestroy {
       this.canAdminister = await this.authorizationService.isCurrentUserAdmin();
       const role = this.plantScope.snapshot().profile?.rol;
       this.canCreate = role === 'admin' || role === 'planta';
+      this.canManageAsistiaAccess = role === 'admin' || role === 'planta';
+      this.canDelete = role === 'admin' || role === 'planta';
       this.plantScope.state$.subscribe(() => this.canWrite = !this.plantScope.isReadOnly());
     } catch {
       this.canAdminister = false;
+      this.canManageAsistiaAccess = false;
       this.canCreate = false;
+      this.canDelete = false;
       this.canWrite = false;
     }
     this.getInfo();
   }
 
   private async loadAccesses(distribuidores: Distribuidor[]): Promise<void> {
-    if (!this.canAdminister) {
+    if (!this.canManageAsistiaAccess) {
       this.accessByDistributorId = {};
       return;
     }
     const entries = await Promise.all(distribuidores.map(async distribuidor => {
       try {
-        const usuario = distribuidor.usuarioUid
-          ? await this.userAdminService.getUsuario(distribuidor.usuarioUid)
-          : await this.userAdminService.getUsuarioByDistribuidorId(distribuidor.id);
+        const usuario = await this.userAdminService.getManagedDistributorUser(distribuidor.id);
         return [distribuidor.id, usuario] as const;
       } catch {
         return [distribuidor.id, null] as const;

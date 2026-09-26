@@ -76,10 +76,10 @@ describe('Fase 1: cuentas y personal operativo', () => {
       await Promise.resolve();
     }
     const form = component instanceof EditarAutoComponent ? component.editarAuto : component.autoNuevo;
-    form.controls['operadorId'].setValue('dist-1');
-    component.seleccionarOperador('dist-1');
+    component.toggleOperador('dist-1', true);
     expect(form.value.operadorId).toBe('dist-1');
     expect(form.value.operador).toBe('JUAN');
+    expect(form.value.operadorIds).toEqual(['dist-1']);
   });
   it('conserva la ruta documental y el expediente del distribuidor', async () => {
     const service = jasmine.createSpyObj<PersonalExpedienteService>('expediente', ['getDocumentos']);

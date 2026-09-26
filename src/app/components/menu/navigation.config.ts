@@ -61,7 +61,7 @@ export function defaultNavigationSections(role: string): NavigationSectionId[] {
   const normalizedRole = String(role || '').trim().toLowerCase();
   if (normalizedRole === 'admin') return [...AUTOLOG_NAVIGATION_SECTION_IDS];
   if (normalizedRole === 'capturista') return ['general', 'sales', 'fleet', 'station', 'attendance'];
-  if (normalizedRole === 'planta') return ['general', 'fleet'];
+  if (normalizedRole === 'planta') return ['general', 'fleet', 'attendance'];
   return [];
 }
 
@@ -75,11 +75,15 @@ export function availableNavigationSections(role: string): NavigationSectionId[]
 }
 
 export function normalizeNavigationSections(role: string, value: unknown): NavigationSectionId[] {
+  const normalizedRole = String(role || '').trim().toLowerCase();
   const allowed = new Set(availableNavigationSections(role));
   if (!Array.isArray(value)) return defaultNavigationSections(role);
   const selected = value.filter((section): section is NavigationSectionId =>
     typeof section === 'string' && allowed.has(section as NavigationSectionId));
-  return [...new Set<NavigationSectionId>(['general', ...selected])];
+  const required: NavigationSectionId[] = normalizedRole === 'planta'
+    ? ['general', 'fleet', 'attendance']
+    : ['general'];
+  return [...new Set<NavigationSectionId>([...required, ...selected])];
 }
 
 export const EXTRA_PAGE_TITLES: Record<string, PageMeta> = {

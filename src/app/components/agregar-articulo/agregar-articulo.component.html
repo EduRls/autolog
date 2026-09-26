@@ -1,49 +1,54 @@
-<ion-header>
-  <ion-toolbar >
-    <ion-title style="text-align: center;">
-      Agrega un nuevo artículo
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="cancel()">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<form class="administrative-form article-form" [formGroup]="articuloNuevo" (ngSubmit)="agregarArticuloNuevo()" [attr.aria-busy]="saving">
+  <header class="modal-header">
+    <div class="modal-title-block">
+      <span class="modal-title-icon"><ion-icon name="cube-outline" aria-hidden="true"></ion-icon></span>
+      <div><h1>Nuevo artículo</h1><p>Agrega un insumo al catálogo de servicios de Autolog.</p></div>
+    </div>
+    <button class="modal-close" type="button" (click)="cancel()" [disabled]="saving" aria-label="Cerrar formulario">
+      <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+    </button>
+  </header>
 
-<ion-content>
-  <form (ngSubmit)="agregarArticuloNuevo()" [formGroup]="articuloNuevo" style="margin: 5%;">
-    <ion-input 
-    label="Nombre del artículo" 
-    label-placement="floating" 
-    fill="outline" 
-    placeholder="Nombre" 
-    style="--background: #ffffff;"
-    formControlName="articulo">
-    </ion-input>
-    <br>
-    <ion-input 
-    label="Precio del artículo" 
-    label-placement="floating"
-    type="number" 
-    fill="outline" 
-    placeholder="Precio" 
-    style="--background: #ffffff;"
-    formControlName="precio">
-    </ion-input>
-    <br>
-    <ion-textarea 
-    label="Descripción del artículo" 
-    labelPlacement="floating" 
-    fill="outline" 
-    placeholder="Descripción" 
-    [autoGrow]="true" 
-    rows="9" 
-    style="--background: #ffffff;"
-    formControlName="desc">
-    </ion-textarea>
-    <ion-button type="submit" expand="block" fill="clear" shape="round" color="success">
-      Agregar artículo
-    </ion-button>
-  </form>
-</ion-content>
+  <div class="modal-body">
+    <fieldset class="form-fields" [disabled]="saving">
+      <div class="catalog-note">
+        <span><ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon></span>
+        <div><strong>Información del catálogo</strong><p>El nombre y precio estarán disponibles al registrar un servicio.</p></div>
+      </div>
+
+      <div class="field">
+        <label for="article-name">Nombre del artículo *</label>
+        <input id="article-name" type="text" formControlName="articulo" placeholder="Ej. Filtro de aceite" autocomplete="off" maxlength="120"
+          [attr.aria-invalid]="articuloNuevo.controls['articulo'].touched && articuloNuevo.controls['articulo'].invalid">
+        <p class="field-error" *ngIf="articuloNuevo.controls['articulo'].touched && articuloNuevo.controls['articulo'].invalid">Ingresa el nombre del artículo.</p>
+      </div>
+
+      <div class="field">
+        <label for="article-price">Precio unitario *</label>
+        <div class="price-input"><span aria-hidden="true">$</span><input id="article-price" type="number" min="0" step="0.01" formControlName="precio" placeholder="0.00"
+          [attr.aria-invalid]="articuloNuevo.controls['precio'].touched && articuloNuevo.controls['precio'].invalid"></div>
+        <p class="field-hint">Importe en pesos mexicanos, antes de impuestos.</p>
+        <p class="field-error" *ngIf="articuloNuevo.controls['precio'].touched && articuloNuevo.controls['precio'].invalid">Ingresa un precio válido igual o mayor a cero.</p>
+      </div>
+
+      <div class="field">
+        <label for="article-description">Descripción *</label>
+        <textarea id="article-description" formControlName="desc" rows="4" maxlength="500" placeholder="Describe el artículo y su uso principal…"
+          [attr.aria-invalid]="articuloNuevo.controls['desc'].touched && articuloNuevo.controls['desc'].invalid"></textarea>
+        <div class="field-meta"><p class="field-error" *ngIf="articuloNuevo.controls['desc'].touched && articuloNuevo.controls['desc'].invalid">Agrega una descripción breve.</p><span>{{ articuloNuevo.controls['desc'].value?.length || 0 }}/500</span></div>
+      </div>
+    </fieldset>
+  </div>
+
+  <footer class="modal-footer">
+    <span class="required-note">* Campos obligatorios</span>
+    <div class="footer-actions">
+      <button class="form-button" type="button" (click)="cancel()" [disabled]="saving">Cancelar</button>
+      <button class="form-button primary" type="submit" [disabled]="saving || articuloNuevo.invalid">
+        <ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>
+        <ion-icon *ngIf="!saving" name="add-circle-outline" aria-hidden="true"></ion-icon>
+        {{ saving ? 'Guardando…' : 'Agregar artículo' }}
+      </button>
+    </div>
+  </footer>
+</form>

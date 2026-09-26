@@ -1,0 +1,32 @@
+:host { display: block; }
+.status-section { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-md); background: #fff; }
+.status-heading { display: flex; align-items: center; gap: 11px; }
+.status-heading-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; color: var(--autolog-primary); border-radius: 10px; background: var(--autolog-primary-soft); font-size: 18px; }
+.status-heading h2 { margin: 0; color: var(--autolog-text); font-size: 14px; font-weight: 700; }
+.status-heading p { margin: 3px 0 0; color: var(--autolog-text-secondary); font-size: 11px; }
+.status-loading, .status-error { display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 12px; border-radius: var(--autolog-radius-sm); background: var(--autolog-bg); color: var(--autolog-text-secondary); font-size: 12px; }
+.status-loading ion-spinner { width: 18px; height: 18px; color: var(--autolog-primary); }
+.status-error { color: var(--autolog-danger); background: rgba(var(--ion-color-danger-rgb), .08); }
+.status-error ion-icon { flex: 0 0 18px; font-size: 18px; }
+.status-error span { flex: 1; }
+.status-error button { padding: 7px 10px; color: var(--autolog-danger); border: 1px solid currentColor; border-radius: 7px; background: transparent; font-size: 11px; font-weight: 700; cursor: pointer; }
+.overall-state { display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: var(--ion-color-warning-shade); border-radius: var(--autolog-radius-sm); background: rgba(var(--ion-color-warning-rgb), .11); }
+.overall-state.ready { color: var(--ion-color-success-shade); background: rgba(var(--ion-color-success-rgb), .1); }
+.overall-state > ion-icon { flex: 0 0 22px; font-size: 22px; }
+.overall-state span, .status-grid article span { display: grid; gap: 2px; }
+.overall-state small, .status-grid small { color: var(--autolog-text-secondary); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+.overall-state strong, .status-grid strong { color: var(--autolog-text); font-size: 12px; }
+.status-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.status-grid article { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 11px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); background: var(--autolog-bg); }
+.status-grid article > ion-icon { flex: 0 0 19px; color: var(--autolog-text-muted); font-size: 19px; }
+.status-grid article.complete > ion-icon { color: var(--ion-color-success); }
+.status-grid article span { min-width: 0; }
+.status-grid strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.device-detail, .mode-note { margin: 0; color: var(--autolog-text-secondary); font-size: 11px; line-height: 1.45; }
+.device-detail { display: flex; align-items: center; gap: 6px; }
+.device-detail ion-icon { color: var(--autolog-primary); font-size: 15px; }
+.mode-note { padding: 10px 12px; border-left: 3px solid var(--autolog-primary); border-radius: 0 7px 7px 0; background: var(--autolog-primary-soft); }
+.unlink-button { display: inline-flex; justify-self: start; align-items: center; gap: 7px; min-height: 38px; padding: 8px 12px; color: var(--ion-color-warning-shade); border: 1px solid rgba(var(--ion-color-warning-rgb), .45); border-radius: var(--autolog-radius-sm); background: rgba(var(--ion-color-warning-rgb), .08); font-size: 12px; font-weight: 700; cursor: pointer; }
+.unlink-button ion-spinner { width: 16px; height: 16px; }
+.unlink-button:disabled { opacity: .6; cursor: not-allowed; }
+@media (max-width: 600px) { .status-section { padding: 15px; } .status-grid { grid-template-columns: 1fr; } }

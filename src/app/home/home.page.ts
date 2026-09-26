@@ -35,6 +35,7 @@ export class HomePage implements OnInit {
 
   public userRole: string = ''
   canWrite = true;
+  canDelete = false;
   public autos: any = [];
   estadoSeleccionado: string = '';
   busquedaUnidad: string = ''; // Texto de búsqueda ingresado
@@ -77,7 +78,8 @@ export class HomePage implements OnInit {
     void this.plantScope.initialize();
     this.plantScope.state$.subscribe(state => {
       this.canWrite = !this.plantScope.isReadOnly();
-      this.userRole = state.profile?.rol || '';
+      this.userRole = String(state.profile?.rol || '').toLowerCase();
+      this.canDelete = this.canWrite && ['admin', 'planta'].includes(this.userRole);
     });
     this.obtenerDatos();
 
@@ -350,7 +352,7 @@ export class HomePage implements OnInit {
 
   // Eliminar evento
   async borrarEvento(item: any) {
-    if (!this.canWrite) return;
+    if (!this.canDelete) return;
     const alert = await this.alertController.create({
       header: 'Confirmar eliminación',
       message: `¿Estás seguro de que deseas eliminar el registro?`,
@@ -376,14 +378,14 @@ export class HomePage implements OnInit {
   }
 
   async borrarRegistro(item: any) {
-    this.showLoading('Eliminando evento')
+    if (!this.canDelete) return;
+    await this.showLoading('Eliminando evento');
     try {
-      this.firebaseSerive.deleteEvento(item.id).then(() => {
-        this.actualizarTabla();
-        this.presentToast('Evento eliminado correctamente', 'bottom', 'success');
-      });
+      await this.firebaseSerive.deleteEvento(item.id);
+      this.actualizarTabla();
+      await this.presentToast('Evento eliminado correctamente', 'bottom', 'success');
     } catch (error) {
-      this.presentToast('Error al eliminar evento', 'bottom', 'danger');
+      await this.presentToast('Error al eliminar evento', 'bottom', 'danger');
       console.error(error);
     }
   }

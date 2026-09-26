@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { FirebaseService } from 'src/app/services/firebase/firebase.service';
 
@@ -19,6 +19,7 @@ import { FirebaseService } from 'src/app/services/firebase/firebase.service';
 export class AgregarArticuloComponent implements OnInit {
 
   public articuloNuevo: FormGroup;
+  saving = false;
 
   constructor(
     private modalController: ModalController,
@@ -30,13 +31,14 @@ export class AgregarArticuloComponent implements OnInit {
 
   ngOnInit() {
     this.articuloNuevo = this.fb.group({
-      articulo: [''],
-      precio: [''],
-      desc: ['']
+      articulo: ['', [Validators.required, Validators.maxLength(120)]],
+      precio: ['', [Validators.required, Validators.min(0)]],
+      desc: ['', [Validators.required, Validators.maxLength(500)]]
     });
   }
 
   async cancel(){
+    if (this.saving) return;
     this.articuloNuevo.reset();
     await this.modalController.dismiss();
   }
@@ -66,19 +68,26 @@ export class AgregarArticuloComponent implements OnInit {
   }
 
   async agregarArticuloNuevo(){
-    this.showLoading('Agregando nuevo articulo...');
-    if(this.articuloNuevo.valid){
-      try{
-        this.firebaseService.addArticulo(this.articuloNuevo.value).then((res:any) => {
-          this.presentToast('Artículo agregado correctamente', 'bottom', 'success');
-          this.confirm(this.articuloNuevo.value);
-        })
-      }catch (error) {
-        this.presentToast('Hubo un error al agregar el artículo', 'bottom', 'danger');
-        console.error(error);
-      }
-    }else{
-      this.presentToast('Favor de completar todos los campos', 'bottom', 'warning')
+    if (this.saving) return;
+    if (this.articuloNuevo.invalid) {
+      this.articuloNuevo.markAllAsTouched();
+      await this.presentToast('Completa correctamente los campos obligatorios.', 'bottom', 'warning');
+      return;
+    }
+    this.saving = true;
+    const loading = await this.loadcontroller.create({ message: 'Agregando artículo…' });
+    await loading.present();
+    try {
+      const value = this.articuloNuevo.getRawValue();
+      await this.firebaseService.addArticulo(value);
+      await this.presentToast('Artículo agregado correctamente.', 'bottom', 'success');
+      await this.modalController.dismiss(value);
+    } catch (error) {
+      await this.presentToast('No fue posible agregar el artículo.', 'bottom', 'danger');
+      console.error(error);
+    } finally {
+      this.saving = false;
+      await loading.dismiss();
     }
   }
 

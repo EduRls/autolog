@@ -1,0 +1,30 @@
+:host { display: block; height: 100%; min-height: 0; }
+
+.access-form .form-fields { gap: 18px; }
+.access-notice { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; color: var(--autolog-primary-hover); border: 1px solid rgba(var(--ion-color-primary-rgb), .2); border-radius: var(--autolog-radius-md); background: var(--autolog-primary-soft); }
+.access-notice > ion-icon { flex: 0 0 22px; margin-top: 1px; font-size: 22px; }
+.access-notice strong { font-size: 13px; }
+.access-notice p { margin: 4px 0 0; color: var(--autolog-text-secondary); font-size: 12px; line-height: 1.5; }
+.form-section { display: grid; gap: 16px; padding: 18px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-md); background: #fff; }
+.section-copy { display: flex; align-items: flex-start; gap: 11px; padding-bottom: 14px; border-bottom: 1px solid var(--autolog-border); }
+.section-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; color: var(--autolog-primary); border-radius: 10px; background: var(--autolog-primary-soft); font-size: 18px; }
+.section-copy > div { flex: 1; min-width: 0; }
+.section-copy h2 { margin: 0; color: var(--autolog-text); font-size: 14px; font-weight: 700; }
+.section-copy p { margin: 3px 0 0; color: var(--autolog-text-secondary); font-size: 11px; line-height: 1.45; }
+.account-state { flex-shrink: 0; padding: 5px 9px; color: var(--ion-color-success-shade); border-radius: 999px; background: rgba(var(--ion-color-success-rgb), .12); font-size: 11px; font-weight: 700; }
+.account-state.inactive { color: var(--autolog-text-secondary); background: var(--autolog-bg); }
+.account-toggle { display: flex; align-items: center; gap: 11px; padding: 13px 14px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-sm); background: var(--autolog-bg); cursor: pointer; }
+.account-toggle input { flex: 0 0 18px; width: 18px; height: 18px; margin: 0; accent-color: var(--autolog-primary); }
+.account-toggle span { display: grid; gap: 3px; }
+.account-toggle strong { font-size: 13px; }
+.account-toggle small { color: var(--autolog-text-secondary); font-size: 11px; line-height: 1.4; }
+.required-note { margin-right: auto; color: var(--autolog-text-muted); font-size: 11px; }
+.footer-actions { display: flex; gap: 10px; }
+
+@media (max-width: 600px) {
+  .form-section { padding: 15px; }
+  .access-form .modal-footer { align-items: stretch; flex-direction: column; }
+  .required-note { margin: 0; }
+  .footer-actions { width: 100%; }
+  .footer-actions .form-button { flex: 1; }
+}

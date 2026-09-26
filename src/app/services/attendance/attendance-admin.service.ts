@@ -5,24 +5,33 @@ import {
   AttendanceRecordsRequest,
   AttendanceRecordsResponse,
 } from '../../models/attendance.model';
+import { PlantScopeService } from '../plants/plant-scope.service';
 
 @Injectable({ providedIn: 'root' })
 export class AttendanceAdminService {
-  constructor(private readonly functions: Functions) {}
+  constructor(
+    private readonly functions: Functions,
+    private readonly plantScope: PlantScopeService
+  ) {}
 
   async getDashboard(): Promise<AttendanceDashboardResponse> {
-    const callable = httpsCallable<Record<string, never>, AttendanceDashboardResponse>(
+    await this.plantScope.initialize();
+    const callable = httpsCallable<{ plantId: string | null }, AttendanceDashboardResponse>(
       this.functions,
       'getAttendanceDashboard'
     );
-    return (await callable({})).data;
+    return (await callable({ plantId: this.plantScope.getActivePlantId() })).data;
   }
 
   async listRecords(request: AttendanceRecordsRequest): Promise<AttendanceRecordsResponse> {
+    await this.plantScope.initialize();
     const callable = httpsCallable<AttendanceRecordsRequest, AttendanceRecordsResponse>(
       this.functions,
       'listAttendanceRecords'
     );
-    return (await callable(request)).data;
+    return (await callable({
+      ...request,
+      plantId: this.plantScope.getActivePlantId(),
+    })).data;
   }
 }

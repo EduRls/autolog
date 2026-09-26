@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { EMPTY } from 'rxjs';
 import { AsistenciaConfiguracionPage } from './configuracion/asistencia-configuracion.page';
 import { AsistenciaPanelPage } from './panel/asistencia-panel.page';
 import { AsistenciaRegistrosPage } from './registros/asistencia-registros.page';
@@ -27,7 +28,13 @@ describe('Páginas administrativas de Asistencia', () => {
       declarations: [component],
       imports: [CommonModule, FormsModule, IonicModule.forRoot(), MenuStubComponent],
       providers: [
-        { provide: Router, useValue: jasmine.createSpyObj<Router>('Router', ['navigateByUrl']) },
+        {
+          provide: Router,
+          useValue: {
+            events: EMPTY,
+            navigateByUrl: jasmine.createSpy('navigateByUrl'),
+          },
+        },
         { provide: AttendanceAdminService, useValue: attendance },
       ],
     }).compileComponents();

@@ -5,6 +5,13 @@ import { IonicModule, LoadingController, ModalController, ToastController } from
 import { DistribuidoresService } from 'src/app/services/admVentas/distribuidores/distribuidores.service';
 import { Planta } from 'src/app/models/planta.model';
 import { PlantScopeService } from 'src/app/services/plants/plant-scope.service';
+import { FirebaseService } from 'src/app/services/firebase/firebase.service';
+import { firstValueFrom } from 'rxjs';
+
+interface UnidadRuta {
+  unidad: string;
+  plantaId?: string;
+}
 
 @Component({
   selector: 'app-agregar',
@@ -25,6 +32,8 @@ export class AgregarComponent implements OnInit {
   readonly idempotencyKey = crypto.randomUUID();
   plants: Planta[] = [];
   showPlantSelector = false;
+  unidadesDisponibles: UnidadRuta[] = [];
+  private allUnidades: UnidadRuta[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -32,13 +41,14 @@ export class AgregarComponent implements OnInit {
     private toastController: ToastController,
     private loadController: LoadingController,
     private ditribuidresService: DistribuidoresService,
-    private readonly plantScope: PlantScopeService
+    private readonly plantScope: PlantScopeService,
+    private readonly firebaseService: FirebaseService
   ) { }
 
   ngOnInit() {
     this.operadorNuevo = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(160)]],
-      ruta: ['', [Validators.required, Validators.maxLength(50)]],
+      ruta: ['', Validators.maxLength(50)],
       zona: ['', Validators.required],
       plantaId: ['']
     });
@@ -53,6 +63,34 @@ export class AgregarComponent implements OnInit {
     if (this.showPlantSelector) control.addValidators(Validators.required);
     else control.setValue(this.plantScope.getActivePlantId() || this.plantScope.getPrincipalPlantId() || '');
     control.updateValueAndValidity();
+    await this.loadUnidades();
+  }
+
+  onPlantChange(plantId: string): void {
+    this.operadorNuevo.patchValue({ ruta: '' });
+    this.filterUnidades(plantId);
+  }
+
+  private async loadUnidades(): Promise<void> {
+    try {
+      const autos = await firstValueFrom(this.firebaseService.getAutos());
+      this.allUnidades = autos
+        .filter(auto => typeof auto?.unidad === 'string' && auto.unidad.trim())
+        .map(auto => ({ unidad: auto.unidad.trim(), plantaId: auto.plantaId }));
+      this.filterUnidades(this.operadorNuevo.controls['plantaId'].value);
+    } catch {
+      this.allUnidades = [];
+      this.unidadesDisponibles = [];
+    }
+  }
+
+  private filterUnidades(plantId: string): void {
+    const candidates = plantId
+      ? this.allUnidades.filter(unidad => unidad.plantaId === plantId)
+      : this.allUnidades;
+    this.unidadesDisponibles = candidates.filter((unidad, index) =>
+      candidates.findIndex(item => item.unidad === unidad.unidad) === index
+    );
   }
 
   async presentToast(msg: string, position: 'top' | 'middle' | 'bottom', cl: 'danger' | 'success' | 'warning') {

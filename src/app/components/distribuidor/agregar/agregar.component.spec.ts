@@ -2,11 +2,14 @@ import { FormBuilder } from '@angular/forms';
 import { LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { DistribuidoresService } from 'src/app/services/admVentas/distribuidores/distribuidores.service';
 import { AgregarComponent } from './agregar.component';
+import { FirebaseService } from 'src/app/services/firebase/firebase.service';
+import { of } from 'rxjs';
 
 const scope = {
   initialize: () => Promise.resolve(), snapshot: () => ({plants: []}),
   isGlobal: () => false, getActivePlantId: () => 'p1', getPrincipalPlantId: () => 'p1',
 } as never;
+const units = { getAutos: () => of([]) } as FirebaseService;
 
 describe('AgregarComponent', () => {
   it('crea el formulario comercial con identificador asignado por servidor', () => {
@@ -16,7 +19,8 @@ describe('AgregarComponent', () => {
       jasmine.createSpyObj<ToastController>('ToastController', ['create']),
       jasmine.createSpyObj<LoadingController>('LoadingController', ['create']),
       jasmine.createSpyObj<DistribuidoresService>('DistribuidoresService', ['addDistribuidor']),
-      scope
+      scope,
+      units
     );
     component.ngOnInit();
     expect(component.operadorNuevo.contains('identificador')).toBeFalse();
@@ -34,7 +38,7 @@ describe('AgregarComponent', () => {
     loadingController.create.and.resolveTo(loading);
     const service = jasmine.createSpyObj<DistribuidoresService>('DistribuidoresService', ['addDistribuidor', 'getDistribuidores']);
     service.addDistribuidor.and.resolveTo({ id: 'new', identificador: 'VGBZ-0100' });
-    const component = new AgregarComponent(new FormBuilder(), modal, toast, loadingController, service, scope);
+    const component = new AgregarComponent(new FormBuilder(), modal, toast, loadingController, service, scope, units);
     component.ngOnInit();
     component.operadorNuevo.setValue({ nombre: '  juan pérez ', ruta: ' r-01 ', zona: 'GPE', plantaId: 'p1' });
 
@@ -45,5 +49,20 @@ describe('AgregarComponent', () => {
     });
     expect(modal.dismiss).toHaveBeenCalledWith({ changed: true });
     expect(component.saving).toBeFalse();
+  });
+
+  it('permite crear el distribuidor sin una ruta asignada', () => {
+    const component = new AgregarComponent(
+      new FormBuilder(),
+      jasmine.createSpyObj<ModalController>('ModalController', ['dismiss']),
+      jasmine.createSpyObj<ToastController>('ToastController', ['create']),
+      jasmine.createSpyObj<LoadingController>('LoadingController', ['create']),
+      jasmine.createSpyObj<DistribuidoresService>('DistribuidoresService', ['addDistribuidor']),
+      scope,
+      units
+    );
+    component.ngOnInit();
+    component.operadorNuevo.patchValue({ nombre: 'JUAN', ruta: '', zona: 'gpe', plantaId: 'p1' });
+    expect(component.operadorNuevo.valid).toBeTrue();
   });
 });

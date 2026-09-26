@@ -11,6 +11,7 @@ import { AsistiaStatusComponent } from './asistia-status.component';
   standalone: true,
   imports: [CommonModule, IonicModule, ReactiveFormsModule, AsistiaStatusComponent],
   templateUrl: './acceso-distribuidor.component.html',
+  styleUrls: ['./acceso-distribuidor.component.scss'],
 })
 export class AccesoDistribuidorComponent implements OnInit {
   @Input({ required: true }) distribuidorId!: string;
@@ -23,6 +24,7 @@ export class AccesoDistribuidorComponent implements OnInit {
     activo: new FormControl(true, { nonNullable: true }),
   });
   constructor(private readonly users: UserAdminService, private readonly modalController: ModalController, private readonly toast: ToastController) {}
+  get editing(): boolean { return Boolean(this.usuarioData); }
   ngOnInit(): void {
     if (this.usuarioData) this.form.patchValue(this.usuarioData);
     else this.form.controls.password.setValidators([Validators.required, Validators.minLength(6), Validators.maxLength(128)]);

@@ -4,6 +4,9 @@ import { DistribuidoresService } from 'src/app/services/admVentas/distribuidores
 import { UserAdminService } from 'src/app/services/auth/user-admin.service';
 import { EditarComponent } from './editar.component';
 import { of } from 'rxjs';
+import { FirebaseService } from 'src/app/services/firebase/firebase.service';
+
+const units = { getAutos: () => of([]) } as FirebaseService;
 
 describe('EditarComponent', () => {
   it('edita sólo los datos comerciales del distribuidor', () => {
@@ -13,7 +16,8 @@ describe('EditarComponent', () => {
       jasmine.createSpyObj<LoadingController>('LoadingController', ['create']),
       jasmine.createSpyObj<ToastController>('ToastController', ['create']),
       new FormBuilder(),
-      jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsuario', 'getUsuarioByDistribuidorId'])
+      jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsuario', 'getUsuarioByDistribuidorId']),
+      units
     );
     component.operadorData = {
       id: 'distributor-1',
@@ -45,7 +49,8 @@ describe('EditarComponent', () => {
       loadingController,
       toast,
       new FormBuilder(),
-      jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsuario', 'getUsuarioByDistribuidorId'])
+      jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsuario', 'getUsuarioByDistribuidorId']),
+      units
     );
     component.operadorData = {
       id: 'distributor-1', nombre: 'Juan', identificador: 'VGBZ-01', ruta: '08', zona: 'gpe',

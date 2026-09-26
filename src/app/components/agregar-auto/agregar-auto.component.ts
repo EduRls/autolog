@@ -23,8 +23,10 @@ import { PlantScopeService } from 'src/app/services/plants/plant-scope.service';
 export class AgregarAutoComponent  implements OnInit {
 
   public autoNuevo: FormGroup
+  saving = false;
   operadoresDisponibles: Distribuidor[] = [];
   private allOperadores: Distribuidor[] = [];
+  operadorPorAgregar = '';
   plants: Planta[] = [];
   showPlantSelector = false;
 
@@ -40,25 +42,57 @@ export class AgregarAutoComponent  implements OnInit {
 
   ngOnInit() {
     this.autoNuevo = this.fb.group({
-      unidad: ['', Validators.required],
+      unidad: ['', [Validators.required, Validators.maxLength(30)]],
       operador: ['', Validators.required],
       operadorId: [null, Validators.required],
-      desc: ['', Validators.required],
-      kilometraje: ['', Validators.required],
-      km_actual: ['', Validators.required],
-      km_proximo_servicio: ['', Validators.required],
+      operadorIds: [[], [Validators.required, Validators.maxLength(9)]],
+      operadores: [[], [Validators.required, Validators.maxLength(9)]],
+      desc: ['', [Validators.required, Validators.maxLength(500)]],
+      kilometraje: ['', [Validators.required, Validators.min(0)]],
+      km_actual: ['', [Validators.required, Validators.min(0)]],
+      km_proximo_servicio: ['', [Validators.required, Validators.min(0)]],
       plantaId: ['']
     });
     void this.initializeScope();
   }
 
-  seleccionarOperador(distribuidorId: string | null): void {
-    const distribuidor = this.operadoresDisponibles.find(item => item.id === distribuidorId);
-    if (distribuidor) this.autoNuevo.patchValue({ operador: distribuidor.nombre });
+  toggleOperador(distribuidorId: string, selected: boolean): void {
+    const currentIds = this.autoNuevo.controls['operadorIds'].value as string[];
+    const operadorIds = selected
+      ? [...new Set([...currentIds, distribuidorId])]
+      : currentIds.filter(id => id !== distribuidorId);
+    const seleccionados = operadorIds
+      .map(id => this.operadoresDisponibles.find(item => item.id === id))
+      .filter((item): item is Distribuidor => Boolean(item));
+    this.autoNuevo.patchValue({
+      operadorIds,
+      operadores: seleccionados.map(item => item.nombre),
+      operadorId: seleccionados[0]?.id || null,
+      operador: seleccionados[0]?.nombre || ''
+    });
+    this.autoNuevo.controls['operadorIds'].markAsTouched();
+  }
+
+  operadorSeleccionado(distribuidorId: string): boolean {
+    return (this.autoNuevo.controls['operadorIds'].value as string[]).includes(distribuidorId);
+  }
+
+  agregarOperadorSeleccionado(distribuidorId: string): void {
+    if (!distribuidorId) return;
+    this.toggleOperador(distribuidorId, true);
+    this.operadorPorAgregar = '';
+  }
+
+  get operadoresSeleccionados(): Distribuidor[] {
+    const ids = this.autoNuevo.controls['operadorIds'].value as string[];
+    return ids
+      .map(id => this.operadoresDisponibles.find(item => item.id === id))
+      .filter((item): item is Distribuidor => Boolean(item));
   }
 
   onPlantChange(plantId: string): void {
-    this.autoNuevo.patchValue({ operadorId: null, operador: '' });
+    this.operadorPorAgregar = '';
+    this.autoNuevo.patchValue({ operadorId: null, operador: '', operadorIds: [], operadores: [] });
     this.filterOperadores(plantId);
   }
 
@@ -90,6 +124,7 @@ export class AgregarAutoComponent  implements OnInit {
   }
 
   async cancel(){
+    if (this.saving) return;
     this.autoNuevo.reset();
     await this.modalController.dismiss();
   }
@@ -115,28 +150,39 @@ export class AgregarAutoComponent  implements OnInit {
   }
 
   establecerKilometraje(){
-    const actual:any = this.autoNuevo.get('kilometraje').value;
-    const prox_Servicio = parseInt(actual) + 10000;
+    const inicial = Number(this.autoNuevo.get('kilometraje')?.value);
+    if (!Number.isFinite(inicial) || inicial < 0) return;
+    this.autoNuevo.get('km_actual')?.setValue(inicial);
+    this.establecerProximoServicio();
+  }
 
-    this.autoNuevo.get('km_actual').setValue(parseInt(actual));
-    this.autoNuevo.get('km_proximo_servicio').setValue(prox_Servicio);
+  establecerProximoServicio(): void {
+    const actual = Number(this.autoNuevo.get('km_actual')?.value);
+    this.autoNuevo.get('km_proximo_servicio')?.setValue(
+      Number.isFinite(actual) && actual >= 0 ? actual + 10000 : ''
+    );
   }
 
   async agregarAuto(){
-    this.showLoading('Agregando auto...');
-    if(this.autoNuevo.valid){
-      try {
-        this.firebaseService.addAuto(this.autoNuevo.value).then((res:any) => {
-          this.presentToast('Auto agregado correctamente', 'bottom','success');
-          this.cancel();
-        })
-      } catch (error) {
-        this.presentToast('Hubo un error al agregar el auto', 'bottom', 'danger');
-        console.error(error);
-      }
-    }else{
-      this.presentToast('Todos los campos son obligatorios', 'bottom', 'warning');
+    if (this.saving) return;
+    if (this.autoNuevo.invalid) {
+      this.autoNuevo.markAllAsTouched();
+      await this.presentToast('Completa correctamente los campos obligatorios.', 'bottom', 'warning');
       return;
+    }
+    this.saving = true;
+    const loading = await this.loadcontroller.create({ message: 'Registrando unidad…' });
+    await loading.present();
+    try {
+      await this.firebaseService.addAuto(this.autoNuevo.getRawValue());
+      await this.presentToast('Unidad agregada correctamente.', 'bottom','success');
+      await this.modalController.dismiss({ changed: true });
+    } catch (error) {
+      await this.presentToast('No fue posible agregar la unidad.', 'bottom', 'danger');
+      console.error(error);
+    } finally {
+      this.saving = false;
+      await loading.dismiss();
     }
   }
 

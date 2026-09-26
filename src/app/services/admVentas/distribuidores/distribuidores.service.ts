@@ -54,7 +54,7 @@ export class DistribuidoresService {
     return (await firstValueFrom(this.getDistribuidores())).filter(isDistribuidorActivo);
   }
 
-  async addDistribuidor(reporte: { nombre: string; ruta: string; zona: string; idempotencyKey: string; plantaId?: string }): Promise<{ id: string; identificador: string }> {
+  async addDistribuidor(reporte: { nombre: string; ruta?: string; zona: string; idempotencyKey: string; plantaId?: string }): Promise<{ id: string; identificador: string }> {
     await this.plantScope.initialize();
     const payload = { ...reporte, plantaId: this.plantScope.resolveWritePlantId(reporte.plantaId) };
     const callable = httpsCallable<typeof payload, { id: string; identificador: string }>(this.functions, 'createDistribuidor');

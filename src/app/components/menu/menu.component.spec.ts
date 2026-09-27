@@ -57,7 +57,7 @@ describe('MenuComponent', () => {
   it('renderiza los grupos definidos y conserva perfil y cierre de sesión', async () => {
     await createMenu();
     const text = fixture.nativeElement.textContent;
-    ['General', 'Ventas', 'Flotilla', 'Expendio', 'Asistencia', 'Administración'].forEach(label => expect(text).toContain(label));
+    ['General', 'Ventas', 'Flotilla', 'Expendio', 'Asistencia', 'SGM', 'Administración'].forEach(label => expect(text).toContain(label));
     expect(fixture.nativeElement.querySelector('button[title="Mi perfil"]')).not.toBeNull();
     expect(text).toContain('Cerrar sesión');
     expect(text).not.toMatch(/\bEmpleados\b/);

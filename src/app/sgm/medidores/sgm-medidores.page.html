@@ -1,0 +1,44 @@
+<app-menu titulo="sgmMedidores"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack sgm-page">
+    <header class="page-toolbar panel-heading">
+      <div>
+        <h1>Medidores</h1>
+        <p>Consulta los medidores registrados, su ubicación y su última lectura.</p>
+      </div>
+    </header>
+
+    <ion-card class="filter-card">
+      <ion-card-content>
+        <ion-searchbar [(ngModel)]="searchTerm" [debounce]="200" placeholder="Buscar por clave, ubicación o tipo" aria-label="Buscar medidor"></ion-searchbar>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="table-card">
+      <ion-card-content>
+        <div class="table-container" *ngIf="medidoresFiltrados.length; else sinMedidores">
+          <table>
+            <thead><tr><th>Clave</th><th>Ubicación</th><th>Tipo</th><th>Última lectura</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let medidor of medidoresFiltrados">
+                <td><strong>{{ medidor.clave }}</strong></td>
+                <td>{{ medidor.ubicacion }}</td>
+                <td>{{ medidor.tipo }}</td>
+                <td>{{ medidor.ultimaLectura !== null ? (medidor.ultimaLectura | number:'1.0-2') + ' ' + medidor.unidad : 'Sin información' }}</td>
+                <td>{{ medidor.fechaLectura ? (medidor.fechaLectura | date:'medium') : '—' }}</td>
+                <td><ion-badge [color]="estadoColor[medidor.estado]">{{ estadoLabel[medidor.estado] }}</ion-badge></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #sinMedidores>
+          <div class="section-state">
+            <ion-icon name="pulse-outline"></ion-icon>
+            <strong>{{ medidores.length ? 'No hay coincidencias para la búsqueda.' : 'No hay medidores registrados.' }}</strong>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+  </main>
+</ion-content>

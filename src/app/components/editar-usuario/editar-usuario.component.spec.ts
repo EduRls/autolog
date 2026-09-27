@@ -43,7 +43,7 @@ describe('EditarUsuarioComponent', () => {
     component.ngOnInit();
 
     expect(component.permissionGroups.map(group => group.id)).toEqual([
-      'general', 'sales', 'fleet', 'station', 'attendance'
+      'general', 'sales', 'fleet', 'station', 'attendance', 'sgm'
     ]);
   });
 });

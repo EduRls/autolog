@@ -135,6 +135,12 @@ export const APP_ROUTES: Routes = [
     data: { navigationSection: 'attendance' }
   },
   {
+    path: 'sgm',
+    loadChildren: () => import('./sgm/sgm.module').then(m => m.SgmModule),
+    canActivate: [autologAccessGuard, navigationSectionGuard],
+    data: { navigationSection: 'sgm' }
+  },
+  {
     path: 'politicas',
     loadChildren: () => import('./politicas/politicas.module').then( m => m.PoliticasPageModule)
   },

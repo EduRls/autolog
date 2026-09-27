@@ -1,0 +1,55 @@
+<app-menu titulo="sgmDashboard"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack sgm-page">
+    <header class="page-toolbar panel-heading">
+      <div>
+        <h1>Dashboard SGM</h1>
+        <p>Resumen general de medidores, estados y lecturas recientes.</p>
+      </div>
+      <ion-button fill="outline" color="medium" routerLink="/sgm/medidores">
+        <ion-icon slot="start" name="pulse-outline"></ion-icon>Ver medidores
+      </ion-button>
+    </header>
+
+    <section class="metrics-grid">
+      <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="speedometer-outline"></ion-icon></span><div><p>Medidores registrados</p><h3>{{ medidores.length }}</h3></div></ion-card-content></ion-card>
+      <ion-card class="metric-card metric-success"><ion-card-content><span class="metric-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></span><div><p>Activos</p><h3>{{ countBy('activo') }}</h3></div></ion-card-content></ion-card>
+      <ion-card class="metric-card metric-warning"><ion-card-content><span class="metric-icon"><ion-icon name="warning-outline"></ion-icon></span><div><p>Con alerta</p><h3>{{ countBy('alerta') }}</h3></div></ion-card-content></ion-card>
+      <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="time-outline"></ion-icon></span><div><p>Última lectura</p><h3>{{ ultimaLectura ? (ultimaLectura | date:'short') : '—' }}</h3></div></ion-card-content></ion-card>
+    </section>
+
+    <section class="primary-grid">
+      <ion-card class="autolog-card">
+        <ion-card-content>
+          <div class="section-heading"><div><h2>Lecturas recientes</h2><p>Últimas lecturas reportadas por los medidores.</p></div></div>
+          <div class="table-container" *ngIf="lecturasRecientes.length; else sinLecturas">
+            <table>
+              <thead><tr><th>Medidor</th><th>Ubicación</th><th>Lectura</th><th>Fecha</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let medidor of lecturasRecientes">
+                  <td>{{ medidor.clave }}</td>
+                  <td>{{ medidor.ubicacion }}</td>
+                  <td>{{ medidor.ultimaLectura | number:'1.0-2' }} {{ medidor.unidad }}</td>
+                  <td>{{ medidor.fechaLectura | date:'medium' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #sinLecturas>
+            <div class="section-state"><ion-icon name="analytics-outline"></ion-icon><strong>Aún no hay lecturas registradas.</strong><small>Las lecturas aparecerán aquí cuando los medidores comiencen a reportar.</small></div>
+          </ng-template>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="autolog-card">
+        <ion-card-content>
+          <div class="section-heading"><div><h2>Estado de medidores</h2><p>Distribución por estado operativo.</p></div></div>
+          <ul class="status-list">
+            <li *ngFor="let estado of estados"><ion-badge [color]="estadoColor[estado]">{{ estadoLabel[estado] }}</ion-badge><strong>{{ countBy(estado) }}</strong></li>
+          </ul>
+        </ion-card-content>
+      </ion-card>
+    </section>
+  </main>
+</ion-content>

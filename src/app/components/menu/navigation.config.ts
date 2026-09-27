@@ -1,5 +1,5 @@
 export type NavigationPermission = 'admin' | 'global';
-export type NavigationSectionId = 'general' | 'sales' | 'fleet' | 'station' | 'attendance' | 'administration';
+export type NavigationSectionId = 'general' | 'sales' | 'fleet' | 'station' | 'attendance' | 'sgm' | 'administration';
 
 export interface NavigationItem {
   id: string;
@@ -48,6 +48,10 @@ export const AUTOLOG_NAVIGATION: NavigationGroup[] = [
     { id: 'attendance-records', label: 'Registros', icon: 'time-outline', route: '/asistencia/registros', title: 'Registros de asistencia', description: 'Consulta entradas, salidas e historial.', keywords: ['asistencia', 'asistia', 'registros', 'entradas', 'salidas', 'historial'], permission: 'global' },
     { id: 'attendance-settings', label: 'Configuración', icon: 'options-outline', route: '/asistencia/configuracion', title: 'Configuración de asistencia', description: 'Administra ubicaciones y reglas utilizadas por ASISTIA.', keywords: ['asistencia', 'asistia', 'configuración', 'configuracion', 'puntos', 'geocercas'], permission: 'admin', match: 'prefix' },
   ] },
+  { id: 'sgm', label: 'SGM', icon: 'speedometer-outline', collapsible: true, items: [
+    { id: 'sgm-dashboard', label: 'Dashboard', icon: 'bar-chart-outline', route: '/sgm', title: 'Dashboard SGM', description: 'Consulta el resumen general de medidores y lecturas.', keywords: ['sgm', 'dashboard', 'panel', 'medidores', 'resumen'], permission: 'global' },
+    { id: 'sgm-meters', label: 'Medidores', icon: 'pulse-outline', route: '/sgm/medidores', title: 'Medidores', description: 'Administra y consulta los medidores registrados.', keywords: ['sgm', 'medidores', 'lecturas', 'sensores'], permission: 'global' },
+  ] },
   { id: 'administration', label: 'Administración', icon: 'settings-outline', collapsible: true, items: [
     { id: 'plants', label: 'Plantas', icon: 'business-outline', route: '/plantas', title: 'Plantas', description: 'Administra el catálogo global de plantas.', keywords: ['plantas', 'sedes', 'alcance'], permission: 'admin' },
     { id: 'users', label: 'Usuarios', icon: 'person-add-outline', route: '/usuarios', title: 'Usuarios', description: 'Administra las cuentas y roles con acceso a AUTOLOG.', keywords: ['usuarios', 'cuentas', 'administración', 'administracion'], permission: 'admin' },
@@ -60,7 +64,7 @@ export const AUTOLOG_NAVIGATION_SECTION_IDS: NavigationSectionId[] =
 export function defaultNavigationSections(role: string): NavigationSectionId[] {
   const normalizedRole = String(role || '').trim().toLowerCase();
   if (normalizedRole === 'admin') return [...AUTOLOG_NAVIGATION_SECTION_IDS];
-  if (normalizedRole === 'capturista') return ['general', 'sales', 'fleet', 'station', 'attendance'];
+  if (normalizedRole === 'capturista') return ['general', 'sales', 'fleet', 'station', 'attendance', 'sgm'];
   if (normalizedRole === 'planta') return ['general', 'fleet', 'attendance'];
   return [];
 }
@@ -69,7 +73,7 @@ export function availableNavigationSections(role: string): NavigationSectionId[]
   const normalizedRole = String(role || '').trim().toLowerCase();
   if (normalizedRole === 'admin') return [...AUTOLOG_NAVIGATION_SECTION_IDS];
   if (normalizedRole === 'capturista' || normalizedRole === 'planta') {
-    return ['general', 'sales', 'fleet', 'station', 'attendance'];
+    return ['general', 'sales', 'fleet', 'station', 'attendance', 'sgm'];
   }
   return [];
 }
@@ -82,7 +86,7 @@ export function normalizeNavigationSections(role: string, value: unknown): Navig
     typeof section === 'string' && allowed.has(section as NavigationSectionId));
   const required: NavigationSectionId[] = normalizedRole === 'planta'
     ? ['general', 'fleet', 'attendance']
-    : ['general'];
+    : normalizedRole === 'admin' ? ['general', 'sgm'] : ['general'];
   return [...new Set<NavigationSectionId>([...required, ...selected])];
 }
 
@@ -93,5 +97,7 @@ export const EXTRA_PAGE_TITLES: Record<string, PageMeta> = {
   convertidorDictamen: { title: 'Convertidor de dictámenes', description: 'Transforma dictámenes en archivos JSON estructurados.' },
   admSorteos: { title: 'Sorteos', description: 'Consulta participantes y resultados mensuales.' },
   yo: { title: 'Mi perfil', description: 'Consulta la información de tu cuenta.' },
+  sgmDashboard: { title: 'Dashboard SGM', description: 'Consulta el resumen general de medidores y lecturas.' },
+  sgmMedidores: { title: 'Medidores', description: 'Administra y consulta los medidores registrados.' },
   plantas: { title: 'Plantas', description: 'Administra el catálogo global de plantas.' },
 };

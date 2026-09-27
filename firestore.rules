@@ -235,6 +235,37 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    function validRegistroMedidores(data) {
+      return data.keys().hasOnly([
+          'plantaId', 'almacenamiento', 'consecutivo', 'fechaRegistro', 'medidores',
+          'realizo', 'aprobo', 'fechaCierre',
+          'createdAt', 'createdByUid', 'updatedAt', 'updatedByUid'
+        ])
+        && data.plantaId is string
+        && data.almacenamiento is string && data.almacenamiento.size() > 0 && data.almacenamiento.size() <= 250
+        && data.consecutivo is string && data.consecutivo.matches('^[0-9]{3,}/[0-9]{4}$')
+        && data.fechaRegistro is string && data.fechaRegistro.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.fechaCierre is string && data.fechaCierre.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.medidores is list && data.medidores.size() > 0 && data.medidores.size() <= 200
+        && data.realizo is string && data.realizo.size() > 0 && data.realizo.size() <= 120
+        && data.aprobo is string && data.aprobo.size() > 0 && data.aprobo.size() <= 120
+        && data.updatedAt is timestamp;
+    }
+
+    match /sgm_registros_medidores/{registroId} {
+      allow read: if canReadPlant(resource.data.plantaId);
+      allow create: if canWritePlant(request.resource.data.plantaId)
+        && validRegistroMedidores(request.resource.data)
+        && request.resource.data.createdByUid == request.auth.uid;
+      allow update: if hasPlant(resource.data)
+        && canWritePlant(resource.data.plantaId)
+        && samePlant()
+        && validRegistroMedidores(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdByUid == resource.data.createdByUid;
+      allow delete: if false;
+    }
+
     // Compatibilidad temporal para colecciones comerciales legacy.
     match /{rootCollection}/{document=**} {
       allow read, write: if isGlobalOperator()
@@ -260,7 +291,8 @@ service cloud.firestore {
         && rootCollection != 'asistia_devices'
         && rootCollection != 'asistia_presence_challenges'
         && rootCollection != 'asistia_audit'
-        && rootCollection != 'asistencia_punto_asignaciones';
+        && rootCollection != 'asistencia_punto_asignaciones'
+        && rootCollection != 'sgm_registros_medidores';
     }
   }
 }

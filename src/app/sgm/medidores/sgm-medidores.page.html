@@ -5,37 +5,95 @@
     <header class="page-toolbar panel-heading">
       <div>
         <h1>Medidores</h1>
-        <p>Consulta los medidores registrados, su ubicación y su última lectura.</p>
+        <p>Registros de los equipos de medición, su localización y su estado de operación.</p>
       </div>
+      <ion-button color="primary" (click)="openForm()" [disabled]="!canWrite">
+        <ion-icon slot="start" name="add-outline"></ion-icon>Nuevo registro
+      </ion-button>
     </header>
 
     <ion-card class="filter-card">
       <ion-card-content>
-        <ion-searchbar [(ngModel)]="searchTerm" [debounce]="200" placeholder="Buscar por clave, ubicación o tipo" aria-label="Buscar medidor"></ion-searchbar>
+        <ion-searchbar [(ngModel)]="searchTerm" [debounce]="200" placeholder="Buscar por consecutivo, responsable, número de serie o localización" aria-label="Buscar registro de medidores"></ion-searchbar>
       </ion-card-content>
     </ion-card>
 
     <ion-card class="table-card">
       <ion-card-content>
-        <div class="table-container" *ngIf="medidoresFiltrados.length; else sinMedidores">
-          <table>
-            <thead><tr><th>Clave</th><th>Ubicación</th><th>Tipo</th><th>Última lectura</th><th>Fecha</th><th>Estado</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let medidor of medidoresFiltrados">
-                <td><strong>{{ medidor.clave }}</strong></td>
-                <td>{{ medidor.ubicacion }}</td>
-                <td>{{ medidor.tipo }}</td>
-                <td>{{ medidor.ultimaLectura !== null ? (medidor.ultimaLectura | number:'1.0-2') + ' ' + medidor.unidad : 'Sin información' }}</td>
-                <td>{{ medidor.fechaLectura ? (medidor.fechaLectura | date:'medium') : '—' }}</td>
-                <td><ion-badge [color]="estadoColor[medidor.estado]">{{ estadoLabel[medidor.estado] }}</ion-badge></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <ng-template #sinMedidores>
+        <div class="section-state" *ngIf="state === 'loading'" role="status"><ion-spinner name="crescent"></ion-spinner><span>Cargando registros…</span></div>
+        <div class="section-state error" *ngIf="state === 'error'"><ion-icon name="alert-circle-outline"></ion-icon><strong>No fue posible cargar los registros.</strong><ion-button fill="outline" (click)="load()">Reintentar</ion-button></div>
+
+        <ng-container *ngIf="state === 'ready'">
+          <div class="table-container" *ngIf="registrosFiltrados.length; else sinRegistros">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-toggle"><span class="visually-hidden">Detalle</span></th>
+                  <th>Consecutivo</th>
+                  <th>Fecha de registro</th>
+                  <th *ngIf="showPlantColumn">Planta</th>
+                  <th>Medidores</th>
+                  <th>Almacenamiento</th>
+                  <th>Realizó</th>
+                  <th>Aprobó</th>
+                  <th>Fecha de cierre</th>
+                  <th class="col-actions">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let registro of registrosFiltrados">
+                  <tr class="selectable-row" (click)="toggle(registro)">
+                    <td class="col-toggle">
+                      <button type="button" class="row-toggle" (click)="$event.stopPropagation(); toggle(registro)" [attr.aria-expanded]="expandedId === registro.id" [attr.aria-label]="(expandedId === registro.id ? 'Ocultar' : 'Ver') + ' medidores del registro ' + registro.consecutivo">
+                        <ion-icon [name]="expandedId === registro.id ? 'chevron-down-outline' : 'chevron-forward-outline'" aria-hidden="true"></ion-icon>
+                      </button>
+                    </td>
+                    <td><strong>{{ registro.consecutivo }}</strong></td>
+                    <td>{{ registro.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+                    <td *ngIf="showPlantColumn">{{ plantName(registro.plantaId) }}</td>
+                    <td>{{ registro.medidores.length }}</td>
+                    <td class="storage-cell" [title]="registro.almacenamiento">{{ registro.almacenamiento }}</td>
+                    <td>{{ registro.realizo }}</td>
+                    <td>{{ registro.aprobo }}</td>
+                    <td>{{ registro.fechaCierre | date:'dd/MM/yyyy' }}</td>
+                    <td class="col-actions">
+                      <ion-button fill="clear" (click)="$event.stopPropagation(); openForm(registro)" [disabled]="!canEdit(registro)" title="Editar registro" [attr.aria-label]="'Editar registro ' + registro.consecutivo">
+                        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                      </ion-button>
+                    </td>
+                  </tr>
+                  <tr class="detail-row" *ngIf="expandedId === registro.id">
+                    <td [attr.colspan]="showPlantColumn ? 10 : 9">
+                      <div class="table-container nested">
+                        <table>
+                          <thead><tr><th>No.</th><th>Identificación interna</th><th>Descripción del equipo</th><th>Marca</th><th>Modelo</th><th>Número de serie</th><th>Localización</th><th>Estado de operación</th></tr></thead>
+                          <tbody>
+                            <tr *ngFor="let medidor of registro.medidores">
+                              <td>{{ medidor.no }}</td>
+                              <td>{{ medidor.identificacionInterna }}</td>
+                              <td>{{ medidor.descripcion }}</td>
+                              <td>{{ medidor.marca }}</td>
+                              <td>{{ medidor.modelo }}</td>
+                              <td>{{ medidor.numeroSerie }}</td>
+                              <td>{{ medidor.localizacion }}</td>
+                              <td><ion-badge [color]="estadoColor[medidor.estadoOperacion]">{{ estadoLabel[medidor.estadoOperacion] }}</ion-badge></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </ng-container>
+
+        <ng-template #sinRegistros>
           <div class="section-state">
-            <ion-icon name="pulse-outline"></ion-icon>
-            <strong>{{ medidores.length ? 'No hay coincidencias para la búsqueda.' : 'No hay medidores registrados.' }}</strong>
+            <ion-icon name="document-text-outline"></ion-icon>
+            <strong>{{ registros.length ? 'No hay coincidencias para la búsqueda.' : 'Aún no hay registros de medidores.' }}</strong>
+            <ion-button *ngIf="!registros.length && canWrite" fill="outline" (click)="openForm()">Crear el primer registro</ion-button>
           </div>
         </ng-template>
       </ion-card-content>

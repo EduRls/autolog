@@ -1,0 +1,14 @@
+.section-state.error { color: var(--autolog-danger); }
+.col-toggle { width: 44px; padding-right: 0; }
+.col-actions { width: 80px; text-align: center; }
+.row-toggle { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: var(--autolog-radius-sm); color: var(--autolog-text-secondary); background: transparent; font-size: 16px; cursor: pointer; }
+.row-toggle:hover { background: var(--autolog-primary-soft); color: var(--autolog-primary); }
+.storage-cell { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.detail-row, .detail-row:hover { background: #f8fafc; }
+.detail-row > td { padding: 4px 16px 16px 60px; }
+.table-container.nested table { min-width: 900px; font-size: 12px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 767px) {
+  .detail-row > td { padding: 4px 8px 12px; }
+}

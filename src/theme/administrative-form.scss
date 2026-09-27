@@ -23,6 +23,10 @@ ion-modal.autolog-form-modal.autolog-asistia-access-modal {
   --width: min(760px, calc(100vw - 40px));
   --height: min(820px, calc(100dvh - 40px));
 }
+ion-modal.autolog-form-modal.autolog-meters-modal {
+  --width: min(1240px, calc(100vw - 40px));
+  --height: min(880px, calc(100dvh - 40px));
+}
 ion-modal.autolog-form-modal form.administrative-form {
   display: flex;
   flex-direction: column;

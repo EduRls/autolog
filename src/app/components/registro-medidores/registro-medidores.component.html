@@ -1,0 +1,141 @@
+<form class="administrative-form meters-form" [formGroup]="form" (ngSubmit)="save()" [attr.aria-busy]="saving" novalidate>
+  <header class="modal-header">
+    <div class="modal-title-block">
+      <span class="modal-title-icon"><ion-icon name="pulse-outline" aria-hidden="true"></ion-icon></span>
+      <div>
+        <h1>{{ isEdit ? 'Editar registro de medidores' : 'Nuevo registro de medidores' }}</h1>
+        <p>Documenta los equipos de medición, su localización y su estado de operación.</p>
+      </div>
+    </div>
+    <button class="modal-close" type="button" (click)="cancel()" [disabled]="saving" aria-label="Cerrar formulario">
+      <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+    </button>
+  </header>
+
+  <div class="modal-body">
+    <fieldset class="form-fields" [disabled]="saving">
+      <section class="form-block">
+        <h2 class="form-section-title">Datos del registro</h2>
+
+        <div class="field" *ngIf="showPlantSelector">
+          <label for="meters-plant">Planta destino *</label>
+          <select id="meters-plant" formControlName="plantaId" [attr.aria-invalid]="invalid(form.get('plantaId'))">
+            <option value="" disabled>Selecciona una planta</option>
+            <option *ngFor="let plant of plants" [value]="plant.id">{{ plant.nombre }}</option>
+          </select>
+          <p class="field-error" *ngIf="invalid(form.get('plantaId'))">Selecciona la planta a la que pertenece el registro.</p>
+        </div>
+
+        <div class="field">
+          <label for="meters-storage">Almacenamiento del registro *</label>
+          <input id="meters-storage" type="text" formControlName="almacenamiento" maxlength="250" autocomplete="off"
+            placeholder="Ej. Archivo de calidad, gaveta 2 · o ruta electrónica" [attr.aria-invalid]="invalid(form.get('almacenamiento'))">
+          <p class="field-hint">Lugar físico o ruta electrónica donde se almacenará el formato una vez lleno.</p>
+          <p class="field-error" *ngIf="invalid(form.get('almacenamiento'))">Indica dónde se almacenará el registro.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="meters-consecutive">Consecutivo No. *</label>
+            <input id="meters-consecutive" type="text" formControlName="consecutivo" maxlength="12" autocomplete="off"
+              placeholder="001/2026" [attr.aria-invalid]="invalid(form.get('consecutivo'))">
+            <p class="field-error" *ngIf="invalid(form.get('consecutivo')) && form.get('consecutivo')?.hasError('duplicated')">Este consecutivo ya existe en la planta.</p>
+            <p class="field-error" *ngIf="invalid(form.get('consecutivo')) && !form.get('consecutivo')?.hasError('duplicated')">Usa el formato 001/2026.</p>
+          </div>
+          <div class="field">
+            <label for="meters-date">Fecha de registro *</label>
+            <input id="meters-date" type="date" formControlName="fechaRegistro" [attr.aria-invalid]="invalid(form.get('fechaRegistro'))">
+            <p class="field-error" *ngIf="invalid(form.get('fechaRegistro'))">Indica la fecha en que se realizó el registro.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-block" formArrayName="medidores">
+        <div class="block-heading">
+          <div>
+            <h2 class="form-section-title">Medidores</h2>
+            <p class="field-hint">{{ medidores.length }} {{ medidores.length === 1 ? 'medidor' : 'medidores' }} en el registro.</p>
+          </div>
+          <button class="form-button" type="button" (click)="addMedidor()">
+            <ion-icon name="add-outline" aria-hidden="true"></ion-icon>Agregar medidor
+          </button>
+        </div>
+
+        <div class="meters-table-wrapper">
+          <table class="meters-table">
+            <thead>
+              <tr>
+                <th class="col-no">No.</th>
+                <th>Identificación interna</th>
+                <th>Descripción del equipo</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Número de serie</th>
+                <th>Localización</th>
+                <th>Estado de operación</th>
+                <th class="col-actions"><span class="visually-hidden">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let medidor of medidores.controls; let i = index" [formGroupName]="i">
+                <td class="col-no" data-label="No.">{{ i + 1 }}</td>
+                <td data-label="Identificación interna"><input type="text" formControlName="identificacionInterna" placeholder="001" maxlength="40" [attr.aria-label]="'Identificación interna del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('identificacionInterna'))"></td>
+                <td data-label="Descripción del equipo"><input type="text" formControlName="descripcion" placeholder="Medidor de flujo" maxlength="200" [attr.aria-label]="'Descripción del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('descripcion'))"></td>
+                <td data-label="Marca"><input type="text" formControlName="marca" maxlength="80" [attr.aria-label]="'Marca del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('marca'))"></td>
+                <td data-label="Modelo"><input type="text" formControlName="modelo" maxlength="80" [attr.aria-label]="'Modelo del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('modelo'))"></td>
+                <td data-label="Número de serie"><input type="text" formControlName="numeroSerie" maxlength="80" [attr.aria-label]="'Número de serie del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('numeroSerie'))"></td>
+                <td data-label="Localización"><input type="text" formControlName="localizacion" maxlength="150" [attr.aria-label]="'Localización del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('localizacion'))"></td>
+                <td data-label="Estado de operación">
+                  <select formControlName="estadoOperacion" [attr.aria-label]="'Estado de operación del medidor ' + (i + 1)">
+                    <option *ngFor="let estado of estados" [value]="estado">{{ estadoLabel[estado] }}</option>
+                  </select>
+                </td>
+                <td class="col-actions">
+                  <button class="row-remove" type="button" (click)="removeMedidor(i)" [disabled]="medidores.length === 1" [attr.aria-label]="'Quitar medidor ' + (i + 1)" title="Quitar medidor">
+                    <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="field-error" *ngIf="medidores.touched && medidores.invalid">Completa todos los datos de cada medidor.</p>
+      </section>
+
+      <section class="form-block">
+        <h2 class="form-section-title">Cierre del registro</h2>
+        <div class="form-grid three">
+          <div class="field">
+            <label for="meters-made-by">Realizó *</label>
+            <input id="meters-made-by" type="text" formControlName="realizo" maxlength="120" autocomplete="off" placeholder="Nombre de quien realizó" [attr.aria-invalid]="invalid(form.get('realizo'))">
+            <p class="field-error" *ngIf="invalid(form.get('realizo'))">Indica quién realizó el registro.</p>
+          </div>
+          <div class="field">
+            <label for="meters-approved-by">Aprobó *</label>
+            <input id="meters-approved-by" type="text" formControlName="aprobo" maxlength="120" autocomplete="off" placeholder="Nombre de quien aprobó" [attr.aria-invalid]="invalid(form.get('aprobo'))">
+            <p class="field-error" *ngIf="invalid(form.get('aprobo'))">Indica quién aprobó el registro.</p>
+          </div>
+          <div class="field">
+            <label for="meters-close-date">Fecha *</label>
+            <input id="meters-close-date" type="date" formControlName="fechaCierre" [attr.aria-invalid]="invalid(form.get('fechaCierre')) || (form.get('fechaCierre')?.touched && form.hasError('cierreBeforeRegistro'))">
+            <p class="field-hint">Fecha en que se cerró el registro.</p>
+            <p class="field-error" *ngIf="invalid(form.get('fechaCierre'))">Indica la fecha de cierre.</p>
+            <p class="field-error" *ngIf="form.get('fechaCierre')?.touched && form.hasError('cierreBeforeRegistro')">No puede ser anterior a la fecha de registro.</p>
+          </div>
+        </div>
+      </section>
+    </fieldset>
+  </div>
+
+  <footer class="modal-footer">
+    <span class="required-note">* Campos obligatorios</span>
+    <div class="footer-actions">
+      <button class="form-button" type="button" (click)="cancel()" [disabled]="saving">Cancelar</button>
+      <button class="form-button primary" type="submit" [disabled]="saving">
+        <ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>
+        <ion-icon *ngIf="!saving" name="save-outline" aria-hidden="true"></ion-icon>
+        {{ saving ? 'Guardando…' : (isEdit ? 'Guardar cambios' : 'Guardar registro') }}
+      </button>
+    </div>
+  </footer>
+</form>

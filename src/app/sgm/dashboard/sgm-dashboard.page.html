@@ -5,51 +5,57 @@
     <header class="page-toolbar panel-heading">
       <div>
         <h1>Dashboard SGM</h1>
-        <p>Resumen general de medidores, estados y lecturas recientes.</p>
+        <p>Resumen de los registros de medidores y su estado de operación.</p>
       </div>
       <ion-button fill="outline" color="medium" routerLink="/sgm/medidores">
         <ion-icon slot="start" name="pulse-outline"></ion-icon>Ver medidores
       </ion-button>
     </header>
 
-    <section class="metrics-grid">
-      <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="speedometer-outline"></ion-icon></span><div><p>Medidores registrados</p><h3>{{ medidores.length }}</h3></div></ion-card-content></ion-card>
-      <ion-card class="metric-card metric-success"><ion-card-content><span class="metric-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></span><div><p>Activos</p><h3>{{ countBy('activo') }}</h3></div></ion-card-content></ion-card>
-      <ion-card class="metric-card metric-warning"><ion-card-content><span class="metric-icon"><ion-icon name="warning-outline"></ion-icon></span><div><p>Con alerta</p><h3>{{ countBy('alerta') }}</h3></div></ion-card-content></ion-card>
-      <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="time-outline"></ion-icon></span><div><p>Última lectura</p><h3>{{ ultimaLectura ? (ultimaLectura | date:'short') : '—' }}</h3></div></ion-card-content></ion-card>
-    </section>
+    <div class="section-state" *ngIf="state === 'loading'" role="status"><ion-spinner name="crescent"></ion-spinner><span>Cargando información…</span></div>
+    <div class="section-state" *ngIf="state === 'error'"><ion-icon name="alert-circle-outline"></ion-icon><strong>No fue posible cargar la información de SGM.</strong><ion-button fill="outline" (click)="load()">Reintentar</ion-button></div>
 
-    <section class="primary-grid">
-      <ion-card class="autolog-card">
-        <ion-card-content>
-          <div class="section-heading"><div><h2>Lecturas recientes</h2><p>Últimas lecturas reportadas por los medidores.</p></div></div>
-          <div class="table-container" *ngIf="lecturasRecientes.length; else sinLecturas">
-            <table>
-              <thead><tr><th>Medidor</th><th>Ubicación</th><th>Lectura</th><th>Fecha</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let medidor of lecturasRecientes">
-                  <td>{{ medidor.clave }}</td>
-                  <td>{{ medidor.ubicacion }}</td>
-                  <td>{{ medidor.ultimaLectura | number:'1.0-2' }} {{ medidor.unidad }}</td>
-                  <td>{{ medidor.fechaLectura | date:'medium' }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <ng-template #sinLecturas>
-            <div class="section-state"><ion-icon name="analytics-outline"></ion-icon><strong>Aún no hay lecturas registradas.</strong><small>Las lecturas aparecerán aquí cuando los medidores comiencen a reportar.</small></div>
-          </ng-template>
-        </ion-card-content>
-      </ion-card>
+    <ng-container *ngIf="state === 'ready'">
+      <section class="metrics-grid">
+        <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="document-text-outline"></ion-icon></span><div><p>Registros</p><h3>{{ registros.length }}</h3></div></ion-card-content></ion-card>
+        <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="speedometer-outline"></ion-icon></span><div><p>Medidores registrados</p><h3>{{ medidores.length }}</h3></div></ion-card-content></ion-card>
+        <ion-card class="metric-card metric-success"><ion-card-content><span class="metric-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></span><div><p>En operación</p><h3>{{ countBy('EN_OPERACION') }}</h3></div></ion-card-content></ion-card>
+        <ion-card class="metric-card"><ion-card-content><span class="metric-icon"><ion-icon name="time-outline"></ion-icon></span><div><p>Último registro</p><h3>{{ ultimoRegistro ? ultimoRegistro.consecutivo : '—' }}</h3><p *ngIf="ultimoRegistro">{{ ultimoRegistro.fechaRegistro | date:'dd/MM/yyyy' }}</p></div></ion-card-content></ion-card>
+      </section>
 
-      <ion-card class="autolog-card">
-        <ion-card-content>
-          <div class="section-heading"><div><h2>Estado de medidores</h2><p>Distribución por estado operativo.</p></div></div>
-          <ul class="status-list">
-            <li *ngFor="let estado of estados"><ion-badge [color]="estadoColor[estado]">{{ estadoLabel[estado] }}</ion-badge><strong>{{ countBy(estado) }}</strong></li>
-          </ul>
-        </ion-card-content>
-      </ion-card>
-    </section>
+      <section class="primary-grid">
+        <ion-card class="autolog-card">
+          <ion-card-content>
+            <div class="section-heading"><div><h2>Registros recientes</h2><p>Últimos registros de medidores capturados.</p></div></div>
+            <div class="table-container" *ngIf="registrosRecientes.length; else sinRegistros">
+              <table>
+                <thead><tr><th>Consecutivo</th><th>Fecha de registro</th><th>Medidores</th><th>Realizó</th><th>Aprobó</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let registro of registrosRecientes">
+                    <td><strong>{{ registro.consecutivo }}</strong></td>
+                    <td>{{ registro.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ registro.medidores.length }}</td>
+                    <td>{{ registro.realizo }}</td>
+                    <td>{{ registro.aprobo }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #sinRegistros>
+              <div class="section-state"><ion-icon name="document-text-outline"></ion-icon><strong>Aún no hay registros de medidores.</strong><ion-button fill="outline" routerLink="/sgm/medidores">Ir a medidores</ion-button></div>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="autolog-card">
+          <ion-card-content>
+            <div class="section-heading"><div><h2>Estado de operación</h2><p>Distribución de los medidores registrados.</p></div></div>
+            <ul class="status-list">
+              <li *ngFor="let estado of estados"><ion-badge [color]="estadoColor[estado]">{{ estadoLabel[estado] }}</ion-badge><strong>{{ countBy(estado) }}</strong></li>
+            </ul>
+          </ion-card-content>
+        </ion-card>
+      </section>
+    </ng-container>
   </main>
 </ion-content>

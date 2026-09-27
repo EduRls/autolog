@@ -1,31 +1,62 @@
-import { Component } from '@angular/core';
-import { Medidor, MEDIDOR_ESTADO_COLOR, MEDIDOR_ESTADO_LABEL, MedidorEstado } from '../sgm.models';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { SgmMedidoresService } from 'src/app/services/sgm/sgm-medidores.service';
+import {
+  ESTADO_OPERACION_COLOR,
+  ESTADO_OPERACION_LABEL,
+  ESTADOS_OPERACION_MEDIDOR,
+  EstadoOperacionMedidor,
+  MedidorRegistro,
+  RegistroMedidores,
+} from '../sgm.models';
+
+type LoadState = 'loading' | 'ready' | 'error';
 
 @Component({
   selector: 'app-sgm-dashboard',
   templateUrl: './sgm-dashboard.page.html',
   styleUrls: ['../sgm.shared.scss'],
 })
-export class SgmDashboardPage {
-  // TODO: conectar con la fuente de datos de SGM.
-  medidores: Medidor[] = [];
-  readonly estados: MedidorEstado[] = ['activo', 'alerta', 'inactivo'];
-  readonly estadoLabel = MEDIDOR_ESTADO_LABEL;
-  readonly estadoColor = MEDIDOR_ESTADO_COLOR;
+export class SgmDashboardPage implements OnInit, OnDestroy {
+  registros: RegistroMedidores[] = [];
+  state: LoadState = 'loading';
+  readonly estados = ESTADOS_OPERACION_MEDIDOR;
+  readonly estadoLabel = ESTADO_OPERACION_LABEL;
+  readonly estadoColor = ESTADO_OPERACION_COLOR;
+  private subscription?: Subscription;
 
-  countBy(estado: MedidorEstado): number {
-    return this.medidores.filter(medidor => medidor.estado === estado).length;
+  constructor(private readonly sgmService: SgmMedidoresService) {}
+
+  ngOnInit(): void {
+    this.load();
   }
 
-  get ultimaLectura(): Date | null {
-    const fechas = this.medidores.map(medidor => medidor.fechaLectura?.getTime() ?? 0).filter(Boolean);
-    return fechas.length ? new Date(Math.max(...fechas)) : null;
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
-  get lecturasRecientes(): Medidor[] {
-    return this.medidores
-      .filter(medidor => medidor.fechaLectura)
-      .sort((a, b) => b.fechaLectura!.getTime() - a.fechaLectura!.getTime())
-      .slice(0, 8);
+  load(): void {
+    this.state = 'loading';
+    this.subscription?.unsubscribe();
+    this.subscription = this.sgmService.listRegistros().subscribe({
+      next: registros => { this.registros = registros; this.state = 'ready'; },
+      error: error => { console.error(error); this.state = 'error'; },
+    });
+  }
+
+  get medidores(): MedidorRegistro[] {
+    return this.registros.flatMap(registro => registro.medidores || []);
+  }
+
+  countBy(estado: EstadoOperacionMedidor): number {
+    return this.medidores.filter(medidor => medidor.estadoOperacion === estado).length;
+  }
+
+  get ultimoRegistro(): RegistroMedidores | null {
+    return this.registros[0] ?? null;
+  }
+
+  get registrosRecientes(): RegistroMedidores[] {
+    return this.registros.slice(0, 6);
   }
 }

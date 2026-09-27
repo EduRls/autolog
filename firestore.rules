@@ -262,8 +262,10 @@ service cloud.firestore {
         && samePlant()
         && validRegistroMedidores(request.resource.data)
         && request.resource.data.createdAt == resource.data.createdAt
-        && request.resource.data.createdByUid == resource.data.createdByUid;
-      allow delete: if false;
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && request.resource.data.consecutivo == resource.data.consecutivo;
+      allow delete: if hasPlant(resource.data)
+        && canWritePlant(resource.data.plantaId);
     }
 
     // Compatibilidad temporal para colecciones comerciales legacy.

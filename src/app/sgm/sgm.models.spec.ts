@@ -1,4 +1,4 @@
-import { CONSECUTIVO_PATTERN, nextConsecutivo } from './sgm.models';
+import { CONSECUTIVO_PATTERN, formatConsecutivo, nextConsecutivo } from './sgm.models';
 
 describe('SGM models', () => {
   it('suggests the first consecutive of the year when there are no records', () => {
@@ -14,5 +14,9 @@ describe('SGM models', () => {
     expect(CONSECUTIVO_PATTERN.test('001/2026')).toBeTrue();
     expect(CONSECUTIVO_PATTERN.test('1/2026')).toBeFalse();
     expect(CONSECUTIVO_PATTERN.test('001-2026')).toBeFalse();
+  });
+
+  it('formats the consecutive with three digits and the year', () => {
+    expect(formatConsecutivo(7, 2026)).toBe('007/2026');
   });
 });

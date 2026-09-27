@@ -60,6 +60,9 @@
                       <ion-button fill="clear" (click)="$event.stopPropagation(); openForm(registro)" [disabled]="!canEdit(registro)" title="Editar registro" [attr.aria-label]="'Editar registro ' + registro.consecutivo">
                         <ion-icon slot="icon-only" name="create-outline"></ion-icon>
                       </ion-button>
+                      <ion-button fill="clear" color="danger" (click)="$event.stopPropagation(); confirmDelete(registro)" [disabled]="!canEdit(registro)" title="Eliminar registro" [attr.aria-label]="'Eliminar registro ' + registro.consecutivo">
+                        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                      </ion-button>
                     </td>
                   </tr>
                   <tr class="detail-row" *ngIf="expandedId === registro.id">

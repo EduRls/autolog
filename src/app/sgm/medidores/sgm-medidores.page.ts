@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { RegistroMedidoresComponent } from 'src/app/components/registro-medidores/registro-medidores.component';
 import { PlantScopeService } from 'src/app/services/plants/plant-scope.service';
 import { SgmMedidoresService } from 'src/app/services/sgm/sgm-medidores.service';
-import { ESTADO_OPERACION_COLOR, ESTADO_OPERACION_LABEL, RegistroMedidores, nextConsecutivo } from '../sgm.models';
+import { ESTADO_OPERACION_COLOR, ESTADO_OPERACION_LABEL, RegistroMedidores } from '../sgm.models';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -25,7 +25,9 @@ export class SgmMedidoresPage implements OnInit, OnDestroy {
   constructor(
     private readonly sgmService: SgmMedidoresService,
     private readonly plantScope: PlantScopeService,
-    private readonly modalController: ModalController
+    private readonly modalController: ModalController,
+    private readonly alertController: AlertController,
+    private readonly toastController: ToastController
   ) {}
 
   get canWrite(): boolean { return !this.plantScope.isReadOnly(); }
@@ -73,19 +75,44 @@ export class SgmMedidoresPage implements OnInit, OnDestroy {
   }
 
   async openForm(registro?: RegistroMedidores): Promise<void> {
-    const plantId = registro?.plantaId ?? this.plantScope.getActivePlantId();
-    const samePlant = plantId ? this.registros.filter(item => item.plantaId === plantId) : this.registros;
     const modal = await this.modalController.create({
       component: RegistroMedidoresComponent,
       cssClass: ['autolog-form-modal', 'autolog-meters-modal'],
       backdropDismiss: false,
       componentProps: {
         registro,
-        consecutivoSugerido: nextConsecutivo(samePlant),
-        consecutivosExistentes: samePlant.map(item => item.consecutivo),
       },
     });
     await modal.present();
+  }
+
+  async confirmDelete(registro: RegistroMedidores): Promise<void> {
+    const total = registro.medidores.length;
+    const alert = await this.alertController.create({
+      header: 'Eliminar registro',
+      message: `Se eliminará el registro ${registro.consecutivo} con sus ${total} ${total === 1 ? 'medidor' : 'medidores'}. Esta acción no se puede deshacer.`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Eliminar', role: 'destructive', handler: () => { this.deleteRegistro(registro); } },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async deleteRegistro(registro: RegistroMedidores): Promise<void> {
+    try {
+      await this.sgmService.deleteRegistro(registro);
+      if (this.expandedId === registro.id) this.expandedId = null;
+      await this.presentToast(`Registro ${registro.consecutivo} eliminado.`, 'success');
+    } catch (error) {
+      console.error(error);
+      await this.presentToast('No fue posible eliminar el registro.', 'danger');
+    }
+  }
+
+  private async presentToast(message: string, color: 'danger' | 'success'): Promise<void> {
+    const toast = await this.toastController.create({ message, duration: 1800, position: 'bottom', color });
+    await toast.present();
   }
 
   private normalize(value: string): string {

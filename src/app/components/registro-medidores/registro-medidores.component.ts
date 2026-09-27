@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
+import { Subscription, distinctUntilChanged, map, merge } from 'rxjs';
 import { Planta } from 'src/app/models/planta.model';
 import { PlantScopeService } from 'src/app/services/plants/plant-scope.service';
 import { SgmMedidoresService } from 'src/app/services/sgm/sgm-medidores.service';
 import {
-  CONSECUTIVO_PATTERN,
   ESTADO_OPERACION_LABEL,
   ESTADOS_OPERACION_MEDIDOR,
   MedidorRegistro,
@@ -21,20 +21,20 @@ import {
   standalone: true,
   imports: [IonicModule, CommonModule, ReactiveFormsModule],
 })
-export class RegistroMedidoresComponent implements OnInit {
+export class RegistroMedidoresComponent implements OnInit, OnDestroy {
   /** Registro a editar; si se omite, el formulario crea uno nuevo. */
   @Input() registro?: RegistroMedidores;
-  /** Consecutivo sugerido para un registro nuevo. */
-  @Input() consecutivoSugerido = '';
-  /** Consecutivos ya usados en la planta, para evitar duplicados. */
-  @Input() consecutivosExistentes: string[] = [];
 
   form!: FormGroup;
   saving = false;
+  /** Plantas disponibles como destino del registro. */
   plants: Planta[] = [];
-  showPlantSelector = false;
   readonly estados = ESTADOS_OPERACION_MEDIDOR;
   readonly estadoLabel = ESTADO_OPERACION_LABEL;
+  /** Consecutivo que seguiría, consultado en la colección de registros. */
+  consecutivoSiguiente = '';
+  private consultaConsecutivo = 0;
+  private readonly subscriptions = new Subscription();
 
   constructor(
     private readonly fb: FormBuilder,
@@ -47,13 +47,18 @@ export class RegistroMedidoresComponent implements OnInit {
   get isEdit(): boolean { return Boolean(this.registro); }
   get medidores(): FormArray<FormGroup> { return this.form.controls['medidores'] as FormArray<FormGroup>; }
 
+  /** Consecutivo del registro, o el que seguiría si es nuevo. Lo asigna el sistema al guardar. */
+  get consecutivoMostrado(): string {
+    if (this.registro) return this.registro.consecutivo;
+    return this.consecutivoSiguiente || '—';
+  }
+
   async ngOnInit(): Promise<void> {
     const today = this.today();
     this.form = this.fb.group({
-      plantaId: [''],
+      plantaId: [this.registro?.plantaId ?? '', Validators.required],
       almacenamiento: [this.registro?.almacenamiento ?? '', [Validators.required, Validators.maxLength(250)]],
-      consecutivo: [this.registro?.consecutivo ?? this.consecutivoSugerido, [Validators.required, Validators.pattern(CONSECUTIVO_PATTERN), this.uniqueConsecutivo]],
-      fechaRegistro: [this.registro?.fechaRegistro ?? today, Validators.required],
+      fechaRegistro: [this.registro?.fechaRegistro ?? today, [Validators.required, this.sameYearAsConsecutivo]],
       medidores: this.fb.array<FormGroup>([]),
       realizo: [this.registro?.realizo ?? '', [Validators.required, Validators.maxLength(120)]],
       aprobo: [this.registro?.aprobo ?? '', [Validators.required, Validators.maxLength(120)]],
@@ -63,7 +68,33 @@ export class RegistroMedidoresComponent implements OnInit {
     const medidores = this.registro?.medidores?.length ? this.registro.medidores : [undefined];
     medidores.forEach(medidor => this.medidores.push(this.createMedidorGroup(medidor)));
 
-    if (!this.isEdit) await this.setupPlantSelector();
+    await this.setupPlants();
+
+    if (!this.isEdit) {
+      const plantaId$ = this.form.controls['plantaId'].valueChanges;
+      const year$ = this.form.controls['fechaRegistro'].valueChanges.pipe(map(value => String(value || '').slice(0, 4)), distinctUntilChanged());
+      this.subscriptions.add(merge(plantaId$, year$).subscribe(() => this.consultarConsecutivo()));
+      await this.consultarConsecutivo();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  /** Consulta el último consecutivo de la planta y año seleccionados y muestra el que sigue. */
+  async consultarConsecutivo(): Promise<void> {
+    const plantaId = this.form.controls['plantaId'].value;
+    const year = Number(String(this.form.controls['fechaRegistro'].value || '').slice(0, 4));
+    const consulta = ++this.consultaConsecutivo;
+    this.consecutivoSiguiente = '';
+    if (!plantaId || !year) return;
+    try {
+      const siguiente = await this.sgmService.getSiguienteConsecutivo(plantaId, year);
+      if (consulta === this.consultaConsecutivo) this.consecutivoSiguiente = siguiente;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   addMedidor(): void {
@@ -94,9 +125,13 @@ export class RegistroMedidoresComponent implements OnInit {
     this.saving = true;
     try {
       const payload = this.form.getRawValue() as RegistroMedidoresPayload;
-      if (this.registro) await this.sgmService.updateRegistro(this.registro, payload);
-      else await this.sgmService.createRegistro(payload);
-      await this.presentToast(this.isEdit ? 'Registro actualizado correctamente.' : 'Registro guardado correctamente.', 'success');
+      if (this.registro) {
+        await this.sgmService.updateRegistro(this.registro, payload);
+        await this.presentToast(`Registro ${this.registro.consecutivo} actualizado correctamente.`, 'success');
+      } else {
+        const { consecutivo } = await this.sgmService.createRegistro(payload);
+        await this.presentToast(`Registro ${consecutivo} guardado correctamente.`, 'success');
+      }
       await this.modalController.dismiss(payload, 'saved');
     } catch (error) {
       console.error(error);
@@ -121,20 +156,33 @@ export class RegistroMedidoresComponent implements OnInit {
     });
   }
 
-  private async setupPlantSelector(): Promise<void> {
+  /**
+   * Nuevo registro: se listan las plantas donde el usuario puede escribir y se preselecciona
+   * la planta activa (o la única disponible). Al editar, la planta queda bloqueada.
+   */
+  private async setupPlants(): Promise<void> {
     await this.plantScope.initialize();
-    this.plants = this.plantScope.snapshot().plants;
-    this.showPlantSelector = this.plantScope.isGlobal() && !this.plantScope.getActivePlantId();
     const control = this.form.controls['plantaId'];
-    if (this.showPlantSelector) control.addValidators(Validators.required);
-    else control.setValue(this.plantScope.getActivePlantId() || this.plantScope.getPrincipalPlantId() || '');
-    control.updateValueAndValidity();
+    const all = this.plantScope.snapshot().plants;
+    if (this.registro) {
+      this.plants = all.filter(plant => plant.id === this.registro!.plantaId);
+      if (!this.plants.length) this.plants = [{ id: this.registro.plantaId, nombre: this.registro.plantaId } as Planta];
+      control.disable();
+      return;
+    }
+    this.plants = all.filter(plant => plant.activo !== false && this.plantScope.canWritePlant(plant.id));
+    const active = this.plantScope.getActivePlantId();
+    const preselected = active && this.plants.some(plant => plant.id === active)
+      ? active
+      : this.plants.length === 1 ? this.plants[0].id : '';
+    control.setValue(preselected);
   }
 
-  private readonly uniqueConsecutivo = (control: AbstractControl): ValidationErrors | null => {
-    const value = String(control.value || '').trim();
-    if (!value || value === this.registro?.consecutivo) return null;
-    return this.consecutivosExistentes.includes(value) ? { duplicated: true } : null;
+  /** Al editar, la fecha debe permanecer en el año del consecutivo ya asignado. */
+  private readonly sameYearAsConsecutivo = (control: AbstractControl): ValidationErrors | null => {
+    const year = Number(String(this.registro?.consecutivo || '').split('/')[1]);
+    if (!year || !control.value) return null;
+    return Number(String(control.value).slice(0, 4)) === year ? null : { consecutivoYear: year };
   };
 
   private readonly cierreAfterRegistro = (group: AbstractControl): ValidationErrors | null => {

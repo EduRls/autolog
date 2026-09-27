@@ -17,12 +17,13 @@
       <section class="form-block">
         <h2 class="form-section-title">Datos del registro</h2>
 
-        <div class="field" *ngIf="showPlantSelector">
-          <label for="meters-plant">Planta destino *</label>
+        <div class="field">
+          <label for="meters-plant">Planta de destino *</label>
           <select id="meters-plant" formControlName="plantaId" [attr.aria-invalid]="invalid(form.get('plantaId'))">
-            <option value="" disabled>Selecciona una planta</option>
+            <option value="" disabled>{{ plants.length ? 'Selecciona una planta' : 'No hay plantas disponibles' }}</option>
             <option *ngFor="let plant of plants" [value]="plant.id">{{ plant.nombre }}</option>
           </select>
+          <p class="field-hint" *ngIf="isEdit">La planta de destino no se puede modificar.</p>
           <p class="field-error" *ngIf="invalid(form.get('plantaId'))">Selecciona la planta a la que pertenece el registro.</p>
         </div>
 
@@ -36,16 +37,14 @@
 
         <div class="form-grid">
           <div class="field">
-            <label for="meters-consecutive">Consecutivo No. *</label>
-            <input id="meters-consecutive" type="text" formControlName="consecutivo" maxlength="12" autocomplete="off"
-              placeholder="001/2026" [attr.aria-invalid]="invalid(form.get('consecutivo'))">
-            <p class="field-error" *ngIf="invalid(form.get('consecutivo')) && form.get('consecutivo')?.hasError('duplicated')">Este consecutivo ya existe en la planta.</p>
-            <p class="field-error" *ngIf="invalid(form.get('consecutivo')) && !form.get('consecutivo')?.hasError('duplicated')">Usa el formato 001/2026.</p>
+            <label for="meters-consecutive">Consecutivo No.</label>
+            <input id="meters-consecutive" type="text" class="readonly-input" [value]="consecutivoMostrado" readonly tabindex="-1" aria-readonly="true">
           </div>
           <div class="field">
             <label for="meters-date">Fecha de registro *</label>
             <input id="meters-date" type="date" formControlName="fechaRegistro" [attr.aria-invalid]="invalid(form.get('fechaRegistro'))">
-            <p class="field-error" *ngIf="invalid(form.get('fechaRegistro'))">Indica la fecha en que se realizó el registro.</p>
+            <p class="field-error" *ngIf="invalid(form.get('fechaRegistro')) && form.get('fechaRegistro')?.hasError('required')">Indica la fecha en que se realizó el registro.</p>
+            <p class="field-error" *ngIf="invalid(form.get('fechaRegistro')) && form.get('fechaRegistro')?.hasError('consecutivoYear')">La fecha debe ser del año {{ form.get('fechaRegistro')?.getError('consecutivoYear') }}, igual que el consecutivo.</p>
           </div>
         </div>
       </section>
@@ -79,8 +78,8 @@
             <tbody>
               <tr *ngFor="let medidor of medidores.controls; let i = index" [formGroupName]="i">
                 <td class="col-no" data-label="No.">{{ i + 1 }}</td>
-                <td data-label="Identificación interna"><input type="text" formControlName="identificacionInterna" placeholder="001" maxlength="40" [attr.aria-label]="'Identificación interna del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('identificacionInterna'))"></td>
-                <td data-label="Descripción del equipo"><input type="text" formControlName="descripcion" placeholder="Medidor de flujo" maxlength="200" [attr.aria-label]="'Descripción del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('descripcion'))"></td>
+                <td data-label="Identificación interna"><input type="text" formControlName="identificacionInterna" maxlength="40" [attr.aria-label]="'Identificación interna del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('identificacionInterna'))"></td>
+                <td data-label="Descripción del equipo"><input type="text" formControlName="descripcion" maxlength="200" [attr.aria-label]="'Descripción del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('descripcion'))"></td>
                 <td data-label="Marca"><input type="text" formControlName="marca" maxlength="80" [attr.aria-label]="'Marca del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('marca'))"></td>
                 <td data-label="Modelo"><input type="text" formControlName="modelo" maxlength="80" [attr.aria-label]="'Modelo del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('modelo'))"></td>
                 <td data-label="Número de serie"><input type="text" formControlName="numeroSerie" maxlength="80" [attr.aria-label]="'Número de serie del medidor ' + (i + 1)" [attr.aria-invalid]="invalid(medidor.get('numeroSerie'))"></td>
@@ -118,7 +117,6 @@
           <div class="field">
             <label for="meters-close-date">Fecha *</label>
             <input id="meters-close-date" type="date" formControlName="fechaCierre" [attr.aria-invalid]="invalid(form.get('fechaCierre')) || (form.get('fechaCierre')?.touched && form.hasError('cierreBeforeRegistro'))">
-            <p class="field-hint">Fecha en que se cerró el registro.</p>
             <p class="field-error" *ngIf="invalid(form.get('fechaCierre'))">Indica la fecha de cierre.</p>
             <p class="field-error" *ngIf="form.get('fechaCierre')?.touched && form.hasError('cierreBeforeRegistro')">No puede ser anterior a la fecha de registro.</p>
           </div>

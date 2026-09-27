@@ -4,6 +4,8 @@
 .form-block { display: grid; gap: 16px; min-width: 0; }
 .form-block .form-section-title { margin: 0; }
 .form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.meters-form .field .readonly-input, .meters-form .field select:disabled { color: var(--autolog-text-secondary); background: var(--autolog-bg); cursor: not-allowed; }
+.meters-form .field .readonly-input { font-weight: 700; letter-spacing: .02em; }
 .block-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .block-heading .field-hint { margin-top: 4px; }
 

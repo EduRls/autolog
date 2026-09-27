@@ -1,6 +1,6 @@
 .section-state.error { color: var(--autolog-danger); }
 .col-toggle { width: 44px; padding-right: 0; }
-.col-actions { width: 80px; text-align: center; }
+.col-actions { width: 110px; white-space: nowrap; text-align: center; }
 .row-toggle { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: var(--autolog-radius-sm); color: var(--autolog-text-secondary); background: transparent; font-size: 16px; cursor: pointer; }
 .row-toggle:hover { background: var(--autolog-primary-soft); color: var(--autolog-primary); }
 .storage-cell { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

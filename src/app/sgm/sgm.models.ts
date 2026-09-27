@@ -30,7 +30,6 @@ export interface MedidorRegistro {
 export interface RegistroMedidoresPayload {
   plantaId?: string | null;
   almacenamiento: string;
-  consecutivo: string;
   /** Fecha en formato YYYY-MM-DD. */
   fechaRegistro: string;
   medidores: MedidorRegistro[];
@@ -43,6 +42,8 @@ export interface RegistroMedidoresPayload {
 export interface RegistroMedidores extends RegistroMedidoresPayload {
   id: string;
   plantaId: string;
+  /** Asignado por el sistema al guardar; el usuario no puede modificarlo. */
+  consecutivo: string;
   createdAt?: unknown;
   createdByUid?: string | null;
   updatedAt?: unknown;
@@ -52,10 +53,17 @@ export interface RegistroMedidores extends RegistroMedidoresPayload {
 /** Formato del consecutivo: 001/2026. */
 export const CONSECUTIVO_PATTERN = /^\d{3,}\/\d{4}$/;
 
-export function nextConsecutivo(registros: Pick<RegistroMedidores, 'consecutivo'>[], year = new Date().getFullYear()): string {
-  const max = registros.reduce((current, registro) => {
+export function formatConsecutivo(numero: number, year: number): string {
+  return `${String(numero).padStart(3, '0')}/${year}`;
+}
+
+export function maxConsecutivoNumero(registros: Pick<RegistroMedidores, 'consecutivo'>[], year: number): number {
+  return registros.reduce((current, registro) => {
     const [number, registroYear] = String(registro.consecutivo || '').split('/');
     return Number(registroYear) === year ? Math.max(current, Number(number) || 0) : current;
   }, 0);
-  return `${String(max + 1).padStart(3, '0')}/${year}`;
+}
+
+export function nextConsecutivo(registros: Pick<RegistroMedidores, 'consecutivo'>[], year = new Date().getFullYear()): string {
+  return formatConsecutivo(maxConsecutivoNumero(registros, year) + 1, year);
 }

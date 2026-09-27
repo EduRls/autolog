@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
-import { Firestore, addDoc, collection, collectionData, doc, query, serverTimestamp, updateDoc, where } from '@angular/fire/firestore';
+import { Firestore, addDoc, collection, collectionData, deleteDoc, doc, getDocs, query, serverTimestamp, updateDoc, where } from '@angular/fire/firestore';
 import { Observable, distinctUntilChanged, filter, from, map, switchMap } from 'rxjs';
-import { RegistroMedidores, RegistroMedidoresPayload, SGM_REGISTROS_MEDIDORES_COLLECTION } from '../../sgm/sgm.models';
+import {
+  RegistroMedidores,
+  RegistroMedidoresPayload,
+  SGM_REGISTROS_MEDIDORES_COLLECTION,
+  nextConsecutivo,
+} from '../../sgm/sgm.models';
 import { PlantScopeService } from '../plants/plant-scope.service';
 
 @Injectable({ providedIn: 'root' })
@@ -32,21 +37,31 @@ export class SgmMedidoresService {
     );
   }
 
-  async createRegistro(payload: RegistroMedidoresPayload): Promise<string> {
+  /** Consulta los registros de la planta y devuelve el consecutivo que sigue para el año indicado. */
+  async getSiguienteConsecutivo(plantaId: string, year: number): Promise<string> {
+    const snapshot = await getDocs(query(collection(this.firestore, SGM_REGISTROS_MEDIDORES_COLLECTION), where('plantaId', '==', plantaId)));
+    return nextConsecutivo(snapshot.docs.map(item => item.data() as RegistroMedidores), year);
+  }
+
+  /** Antes de guardar vuelve a consultar el último consecutivo y asigna el que sigue. */
+  async createRegistro(payload: RegistroMedidoresPayload): Promise<{ id: string; consecutivo: string }> {
     await this.plantScope.initialize();
     const plantaId = this.plantScope.resolveWritePlantId(payload.plantaId);
     const uid = this.auth.currentUser?.uid || null;
+    const consecutivo = await this.getSiguienteConsecutivo(plantaId, Number(payload.fechaRegistro.slice(0, 4)));
     const reference = await addDoc(collection(this.firestore, SGM_REGISTROS_MEDIDORES_COLLECTION), {
       ...this.clean(payload),
       plantaId,
+      consecutivo,
       createdAt: serverTimestamp(),
       createdByUid: uid,
       updatedAt: serverTimestamp(),
       updatedByUid: uid,
     });
-    return reference.id;
+    return { id: reference.id, consecutivo };
   }
 
+  /** La planta y el consecutivo no se modifican al editar. */
   async updateRegistro(registro: RegistroMedidores, payload: RegistroMedidoresPayload): Promise<void> {
     await this.plantScope.initialize();
     if (!registro.plantaId || !this.plantScope.canWritePlant(registro.plantaId)) throw new Error('PLANT_WRITE_DENIED');
@@ -57,10 +72,15 @@ export class SgmMedidoresService {
     });
   }
 
+  async deleteRegistro(registro: RegistroMedidores): Promise<void> {
+    await this.plantScope.initialize();
+    if (!registro.plantaId || !this.plantScope.canWritePlant(registro.plantaId)) throw new Error('PLANT_WRITE_DENIED');
+    await deleteDoc(doc(this.firestore, SGM_REGISTROS_MEDIDORES_COLLECTION, registro.id));
+  }
+
   private clean(payload: RegistroMedidoresPayload) {
     return {
       almacenamiento: payload.almacenamiento.trim(),
-      consecutivo: payload.consecutivo.trim(),
       fechaRegistro: payload.fechaRegistro,
       medidores: payload.medidores.map((medidor, index) => ({
         no: index + 1,

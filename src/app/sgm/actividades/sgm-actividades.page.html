@@ -1,0 +1,31 @@
+<app-menu titulo="sgmActividades"></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack sgm-page">
+    <header class="page-toolbar panel-heading">
+      <div>
+        <h1>Actividades</h1>
+        <p>Programa y da seguimiento a las actividades de los medidores.</p>
+      </div>
+    </header>
+
+    <ion-card class="autolog-card activity-sections">
+      <ion-card-content>
+        <ion-segment [value]="seccionActiva" (ionChange)="cambiarSeccion($event.detail.value)" scrollable aria-label="Tipo de actividad">
+          <ion-segment-button *ngFor="let item of secciones" [value]="item.id">
+            <ion-icon [name]="item.icon" aria-hidden="true"></ion-icon>
+            <ion-label>{{ item.label }}</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <section [attr.aria-label]="seccion.title">
+          <div class="section-heading"><div><h2>{{ seccion.title }}</h2><p>{{ seccion.description }}</p></div></div>
+          <div class="section-state">
+            <ion-icon [name]="seccion.icon"></ion-icon>
+            <strong>{{ seccion.empty }}</strong>
+          </div>
+        </section>
+      </ion-card-content>
+    </ion-card>
+  </main>
+</ion-content>

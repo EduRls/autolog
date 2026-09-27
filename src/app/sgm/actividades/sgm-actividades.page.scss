@@ -1,0 +1,9 @@
+.activity-sections { margin: 0; }
+.activity-sections ion-segment { max-width: 760px; margin-bottom: 24px; }
+.activity-sections ion-segment-button { --padding-start: 12px; --padding-end: 12px; flex-direction: row; gap: 6px; }
+.activity-sections ion-segment-button ion-icon { margin: 0; font-size: 16px; }
+
+@media (max-width: 767px) {
+  .activity-sections ion-card-content { padding-inline: 10px; }
+  .activity-sections ion-segment-button ion-icon { display: none; }
+}

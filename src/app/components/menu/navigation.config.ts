@@ -51,6 +51,9 @@ export const AUTOLOG_NAVIGATION: NavigationGroup[] = [
   { id: 'sgm', label: 'SGM', icon: 'speedometer-outline', collapsible: true, items: [
     { id: 'sgm-dashboard', label: 'Dashboard', icon: 'bar-chart-outline', route: '/sgm', title: 'Dashboard SGM', description: 'Consulta el resumen general de medidores y lecturas.', keywords: ['sgm', 'dashboard', 'panel', 'medidores', 'resumen'], permission: 'global' },
     { id: 'sgm-meters', label: 'Medidores', icon: 'pulse-outline', route: '/sgm/medidores', title: 'Medidores', description: 'Administra y consulta los medidores registrados.', keywords: ['sgm', 'medidores', 'lecturas', 'sensores'], permission: 'global' },
+    { id: 'sgm-activities', label: 'Actividades', icon: 'clipboard-outline', route: '/sgm/actividades', title: 'Actividades', description: 'Programa y da seguimiento a las actividades de los medidores.', keywords: ['sgm', 'actividades', 'tareas', 'medidores'], permission: 'global' },
+    { id: 'sgm-alerts', label: 'Alertas', icon: 'notifications-outline', route: '/sgm/alertas', title: 'Alertas', description: 'Consulta las alertas generadas por los medidores y sus actividades.', keywords: ['sgm', 'alertas', 'avisos', 'medidores'], permission: 'global' },
+    { id: 'sgm-activity-history', label: 'Historial de actividades', icon: 'time-outline', route: '/sgm/historial-actividades', title: 'Historial de actividades', description: 'Consulta las actividades realizadas y su registro histórico.', keywords: ['sgm', 'historial', 'actividades', 'bitácora', 'bitacora'], permission: 'global' },
   ] },
   { id: 'administration', label: 'Administración', icon: 'settings-outline', collapsible: true, items: [
     { id: 'plants', label: 'Plantas', icon: 'business-outline', route: '/plantas', title: 'Plantas', description: 'Administra el catálogo global de plantas.', keywords: ['plantas', 'sedes', 'alcance'], permission: 'admin' },
@@ -99,5 +102,8 @@ export const EXTRA_PAGE_TITLES: Record<string, PageMeta> = {
   yo: { title: 'Mi perfil', description: 'Consulta la información de tu cuenta.' },
   sgmDashboard: { title: 'Dashboard SGM', description: 'Consulta el resumen general de medidores y lecturas.' },
   sgmMedidores: { title: 'Medidores', description: 'Administra y consulta los medidores registrados.' },
+  sgmActividades: { title: 'Actividades', description: 'Programa y da seguimiento a las actividades de los medidores.' },
+  sgmAlertas: { title: 'Alertas', description: 'Consulta las alertas generadas por los medidores y sus actividades.' },
+  sgmHistorialActividades: { title: 'Historial de actividades', description: 'Consulta las actividades realizadas y su registro histórico.' },
   plantas: { title: 'Plantas', description: 'Administra el catálogo global de plantas.' },
 };

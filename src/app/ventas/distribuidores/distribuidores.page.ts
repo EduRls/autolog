@@ -311,7 +311,7 @@ export class DistribuidoresPage implements OnInit, OnDestroy {
       this.canAdminister = await this.authorizationService.isCurrentUserAdmin();
       const role = this.plantScope.snapshot().profile?.rol;
       this.canCreate = role === 'admin' || role === 'planta';
-      this.canManageAsistiaAccess = role === 'admin' || role === 'planta';
+      this.canManageAsistiaAccess = role === 'admin' || role === 'capturista' || role === 'planta';
       this.canDelete = role === 'admin' || role === 'planta';
       this.plantScope.state$.subscribe(() => this.canWrite = !this.plantScope.isReadOnly());
     } catch {

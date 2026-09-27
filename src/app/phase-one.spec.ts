@@ -38,15 +38,35 @@ describe('Fase 1: cuentas y personal operativo', () => {
     ]);
   });
   it('el acceso del distribuidor fija sus permisos sin selectores administrativos', async () => {
-    const users = jasmine.createSpyObj<UserAdminService>('users', ['createUser']);
-    users.createUser.and.resolveTo({uid: 'new', email: 'worker@example.com', activo: true});
+    const users = jasmine.createSpyObj<UserAdminService>('users', ['createManagedDistributorUser']);
+    users.createManagedDistributorUser.and.resolveTo({uid: 'new', email: 'jperez@asistia.autolog.mx', usuario: 'jperez', temporaryPassword: 'As!temporary1', activo: true});
     const component = new AccesoDistribuidorComponent(users, modal(), toast());
     component.distribuidorId = 'd1';
     component.ngOnInit();
-    component.form.patchValue({email: 'worker@example.com', usuario: 'Uno', password: 'temporary1'});
     await component.save();
-    expect(users.createUser).toHaveBeenCalledWith(jasmine.objectContaining({rol: 'empleado', tipoPersonal: 'DISTRIBUIDOR', distribuidorId: 'd1', accesoAutolog: false, accesoAsistencia: true}));
-    expect(component.form.controls.password.value).toBe('');
+    expect(users.createManagedDistributorUser).toHaveBeenCalledWith('d1');
+    expect(component.form.value).toEqual(jasmine.objectContaining({email: 'jperez@asistia.autolog.mx', usuario: 'jperez', password: 'As!temporary1'}));
+  });
+  it('confirma con un toast cuando se cambia la contraseña ASISTIA', async () => {
+    const users = jasmine.createSpyObj<UserAdminService>('users', ['updateUser']);
+    users.updateUser.and.resolveTo({uid: 'worker-1', email: 'jperez@asistia.autolog.mx', activo: true});
+    const toastController = toast();
+    const component = new AccesoDistribuidorComponent(users, modal(), toastController);
+    component.distribuidorId = 'd1';
+    component.usuarioData = {
+      id: 'worker-1', uid: 'worker-1', email: 'jperez@asistia.autolog.mx', usuario: 'jperez',
+      rol: 'empleado', activo: true, tipoPersonal: 'DISTRIBUIDOR', distribuidorId: 'd1',
+      accesoAutolog: false, accesoAsistencia: true, plantaIdPrincipal: null,
+      plantasLectura: [], accesoTodasPlantas: false, seccionesMenu: [],
+    };
+    component.ngOnInit();
+    component.form.controls.password.setValue('NuevaSegura123!');
+    await component.save();
+    expect(users.updateUser).toHaveBeenCalledWith(jasmine.objectContaining({password: 'NuevaSegura123!'}));
+    expect(toastController.create).toHaveBeenCalledWith(jasmine.objectContaining({
+      message: 'Contraseña actualizada correctamente.',
+      color: 'success',
+    }));
   });
   it('una cuenta de distribuidor no supera el guard AUTOLOG', async () => {
     const authorization = new AuthorizationService({} as Auth, {} as Firestore);

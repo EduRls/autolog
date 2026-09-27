@@ -67,12 +67,19 @@ export interface UpdateUsuarioAutologRequest {
   plantasLectura?: string[];
   accesoTodasPlantas?: boolean;
   seccionesMenu?: NavigationSectionId[];
+  /** Blank or omitted keeps the current password. */
+  password?: string;
 }
 
 export interface UsuarioAutologResult {
   uid: string;
   email: string;
   activo: boolean;
+}
+
+export interface ManagedDistributorAccessResult extends UsuarioAutologResult {
+  usuario: string;
+  temporaryPassword: string;
 }
 
 /** Values persisted by the current UI and legacy administrative profiles. */

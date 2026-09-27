@@ -25,6 +25,7 @@ import {
   UsuarioAutolog,
   UsuarioAutologDocument,
   UsuarioAutologResult,
+  ManagedDistributorAccessResult,
 } from '../../models/usuario-autolog.model';
 
 export interface UsuariosPageResult {
@@ -146,6 +147,15 @@ export class UserAdminService {
     return response.data;
   }
 
+  async createManagedDistributorUser(distribuidorId: string): Promise<ManagedDistributorAccessResult> {
+    const callable = httpsCallable<
+      { distribuidorId: string },
+      ManagedDistributorAccessResult
+    >(this.functions, 'createManagedDistributorUser');
+    const response = await callable({ distribuidorId });
+    return response.data;
+  }
+
   async updateUser(request: UpdateUsuarioAutologRequest): Promise<UsuarioAutologResult> {
     const callable = httpsCallable<UpdateUsuarioAutologRequest, UsuarioAutologResult>(
       this.functions,
@@ -165,6 +175,7 @@ export class UserAdminService {
       plantasLectura: request.plantasLectura ?? [],
       accesoTodasPlantas: request.accesoTodasPlantas ?? ['admin', 'capturista'].includes(request.rol),
       seccionesMenu: request.seccionesMenu,
+      ...(request.password ? { password: request.password } : {}),
     });
     return response.data;
   }

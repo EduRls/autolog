@@ -5,6 +5,11 @@
 .access-notice > ion-icon { flex: 0 0 22px; margin-top: 1px; font-size: 22px; }
 .access-notice strong { font-size: 13px; }
 .access-notice p { margin: 4px 0 0; color: var(--autolog-text-secondary); font-size: 12px; line-height: 1.5; }
+.credentials-created { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 14px 16px; color: var(--ion-color-success-shade); border: 1px solid rgba(var(--ion-color-success-rgb), .28); border-radius: var(--autolog-radius-md); background: rgba(var(--ion-color-success-rgb), .08); }
+.credentials-created > ion-icon { font-size: 24px; }
+.credentials-created strong { font-size: 13px; }
+.credentials-created p { margin: 3px 0 0; color: var(--autolog-text-secondary); font-size: 11px; line-height: 1.45; }
+.field input[readonly] { color: var(--autolog-text); background: var(--autolog-bg); cursor: default; }
 .form-section { display: grid; gap: 16px; padding: 18px; border: 1px solid var(--autolog-border); border-radius: var(--autolog-radius-md); background: #fff; }
 .section-copy { display: flex; align-items: flex-start; gap: 11px; padding-bottom: 14px; border-bottom: 1px solid var(--autolog-border); }
 .section-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; color: var(--autolog-primary); border-radius: 10px; background: var(--autolog-primary-soft); font-size: 18px; }
@@ -27,4 +32,6 @@
   .required-note { margin: 0; }
   .footer-actions { width: 100%; }
   .footer-actions .form-button { flex: 1; }
+  .credentials-created { grid-template-columns: auto 1fr; }
+  .credentials-created .form-button { grid-column: 1 / -1; }
 }

@@ -65,8 +65,42 @@ export interface AttendanceDashboardResponse {
   recentActivity: AttendanceDashboardActivity[];
 }
 
+export interface AttendanceCalendarDay {
+  date: string;
+  records: number;
+  completed: number;
+  open: number;
+}
+
+export interface AttendanceCalendarResponse {
+  month: string;
+  days: AttendanceCalendarDay[];
+}
+
+export interface AttendanceScheduleAssignment {
+  distributorId: string;
+  distributorName: string;
+  identifier: string | null;
+  scheduleName: string;
+  startTime: string;
+  endTime: string;
+  days: number[];
+  toleranceMinutes: number;
+  updatedAt: string | null;
+}
+
+export interface AttendanceScheduleInput {
+  distributorIds: string[];
+  scheduleName: string;
+  startTime: string;
+  endTime: string;
+  days: number[];
+  toleranceMinutes: number;
+}
+
 export interface AttendanceAdminRecord {
   verification?: { checkIn: AttendanceValidationEvidence | null; checkOut: AttendanceValidationEvidence | null };
+  schedule?: { checkIn: AttendanceScheduleEvaluation | null; checkOut: AttendanceScheduleEvaluation | null };
   id: string;
   distributor: {
     id: string;
@@ -79,6 +113,18 @@ export interface AttendanceAdminRecord {
   workedMinutes: number;
   pointName: string;
   status: AttendanceDayStatus;
+}
+
+export interface AttendanceScheduleEvaluation {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  days: number[];
+  toleranceMinutes: number;
+  status: 'NON_WORKING_DAY' | 'ON_TIME' | 'LATE' | 'EARLY_DEPARTURE' | 'ON_TIME_DEPARTURE';
+  differenceMinutes: number;
+  scheduledDay: boolean;
 }
 
 export interface AttendanceValidationEvidence {

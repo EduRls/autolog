@@ -31,6 +31,8 @@ export class AsistenciaPuntosPage implements OnInit, AfterViewInit, OnDestroy {
   selectedPoint: AttendancePoint | null = null;
   editorOpen = false;
   saving = false;
+  saveError = '';
+  discardedAssignments = 0;
   distributorSearch = '';
   form: AttendancePointInput = this.emptyForm();
 
@@ -39,6 +41,7 @@ export class AsistenciaPuntosPage implements OnInit, AfterViewInit, OnDestroy {
   private radiusCircle?: L.Circle;
   private resizeObserver?: ResizeObserver;
   private layoutSubscription?: Subscription;
+  private distributorsLoaded = false;
 
   constructor(
     private readonly pointsService: AttendancePointsService,
@@ -75,6 +78,7 @@ export class AsistenciaPuntosPage implements OnInit, AfterViewInit, OnDestroy {
       ]);
       this.puntos = puntos;
       this.distribuidores = distribuidores;
+      this.distributorsLoaded = true;
       this.state = puntos.length ? 'data' : 'empty';
     } catch (error) {
       console.error('[AsistenciaPuntosPage.load]', error);
@@ -86,6 +90,8 @@ export class AsistenciaPuntosPage implements OnInit, AfterViewInit, OnDestroy {
     this.selectedPoint = null;
     this.selectedIds.clear();
     this.form = this.emptyForm();
+    this.saveError = '';
+    this.discardedAssignments = 0;
     this.editorOpen = true;
     this.openMap();
   }
@@ -97,7 +103,14 @@ export class AsistenciaPuntosPage implements OnInit, AfterViewInit, OnDestroy {
       longitude: point.longitude, radioMetros: point.radioMetros, activo: point.activo, distribuidorIds: [],
     };
     this.editorOpen = true;
-    this.selectedIds = new Set(await this.pointsService.getAssignments(point.id));
+    this.saveError = '';
+    const assignments = await this.pointsService.getAssignments(point.id);
+    const activeIds = new Set(this.distribuidores.map(distributor => distributor.id));
+    const validAssignments = this.distributorsLoaded
+      ? assignments.filter(id => activeIds.has(id))
+      : assignments;
+    this.discardedAssignments = assignments.length - validAssignments.length;
+    this.selectedIds = new Set(validAssignments);
     this.openMap();
   }
 
@@ -121,12 +134,20 @@ export class AsistenciaPuntosPage implements OnInit, AfterViewInit, OnDestroy {
   async save(): Promise<void> {
     if (!this.validForm || this.saving) return;
     this.saving = true;
-    const input = { ...this.form, distribuidorIds: [...this.selectedIds] };
+    this.saveError = '';
+    const activeIds = new Set(this.distribuidores.map(distributor => distributor.id));
+    const distribuidorIds = this.distributorsLoaded
+      ? [...this.selectedIds].filter(id => activeIds.has(id))
+      : [...this.selectedIds];
+    const input = { ...this.form, distribuidorIds };
     try {
       if (this.selectedPoint) await this.pointsService.updatePoint(this.selectedPoint.id, input);
       else await this.pointsService.createPoint(input);
       this.editorOpen = false;
       await this.load();
+    } catch (error) {
+      console.error('[AsistenciaPuntosPage.save]', error);
+      this.saveError = this.saveErrorMessage(error);
     } finally { this.saving = false; }
   }
 
@@ -191,6 +212,17 @@ export class AsistenciaPuntosPage implements OnInit, AfterViewInit, OnDestroy {
 
   private emptyForm(): AttendancePointInput {
     return { nombre: '', descripcion: '', latitude: Number.NaN, longitude: Number.NaN, radioMetros: ATTENDANCE_POINT_RADIUS_DEFAULT, activo: true, distribuidorIds: [] };
+  }
+
+  private saveErrorMessage(error: unknown): string {
+    const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
+    if (code.includes('failed-precondition')) {
+      return 'Uno de los distribuidores seleccionados ya no está activo. Actualiza la lista e inténtalo nuevamente.';
+    }
+    if (code.includes('invalid-argument')) {
+      return 'Revisa la ubicación, el radio y los distribuidores seleccionados.';
+    }
+    return 'No fue posible guardar el punto autorizado. Inténtalo nuevamente.';
   }
 
   private normalize(value: string): string { return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }

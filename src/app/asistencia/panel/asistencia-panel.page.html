@@ -35,6 +35,31 @@
       <a class="overview-link" routerLink="/asistencia/registros">Revisar registros <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></a>
     </section>
 
+    <ion-card class="attendance-card attendance-calendar-card">
+      <ion-card-content>
+        <div class="section-heading calendar-heading">
+          <div><span class="attendance-eyebrow">Vista mensual</span><h2>Calendario de asistencia</h2><p>Consulta rápidamente qué días tuvieron jornadas registradas.</p></div>
+          <div class="calendar-navigation">
+            <ion-button fill="clear" size="small" aria-label="Mes anterior" (click)="changeMonth(-1)"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
+            <strong>{{ calendarTitle() }}</strong>
+            <ion-button fill="clear" size="small" aria-label="Mes siguiente" (click)="changeMonth(1)"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
+          </div>
+        </div>
+        <div class="calendar-loading" *ngIf="calendarLoading"><ion-spinner name="crescent"></ion-spinner> Cargando calendario…</div>
+        <div class="calendar-loading calendar-error" *ngIf="calendarError && !calendarLoading"><ion-icon name="alert-circle-outline"></ion-icon> No fue posible cargar este mes.</div>
+        <div class="attendance-calendar" *ngIf="!calendarLoading && !calendarError">
+          <span class="calendar-weekday" *ngFor="let weekday of weekdays">{{ weekday }}</span>
+          <span class="calendar-blank" *ngFor="let blank of calendarLeadingDays"></span>
+          <a class="calendar-day" *ngFor="let day of calendarDays" [class.has-records]="day.records" [routerLink]="['/asistencia/registros']" [queryParams]="{ dateFrom: day.date, dateTo: day.date }" [attr.aria-label]="day.day + ': ' + day.records + ' jornadas'">
+            <strong>{{ day.day }}</strong>
+            <small *ngIf="day.records">{{ day.records }} jornada{{ day.records === 1 ? '' : 's' }}</small>
+            <i *ngIf="day.open" [title]="day.open + ' abiertas'"></i>
+          </a>
+        </div>
+        <div class="calendar-legend" *ngIf="!calendarLoading && !calendarError"><span><i class="complete"></i>Con registros</span><span><i class="open"></i>Jornada abierta</span></div>
+      </ion-card-content>
+    </ion-card>
+
     <ion-card class="attendance-card" *ngIf="state === 'error'">
       <ion-card-content><div class="attendance-state" role="alert"><ion-icon name="alert-circle-outline"></ion-icon><strong>No fue posible cargar la asistencia.</strong><p>Verifica tu conexión e intenta nuevamente.</p><ion-button size="small" (click)="load()">Reintentar</ion-button></div></ion-card-content>
     </ion-card>

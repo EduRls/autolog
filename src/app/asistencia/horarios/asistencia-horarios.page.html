@@ -1,0 +1,45 @@
+<app-menu></app-menu>
+
+<ion-content id="main-content" [fullscreen]="true">
+  <main class="page-stack attendance-page">
+    <section class="attendance-intro schedule-intro">
+      <div><span class="attendance-eyebrow">Configuración</span><h2>Asignación de horarios</h2><p>Selecciona uno o varios empleados y aplica su jornada laboral.</p></div>
+      <ion-button fill="outline" routerLink="/asistencia/configuracion"><ion-icon slot="start" name="arrow-back-outline"></ion-icon>Volver</ion-button>
+    </section>
+
+    <div class="attendance-state autolog-card" *ngIf="state === 'loading'"><ion-spinner name="crescent"></ion-spinner><strong>Cargando empleados y horarios…</strong></div>
+    <div class="attendance-state autolog-card" *ngIf="state === 'error'"><ion-icon name="alert-circle-outline"></ion-icon><strong>No fue posible cargar los horarios.</strong><ion-button size="small" (click)="load()">Reintentar</ion-button></div>
+
+    <section class="schedule-layout" *ngIf="state === 'ready'">
+      <ion-card class="attendance-card schedule-form-card">
+        <ion-card-content>
+          <div class="section-heading"><div><h2>Horario laboral</h2><p>La asignación reemplaza el horario anterior de los empleados seleccionados.</p></div><span class="selection-count">{{ selectedIds.size }} seleccionados</span></div>
+          <div class="schedule-form-grid">
+            <div class="attendance-field schedule-name"><label for="schedule-name">Nombre del horario</label><input id="schedule-name" [(ngModel)]="form.scheduleName" maxlength="80" placeholder="Ej. Turno matutino"></div>
+            <div class="attendance-field"><label for="schedule-start">Entrada</label><input id="schedule-start" type="time" [(ngModel)]="form.startTime"></div>
+            <div class="attendance-field"><label for="schedule-end">Salida</label><input id="schedule-end" type="time" [(ngModel)]="form.endTime"></div>
+            <div class="attendance-field"><label for="schedule-tolerance">Tolerancia (min)</label><input id="schedule-tolerance" type="number" min="0" max="180" [(ngModel)]="form.toleranceMinutes"></div>
+          </div>
+          <div class="weekday-section"><label>Días laborales</label><div class="weekday-selector"><button type="button" *ngFor="let day of weekdays" [class.selected]="form.days.includes(day.value)" (click)="toggleDay(day.value)" [attr.aria-pressed]="form.days.includes(day.value)"><strong>{{ day.short }}</strong><span>{{ day.label }}</span></button></div></div>
+          <div class="employee-toolbar"><div class="attendance-field"><label for="employee-search">Empleados</label><input id="employee-search" [(ngModel)]="search" placeholder="Buscar por nombre o número económico"></div><div><ion-button fill="clear" size="small" (click)="selectVisible()">Seleccionar visibles</ion-button><ion-button fill="clear" size="small" color="medium" (click)="clearSelection()">Limpiar</ion-button></div></div>
+          <div class="employee-list" *ngIf="filteredEmployees.length; else noEmployees">
+            <label class="employee-option" *ngFor="let employee of filteredEmployees"><input type="checkbox" [checked]="selectedIds.has(employee.id)" (change)="toggleEmployee(employee.id, $any($event.target).checked)"><span class="activity-avatar">{{ employee.nombre.charAt(0) }}</span><span><strong>{{ employee.nombre }}</strong><small>{{ employee.identificador || 'Sin número económico' }}</small></span></label>
+          </div>
+          <ng-template #noEmployees><div class="schedule-empty">No hay empleados activos que coincidan con la búsqueda.</div></ng-template>
+          <p class="point-save-error" *ngIf="saveError" role="alert"><ion-icon name="alert-circle-outline"></ion-icon>{{ saveError }}</p>
+          <ion-button expand="block" class="schedule-save" [disabled]="!validForm || saving" (click)="save()"><ion-spinner name="crescent" *ngIf="saving"></ion-spinner><ion-icon slot="start" name="calendar-number-outline" *ngIf="!saving"></ion-icon>{{ saving ? 'Guardando…' : 'Asignar horario' }}</ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="attendance-card assignments-card">
+        <ion-card-content>
+          <div class="section-heading"><div><h2>Horarios asignados</h2><p>{{ assignments.length }} empleados con jornada configurada.</p></div></div>
+          <div class="assignment-list" *ngIf="assignments.length; else noAssignments">
+            <article *ngFor="let assignment of assignments"><span class="activity-avatar">{{ assignment.distributorName.charAt(0) }}</span><div><strong>{{ assignment.distributorName }}</strong><small>{{ assignment.identifier || 'Sin número económico' }} · {{ daySummary(assignment.days) }}</small><p>{{ assignment.scheduleName }} · {{ assignment.startTime }}–{{ assignment.endTime }} · {{ assignment.toleranceMinutes }} min tolerancia</p></div></article>
+          </div>
+          <ng-template #noAssignments><div class="schedule-empty"><ion-icon name="calendar-clear-outline"></ion-icon><strong>Aún no hay horarios asignados.</strong><p>Selecciona empleados y guarda el primer horario.</p></div></ng-template>
+        </ion-card-content>
+      </ion-card>
+    </section>
+  </main>
+</ion-content>

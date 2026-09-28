@@ -12,10 +12,12 @@ export interface SidebarLayoutState {
 @Injectable({ providedIn: 'root' })
 export class SidebarLayoutService implements OnDestroy {
   private readonly storageKey = 'autolog-sidebar-collapsed';
+  private readonly navigationScrollStorageKey = 'autolog-navigation-scroll-top';
   private readonly publicRoutes = ['/login', '/reloj', '/politicas', '/politicas-pda'];
   private readonly stateSubject: BehaviorSubject<SidebarLayoutState>;
   private readonly routerSubscription: Subscription;
   private shellActive = false;
+  private navigationScrollTop = this.readNavigationScroll();
   private readonly resizeListener = () => this.handleResize(window.innerWidth);
   private readonly escapeListener = (event: KeyboardEvent) => {
     if (event.key === 'Escape') this.closeMobile();
@@ -43,6 +45,14 @@ export class SidebarLayoutService implements OnDestroy {
   }
 
   get snapshot(): SidebarLayoutState { return this.stateSubject.value; }
+
+  get savedNavigationScrollTop(): number { return this.navigationScrollTop; }
+
+  rememberNavigationScroll(value: number): void {
+    if (!Number.isFinite(value)) return;
+    this.navigationScrollTop = Math.max(0, value);
+    sessionStorage.setItem(this.navigationScrollStorageKey, String(this.navigationScrollTop));
+  }
 
   activateShell(): void {
     this.shellActive = true;
@@ -113,5 +123,10 @@ export class SidebarLayoutService implements OnDestroy {
     root.classList.toggle('autolog-shell', this.shellActive);
     root.classList.toggle('autolog-sidebar-collapsed', this.shellActive && state.collapsed && state.viewportWidth >= 768);
     root.classList.toggle('autolog-drawer-open', this.shellActive && state.mobileOpen && state.viewportWidth < 768);
+  }
+
+  private readNavigationScroll(): number {
+    const value = Number(sessionStorage.getItem(this.navigationScrollStorageKey));
+    return Number.isFinite(value) && value > 0 ? value : 0;
   }
 }

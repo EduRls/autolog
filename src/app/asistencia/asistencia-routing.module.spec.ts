@@ -47,6 +47,10 @@ describe('Routing y permisos de Asistencia', () => {
     expect(childRoute('configuracion/puntos').canActivate).toContain(adminGuard);
   });
 
+  it('protege Asignación de horarios con adminGuard', () => {
+    expect(childRoute('configuracion/horarios').canActivate).toContain(adminGuard);
+  });
+
   it('rechaza Configuración para capturista', async () => {
     const authorization = jasmine.createSpyObj<AuthorizationService>('AuthorizationService', ['isCurrentUserAdmin']);
     authorization.isCurrentUserAdmin.and.resolveTo(false);

@@ -12,6 +12,7 @@ describe('SidebarLayoutService', () => {
   beforeEach(() => {
     originalClasses = document.documentElement.className;
     localStorage.removeItem('autolog-sidebar-collapsed');
+    sessionStorage.removeItem('autolog-navigation-scroll-top');
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1366 });
     events = new Subject<NavigationEnd>();
     router = { url: '/home', events } as unknown as typeof router;
@@ -24,6 +25,7 @@ describe('SidebarLayoutService', () => {
     events.complete();
     document.documentElement.className = originalClasses;
     localStorage.removeItem('autolog-sidebar-collapsed');
+    sessionStorage.removeItem('autolog-navigation-scroll-top');
   });
 
   it('mantiene una sola fuente para ancho expandido y compacto', () => {
@@ -64,5 +66,19 @@ describe('SidebarLayoutService', () => {
     router.url = '/login';
     events.next(new NavigationEnd(1, '/login', '/login'));
     expect(document.documentElement.classList.contains('autolog-shell')).toBeFalse();
+  });
+
+  it('conserva la posición de navegación mientras se reemplazan páginas', () => {
+    service.rememberNavigationScroll(428);
+    expect(service.savedNavigationScrollTop).toBe(428);
+    service.rememberNavigationScroll(-20);
+    expect(service.savedNavigationScrollTop).toBe(0);
+  });
+
+  it('recupera la posición de navegación incluso después de recrear el servicio', () => {
+    service.rememberNavigationScroll(512);
+    service.ngOnDestroy();
+    service = new SidebarLayoutService(router, document);
+    expect(service.savedNavigationScrollTop).toBe(512);
   });
 });

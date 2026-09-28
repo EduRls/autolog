@@ -1,5 +1,8 @@
 import { Component, OnInit, isDevMode } from '@angular/core';
-import { AttendanceDashboardActivity } from '../../models/attendance.model';
+import {
+  AttendanceCalendarDay,
+  AttendanceDashboardActivity,
+} from '../../models/attendance.model';
 import { AttendanceAdminService } from '../../services/attendance/attendance-admin.service';
 
 export type AttendanceDashboardState = 'loading' | 'data' | 'empty' | 'error';
@@ -15,6 +18,11 @@ export class AsistenciaPanelPage implements OnInit {
   lastUpdated: Date | null = null;
   private loadVersion = 0;
   recentActivity: AttendanceDashboardActivity[] = [];
+  calendarMonth = this.currentMonth();
+  calendarDays: Array<AttendanceCalendarDay & { day: number }> = [];
+  calendarLoading = false;
+  calendarError = false;
+  readonly weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   metrics = [
     { key: 'present', label: 'Presentes ahora', helper: 'Con jornada abierta', value: 0, icon: 'people-outline', className: 'metric-success' },
     { key: 'checkIns', label: 'Entradas', helper: 'Registradas hoy', value: 0, icon: 'log-in-outline', className: 'metric-entry' },
@@ -42,11 +50,62 @@ export class AsistenciaPanelPage implements OnInit {
         value: dashboard.metrics[metric.key as keyof typeof dashboard.metrics],
       }));
       this.state = dashboard.metrics.movements ? 'data' : 'empty';
+      if (dashboard.date.slice(0, 7) !== this.calendarMonth) {
+        this.calendarMonth = dashboard.date.slice(0, 7);
+      }
+      await this.loadCalendar();
     } catch (error) {
       if (version !== this.loadVersion) return;
       if (isDevMode()) console.error('[getAttendanceDashboard]', error);
       this.state = 'error';
     }
+  }
+
+  async changeMonth(offset: number): Promise<void> {
+    const [year, month] = this.calendarMonth.split('-').map(Number);
+    const next = new Date(year, month - 1 + offset, 1);
+    this.calendarMonth = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+    await this.loadCalendar();
+  }
+
+  get calendarLeadingDays(): number[] {
+    const [year, month] = this.calendarMonth.split('-').map(Number);
+    const mondayIndex = (new Date(year, month - 1, 1).getDay() + 6) % 7;
+    return Array.from({ length: mondayIndex }, (_, index) => index);
+  }
+
+  calendarTitle(): string {
+    const [year, month] = this.calendarMonth.split('-').map(Number);
+    return new Intl.DateTimeFormat('es-MX', {
+      month: 'long', year: 'numeric',
+    }).format(new Date(year, month - 1, 1));
+  }
+
+  private async loadCalendar(): Promise<void> {
+    this.calendarLoading = true;
+    this.calendarError = false;
+    try {
+      const result = await this.attendance.getCalendar(this.calendarMonth);
+      const totals = new Map(result.days.map(day => [day.date, day]));
+      const [year, month] = this.calendarMonth.split('-').map(Number);
+      const count = new Date(year, month, 0).getDate();
+      this.calendarDays = Array.from({ length: count }, (_, index) => {
+        const day = index + 1;
+        const date = `${this.calendarMonth}-${String(day).padStart(2, '0')}`;
+        return { date, day, records: 0, completed: 0, open: 0, ...totals.get(date) };
+      });
+    } catch (error) {
+      if (isDevMode()) console.error('[getAttendanceCalendar]', error);
+      this.calendarError = true;
+      this.calendarDays = [];
+    } finally {
+      this.calendarLoading = false;
+    }
+  }
+
+  private currentMonth(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   }
 
   eventLabel(type: AttendanceDashboardActivity['eventType']): string {

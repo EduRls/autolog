@@ -395,7 +395,7 @@ export class HomePage implements OnInit {
     if (!this.canWrite) return;
     const modalEditEvento = await this.modalController.create({
       component: EditarEventoComponent,
-      cssClass: 'my-custom-class-agregar-evento',
+      cssClass: 'autolog-service-modal',
       componentProps: {
         evento: item
       }

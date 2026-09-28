@@ -5,11 +5,13 @@ import { AsistenciaConfiguracionPage } from './configuracion/asistencia-configur
 import { AsistenciaPanelPage } from './panel/asistencia-panel.page';
 import { AsistenciaRegistrosPage } from './registros/asistencia-registros.page';
 import { AsistenciaPuntosPage } from './puntos/asistencia-puntos.page';
+import { AsistenciaHorariosPage } from './horarios/asistencia-horarios.page';
 
 export const ASISTENCIA_ROUTES: Routes = [
   { path: '', pathMatch: 'full', component: AsistenciaPanelPage },
   { path: 'registros', component: AsistenciaRegistrosPage },
   { path: 'configuracion/puntos', component: AsistenciaPuntosPage, canActivate: [adminGuard] },
+  { path: 'configuracion/horarios', component: AsistenciaHorariosPage, canActivate: [adminGuard] },
   { path: 'configuracion', component: AsistenciaConfiguracionPage, canActivate: [adminGuard] },
 ];
 

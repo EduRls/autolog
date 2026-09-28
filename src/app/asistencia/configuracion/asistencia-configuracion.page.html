@@ -6,6 +6,18 @@
       <div><span class="attendance-eyebrow">Administración</span><h2>Configuración de asistencia</h2><p>Administra las reglas y ubicaciones utilizadas por ASISTIA.</p></div>
     </section>
 
+    <section aria-labelledby="schedule-assignment-title">
+      <ion-card class="attendance-card">
+        <ion-card-content class="settings-primary">
+          <div class="settings-primary-copy">
+            <span class="settings-primary-icon"><ion-icon name="calendar-number-outline" aria-hidden="true"></ion-icon></span>
+            <div><h3 id="schedule-assignment-title">Asignación de horarios</h3><p>Selecciona empleados y define sus días, hora de entrada, salida y tolerancia.</p></div>
+          </div>
+          <div class="settings-primary-action"><ion-button (click)="configureSchedules()">Asignar horarios</ion-button></div>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
     <section aria-labelledby="authorized-points-title">
       <span class="attendance-eyebrow">Prioridad</span>
       <ion-card class="attendance-card">

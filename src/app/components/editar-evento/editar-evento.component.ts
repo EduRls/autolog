@@ -17,6 +17,7 @@ export class EditarEventoComponent implements OnInit {
 
   editarEventoRegistro: FormGroup;
   autos: any[] = [];
+  buscarArticulo = '';
   articulos: any[] = [];
   articulosFiltrados: any[] = [];
   totalSinIVA: number = 0;
@@ -76,7 +77,8 @@ export class EditarEventoComponent implements OnInit {
   }
 
   filtrarArticulos(event: any) {
-    const query = event.target.value.toLowerCase();
+    const query = String(event?.target?.value ?? '').toLowerCase();
+    this.buscarArticulo = String(event?.target?.value ?? '');
     if (query.trim() === '') {
       this.articulosFiltrados = [];
       return;
@@ -90,6 +92,8 @@ export class EditarEventoComponent implements OnInit {
   }
 
   agregarArticulo(articulo: any) {
+    // Conserva el texto buscado, pero contrae el menú de resultados.
+    this.articulosFiltrados = [];
     const existe = this.articulosFormArray.controls.some(
       (control) => control.value.nombre === articulo.nombre
     );

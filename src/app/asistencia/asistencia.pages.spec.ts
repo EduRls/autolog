@@ -2,9 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
-import { EMPTY } from 'rxjs';
 import { AsistenciaConfiguracionPage } from './configuracion/asistencia-configuracion.page';
 import { AsistenciaPanelPage } from './panel/asistencia-panel.page';
 import { AsistenciaRegistrosPage } from './registros/asistencia-registros.page';
@@ -17,24 +16,18 @@ describe('Páginas administrativas de Asistencia', () => {
   let attendance: jasmine.SpyObj<AttendanceAdminService>;
 
   async function createPage<T>(component: new (...args: never[]) => T): Promise<ComponentFixture<T>> {
-    attendance = jasmine.createSpyObj<AttendanceAdminService>('AttendanceAdminService', ['getDashboard', 'listRecords']);
+    attendance = jasmine.createSpyObj<AttendanceAdminService>('AttendanceAdminService', ['getDashboard', 'getCalendar', 'listRecords']);
     attendance.getDashboard.and.resolveTo({
       date: '2026-09-08',
       metrics: { present: 0, checkIns: 0, checkOuts: 0, movements: 0 },
       recentActivity: [],
     });
     attendance.listRecords.and.resolveTo({ records: [], nextCursor: null, hasMore: false });
+    attendance.getCalendar.and.resolveTo({ month: '2026-09', days: [] });
     await TestBed.configureTestingModule({
       declarations: [component],
-      imports: [CommonModule, FormsModule, IonicModule.forRoot(), MenuStubComponent],
+      imports: [CommonModule, FormsModule, IonicModule.forRoot(), RouterTestingModule, MenuStubComponent],
       providers: [
-        {
-          provide: Router,
-          useValue: {
-            events: EMPTY,
-            navigateByUrl: jasmine.createSpy('navigateByUrl'),
-          },
-        },
         { provide: AttendanceAdminService, useValue: attendance },
       ],
     }).compileComponents();
@@ -50,6 +43,7 @@ describe('Páginas administrativas de Asistencia', () => {
     expect(fixture.componentInstance.metrics.every(metric => metric.value === 0)).toBeTrue();
     expect(fixture.nativeElement.textContent).toContain('No hay movimientos hoy.');
     expect(attendance.getDashboard).toHaveBeenCalled();
+    expect(attendance.getCalendar).toHaveBeenCalled();
     fixture.destroy();
   });
 
@@ -142,6 +136,8 @@ describe('Páginas administrativas de Asistencia', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Puntos autorizados');
     expect(text).toContain('Configurar puntos');
+    expect(text).toContain('Asignación de horarios');
+    expect(text).toContain('Asignar horarios');
     expect(text).toContain('Próximamente');
     expect(fixture.nativeElement.querySelector('ion-button[disabled]')).toBeNull();
     fixture.destroy();

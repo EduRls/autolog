@@ -70,6 +70,23 @@
 .future-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .future-card { min-height: 170px; margin: 0; }
 .future-card ion-card-content { display: grid; align-content: start; gap: 12px; height: 100%; }
+.calendar-heading { align-items: center; }
+.calendar-navigation { display: flex; align-items: center; gap: 5px; }
+.calendar-navigation strong { min-width: 145px; color: var(--autolog-text); font-size: 13px; text-align: center; text-transform: capitalize; }
+.attendance-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 18px; }
+.calendar-weekday { padding: 0 4px 6px; color: var(--autolog-text-muted); font-size: 9px; font-weight: 750; text-align: center; text-transform: uppercase; }
+.calendar-day { position: relative; display: grid; align-content: space-between; min-height: 72px; padding: 9px; color: var(--autolog-text-secondary); border: 1px solid var(--autolog-border); border-radius: 10px; background: var(--autolog-bg); text-decoration: none; }
+.calendar-day strong { color: var(--autolog-text); font-size: 12px; }
+.calendar-day small { color: var(--autolog-text-secondary); font-size: 9px; }
+.calendar-day.has-records { border-color: rgba(var(--ion-color-primary-rgb), .25); background: var(--autolog-primary-soft); }
+.calendar-day.has-records strong { color: var(--autolog-primary); }
+.calendar-day > i { position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; }
+.calendar-loading { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 190px; color: var(--autolog-text-secondary); font-size: 11px; }
+.calendar-error { color: var(--ion-color-danger); }
+.calendar-legend { display: flex; gap: 16px; margin-top: 12px; color: var(--autolog-text-secondary); font-size: 9px; }
+.calendar-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.calendar-legend i { width: 8px; height: 8px; border-radius: 3px; background: var(--autolog-primary); }
+.calendar-legend i.open { border-radius: 50%; background: #f59e0b; }
 
 @media (max-width: 1050px) {
   .attendance-grid, .future-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -97,4 +114,9 @@
   .settings-primary-action .coming-soon { justify-self: start; }
   .settings-primary ion-button { width: 100%; }
   .attendance-empty, .attendance-state { min-height: 190px; padding: 22px 14px; }
+  .attendance-calendar { gap: 3px; }
+  .calendar-day { min-height: 54px; padding: 6px; }
+  .calendar-day small { display: none; }
+  .calendar-heading { align-items: stretch; flex-direction: column; }
+  .calendar-navigation { justify-content: space-between; }
 }

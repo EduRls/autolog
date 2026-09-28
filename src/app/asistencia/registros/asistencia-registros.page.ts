@@ -1,5 +1,6 @@
 import { Component, OnInit, isDevMode } from '@angular/core';
-import { AttendanceAdminRecord, AttendanceDayStatus } from '../../models/attendance.model';
+import { ActivatedRoute } from '@angular/router';
+import { AttendanceAdminRecord, AttendanceDayStatus, AttendanceScheduleEvaluation } from '../../models/attendance.model';
 import { AttendanceAdminService } from '../../services/attendance/attendance-admin.service';
 
 export type AttendanceRecordsState = 'loading' | 'empty' | 'error' | 'data';
@@ -21,9 +22,14 @@ export class AsistenciaRegistrosPage implements OnInit {
   private pageCursors: Array<string | null> = [null];
   private loadVersion = 0;
 
-  constructor(private readonly attendance: AttendanceAdminService) {}
+  constructor(
+    private readonly attendance: AttendanceAdminService,
+    private readonly route: ActivatedRoute,
+  ) {}
 
   ngOnInit(): void {
+    this.dateFrom = this.route.snapshot.queryParamMap.get('dateFrom') || '';
+    this.dateTo = this.route.snapshot.queryParamMap.get('dateTo') || '';
     void this.loadPage();
   }
 
@@ -65,6 +71,18 @@ export class AsistenciaRegistrosPage implements OnInit {
 
   statusLabel(status: AttendanceDayStatus): string {
     return status === 'OPEN' ? 'En jornada' : 'Completo';
+  }
+
+  scheduleLabel(schedule: AttendanceScheduleEvaluation | null | undefined): string {
+    if (!schedule) return 'Sin horario';
+    if (schedule.status === 'LATE') {
+      return `Retardo ${Math.max(0, schedule.differenceMinutes - schedule.toleranceMinutes)} min`;
+    }
+    if (schedule.status === 'EARLY_DEPARTURE') {
+      return `Salida anticipada ${Math.abs(schedule.differenceMinutes)} min`;
+    }
+    if (schedule.status === 'NON_WORKING_DAY') return 'Día no laboral';
+    return schedule.status === 'ON_TIME' ? 'Entrada puntual' : 'Salida en horario';
   }
 
   private async loadPage(): Promise<void> {

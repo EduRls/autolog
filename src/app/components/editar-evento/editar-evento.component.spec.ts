@@ -23,4 +23,21 @@ describe('EditarEventoComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('contrae los resultados sin borrar la búsqueda al seleccionar un artículo', () => {
+    component.articulos = [
+      { nombre: 'Filtro de aceite', precio: 150 },
+      { nombre: 'Aceite de motor', precio: 220 },
+    ];
+
+    component.filtrarArticulos({ target: { value: 'aceite' } });
+    expect(component.buscarArticulo).toBe('aceite');
+    expect(component.articulosFiltrados.length).toBe(2);
+
+    component.agregarArticulo(component.articulosFiltrados[0]);
+
+    expect(component.buscarArticulo).toBe('aceite');
+    expect(component.articulosFiltrados).toEqual([]);
+    expect(component.articulosFormArray.length).toBe(1);
+  });
 });

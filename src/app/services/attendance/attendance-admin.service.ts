@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import {
+  AttendanceCalendarResponse,
   AttendanceDashboardResponse,
   AttendanceRecordsRequest,
   AttendanceRecordsResponse,
@@ -21,6 +22,17 @@ export class AttendanceAdminService {
       'getAttendanceDashboard'
     );
     return (await callable({ plantId: this.plantScope.getActivePlantId() })).data;
+  }
+
+  async getCalendar(month: string): Promise<AttendanceCalendarResponse> {
+    await this.plantScope.initialize();
+    const callable = httpsCallable<
+      { month: string; plantId: string | null }, AttendanceCalendarResponse
+    >(this.functions, 'getAttendanceCalendar');
+    return (await callable({
+      month,
+      plantId: this.plantScope.getActivePlantId(),
+    })).data;
   }
 
   async listRecords(request: AttendanceRecordsRequest): Promise<AttendanceRecordsResponse> {

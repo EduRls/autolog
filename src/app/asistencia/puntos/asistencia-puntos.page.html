@@ -41,6 +41,7 @@
           </div>
           <section class="assignment-section">
             <div class="assignment-heading"><div><h4>Asignar distribuidores</h4><p>Solo se muestran distribuidores activos.</p></div><span>{{ selectedIds.size }} seleccionados</span></div>
+            <div class="assignment-warning" *ngIf="discardedAssignments" role="status"><ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon><span>Se retiraron {{ discardedAssignments }} asignaciones de distribuidores que ya no están activos.</span></div>
             <label class="distributor-search"><ion-icon name="search-outline"></ion-icon><input name="distributorSearch" [(ngModel)]="distributorSearch" placeholder="Buscar por nombre o VGBZ" aria-label="Buscar distribuidor"></label>
             <div class="distributor-options">
               <label *ngFor="let distributor of filteredDistributors">
@@ -50,6 +51,7 @@
               <p *ngIf="!filteredDistributors.length">No hay distribuidores activos que coincidan.</p>
             </div>
           </section>
+          <div class="point-save-error" *ngIf="saveError" role="alert"><ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon><span>{{ saveError }}</span></div>
           <div class="editor-actions"><ion-button type="button" fill="outline" color="medium" (click)="cancel()">Cancelar</ion-button><ion-button *ngIf="selectedPoint" type="button" fill="outline" [color]="selectedPoint.activo ? 'danger' : 'success'" (click)="toggleActive(selectedPoint)">{{ selectedPoint.activo ? 'Desactivar' : 'Activar' }}</ion-button><ion-button type="submit" [disabled]="!validForm || saving"><ion-spinner *ngIf="saving" name="crescent"></ion-spinner><span *ngIf="!saving">Guardar punto</span></ion-button></div>
         </form>
       </section>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { Subscription, filter } from 'rxjs';
@@ -23,9 +23,10 @@ import { PlantScopeService, PlantScopeState } from 'src/app/services/plants/plan
   standalone: true,
   imports: [IonicModule, CommonModule]
 })
-export class MenuComponent implements OnInit, OnDestroy {
+export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() titulo = '';
   @ViewChild('navigationSearch') navigationSearch?: ElementRef<HTMLInputElement>;
+  @ViewChild('sidebarNavigation') sidebarNavigation?: ElementRef<HTMLElement>;
 
   readonly navigation = AUTOLOG_NAVIGATION;
   userRole = '';
@@ -42,6 +43,9 @@ export class MenuComponent implements OnInit, OnDestroy {
   private layoutSubscription?: Subscription;
   private plantSubscription?: Subscription;
   private readonly openGroupsStorageKey = 'autolog-navigation-open-groups';
+  private navigationViewReady = false;
+  private restoringNavigationScroll = false;
+  private restoreNavigationTimer?: number;
 
   constructor(
     private readonly router: Router,
@@ -74,7 +78,14 @@ export class MenuComponent implements OnInit, OnDestroy {
       });
   }
 
+  ngAfterViewInit(): void {
+    this.navigationViewReady = true;
+    this.restoreNavigationScroll();
+  }
+
   ngOnDestroy() {
+    if (this.restoreNavigationTimer) window.clearTimeout(this.restoreNavigationTimer);
+    if (!this.restoringNavigationScroll) this.saveNavigationScroll();
     this.routerSubscription?.unsubscribe();
     this.layoutSubscription?.unsubscribe();
     this.plantSubscription?.unsubscribe();
@@ -109,6 +120,14 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.userRole = String(user?.rol || '').trim().toLowerCase();
     this.userName = user?.usuario || user?.email || 'Usuario';
     this.menuSections = new Set(normalizeNavigationSections(this.userRole, user?.seccionesMenu));
+    this.restoreNavigationScroll();
+  }
+
+  onNavigationScroll(event: Event): void {
+    if (this.restoringNavigationScroll) return;
+    this.sidebarLayout.rememberNavigationScroll(
+      (event.currentTarget as HTMLElement).scrollTop,
+    );
   }
 
   onResize() { this.sidebarLayout.handleResize(window.innerWidth); }
@@ -161,7 +180,10 @@ export class MenuComponent implements OnInit, OnDestroy {
     return item ? this.itemIsActive(item) : false;
   }
 
-  navigate(item: NavigationItem) { return this.router.navigateByUrl(item.route, { replaceUrl: true }); }
+  navigate(item: NavigationItem) {
+    this.saveNavigationScroll();
+    return this.router.navigateByUrl(item.route, { replaceUrl: true });
+  }
   rToMiPerfil(){ return this.router.navigateByUrl('/mi-perfil', {replaceUrl: true}); }
 
   logout(){
@@ -245,6 +267,35 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.userRole = String(profile.rol || '').trim().toLowerCase();
     this.userName = profile.usuario || profile.email || 'Usuario';
     this.menuSections = new Set(normalizeNavigationSections(this.userRole, profile.seccionesMenu));
+    this.restoreNavigationScroll();
+  }
+
+  private saveNavigationScroll(): void {
+    const navigation = this.sidebarNavigation?.nativeElement;
+    if (navigation) this.sidebarLayout.rememberNavigationScroll(navigation.scrollTop);
+  }
+
+  private restoreNavigationScroll(): void {
+    if (!this.navigationViewReady || !this.menuSections.size) return;
+    if (this.restoreNavigationTimer) window.clearTimeout(this.restoreNavigationTimer);
+    const target = this.sidebarLayout.savedNavigationScrollTop;
+    if (target <= 0) {
+      this.restoringNavigationScroll = false;
+      return;
+    }
+    this.restoringNavigationScroll = true;
+    requestAnimationFrame(() => {
+      const navigation = this.sidebarNavigation?.nativeElement;
+      if (navigation) navigation.scrollTop = target;
+      this.restoreNavigationTimer = window.setTimeout(() => {
+        const settledNavigation = this.sidebarNavigation?.nativeElement;
+        if (settledNavigation) settledNavigation.scrollTop = target;
+        requestAnimationFrame(() => {
+          this.restoringNavigationScroll = false;
+          this.restoreNavigationTimer = undefined;
+        });
+      }, 240);
+    });
   }
 
 }

@@ -74,6 +74,27 @@ describe('AsistenciaPuntosPage', () => {
     expect(service.updatePoint).toHaveBeenCalledWith('p1', jasmine.objectContaining({ nombre: 'Sucursal actualizada', distribuidorIds: ['d1'] }));
   });
 
+  it('descarta asignaciones históricas de distribuidores que ya no están activos', async () => {
+    await page.load();
+    service.getAssignments.and.resolveTo(['d1', 'distribuidor-inactivo']);
+    await page.editPoint(point);
+    expect([...page.selectedIds]).toEqual(['d1']);
+    expect(page.discardedAssignments).toBe(1);
+    await page.save();
+    expect(service.updatePoint).toHaveBeenCalledWith('p1', jasmine.objectContaining({
+      distribuidorIds: ['d1'],
+    }));
+  });
+
+  it('presenta el error de validación sin cerrar el editor', async () => {
+    await page.load();
+    await page.editPoint(point);
+    service.updatePoint.and.rejectWith({ code: 'functions/failed-precondition' });
+    await page.save();
+    expect(page.editorOpen).toBeTrue();
+    expect(page.saveError).toContain('ya no está activo');
+  });
+
   it('rechaza guardado sin ubicación o con radio fuera del límite', () => {
     page.newPoint();
     page.form.nombre = 'Sin ubicación';

@@ -8,9 +8,10 @@ import { AsistenciaConfiguracionPage } from './configuracion/asistencia-configur
 import { AsistenciaPanelPage } from './panel/asistencia-panel.page';
 import { AsistenciaRegistrosPage } from './registros/asistencia-registros.page';
 import { AsistenciaPuntosPage } from './puntos/asistencia-puntos.page';
+import { AsistenciaHorariosPage } from './horarios/asistencia-horarios.page';
 
 @NgModule({
   imports: [CommonModule, FormsModule, IonicModule, MenuComponent, AsistenciaRoutingModule],
-  declarations: [AsistenciaPanelPage, AsistenciaRegistrosPage, AsistenciaConfiguracionPage, AsistenciaPuntosPage],
+  declarations: [AsistenciaPanelPage, AsistenciaRegistrosPage, AsistenciaConfiguracionPage, AsistenciaPuntosPage, AsistenciaHorariosPage],
 })
 export class AsistenciaModule {}

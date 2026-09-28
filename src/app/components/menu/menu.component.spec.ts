@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ElementRef } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { AuthService } from 'src/app/services/auth/auth.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
+import { SidebarLayoutService } from 'src/app/services/layout/sidebar-layout.service';
 import { MenuComponent } from './menu.component';
 
 describe('MenuComponent', () => {
@@ -44,6 +46,7 @@ describe('MenuComponent', () => {
     rootClass = document.documentElement.className;
     localStorage.removeItem('autolog-sidebar-collapsed');
     localStorage.removeItem('autolog-navigation-open-groups');
+    sessionStorage.removeItem('autolog-navigation-scroll-top');
   });
 
   afterEach(() => {
@@ -52,6 +55,7 @@ describe('MenuComponent', () => {
     document.documentElement.className = rootClass;
     localStorage.removeItem('autolog-sidebar-collapsed');
     localStorage.removeItem('autolog-navigation-open-groups');
+    sessionStorage.removeItem('autolog-navigation-scroll-top');
   });
 
   it('renderiza los grupos definidos y conserva perfil y cierre de sesión', async () => {
@@ -141,6 +145,17 @@ describe('MenuComponent', () => {
     expect(auth.logout).toHaveBeenCalled();
     expect(storage.clear).toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/login', { replaceUrl: true });
+  });
+
+  it('guarda el desplazamiento del menú antes de navegar', async () => {
+    await createMenu();
+    const navigation = { scrollTop: 360 } as HTMLElement;
+    component.sidebarNavigation = new ElementRef(navigation);
+    component.onNavigationScroll({ currentTarget: navigation } as unknown as Event);
+    const layout = TestBed.inject(SidebarLayoutService);
+    expect(layout.savedNavigationScrollTop).toBe(360);
+    await component.navigate(component.visibleGroups.flatMap(group => group.items)[0]);
+    expect(layout.savedNavigationScrollTop).toBe(360);
   });
 
   it('distingue Resumen de Panel de servicios y marca cada ruta de asistencia', async () => {

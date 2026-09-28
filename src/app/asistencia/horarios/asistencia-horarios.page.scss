@@ -1,0 +1,34 @@
+.schedule-intro ion-button { margin: 0; }
+.schedule-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(330px, .75fr); align-items: start; gap: 16px; }
+.schedule-form-card, .assignments-card { margin: 0; }
+.selection-count { display: inline-flex; min-height: 26px; align-items: center; padding: 0 9px; color: var(--autolog-primary); border-radius: 999px; background: var(--autolog-primary-soft); font-size: 10px; font-weight: 750; }
+.schedule-form-grid { display: grid; grid-template-columns: 1.4fr repeat(3, minmax(110px, .65fr)); gap: 10px; margin-top: 18px; }
+.weekday-section { display: grid; gap: 7px; margin-top: 16px; }
+.weekday-section > label { color: var(--autolog-text-secondary); font-size: 11px; font-weight: 700; }
+.weekday-selector { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.weekday-selector button { display: grid; gap: 2px; min-height: 52px; place-items: center; padding: 6px 3px; color: var(--autolog-text-secondary); border: 1px solid var(--autolog-border); border-radius: 10px; background: #fff; cursor: pointer; }
+.weekday-selector button strong { font-size: 13px; }
+.weekday-selector button span { font-size: 8px; }
+.weekday-selector button.selected { color: var(--autolog-primary); border-color: var(--autolog-primary); background: var(--autolog-primary-soft); }
+.employee-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; margin-top: 18px; }
+.employee-toolbar > div:last-child { display: flex; }
+.employee-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 300px; margin-top: 10px; border: 1px solid var(--autolog-border); border-radius: 12px; overflow: auto; }
+.employee-option { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 9px; min-height: 58px; padding: 9px 11px; border-bottom: 1px solid var(--autolog-border); cursor: pointer; }
+.employee-option:nth-child(odd) { border-right: 1px solid var(--autolog-border); }
+.employee-option input { width: 16px; height: 16px; }
+.employee-option strong, .employee-option small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.employee-option strong { color: var(--autolog-text); font-size: 11px; }
+.employee-option small { margin-top: 3px; color: var(--autolog-text-muted); font-size: 9px; }
+.schedule-save { margin: 16px 0 0; }
+.point-save-error { display: flex; align-items: center; gap: 6px; margin: 12px 0 0; color: var(--ion-color-danger); font-size: 11px; }
+.assignment-list { display: grid; gap: 8px; margin-top: 16px; }
+.assignment-list article { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; padding: 11px; border: 1px solid var(--autolog-border); border-radius: 11px; background: var(--autolog-bg); }
+.assignment-list strong, .assignment-list small { display: block; }
+.assignment-list strong { color: var(--autolog-text); font-size: 11px; }
+.assignment-list small { margin-top: 2px; color: var(--autolog-text-muted); font-size: 9px; }
+.assignment-list p { margin: 6px 0 0; color: var(--autolog-text-secondary); font-size: 10px; }
+.schedule-empty { display: grid; min-height: 150px; place-items: center; align-content: center; padding: 18px; color: var(--autolog-text-secondary); text-align: center; font-size: 11px; }
+.schedule-empty ion-icon { margin-bottom: 7px; font-size: 30px; }
+.schedule-empty p { margin: 5px 0 0; }
+@media (max-width: 1050px) { .schedule-layout { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .schedule-form-grid, .employee-list { grid-template-columns: 1fr; } .schedule-name { grid-column: auto; } .employee-option:nth-child(odd) { border-right: 0; } .weekday-selector button span { display: none; } .employee-toolbar { grid-template-columns: 1fr; } }

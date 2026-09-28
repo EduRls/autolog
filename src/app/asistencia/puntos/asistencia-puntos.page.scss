@@ -59,3 +59,7 @@
 
 @media (max-width: 960px) { .points-workspace { grid-template-columns: 1fr; } .points-list { max-height: 300px; overflow-y: auto; } }
 @media (max-width: 600px) { .form-grid, .coordinates { grid-template-columns: 1fr; } .attendance-map { min-height: 320px; } .editor-actions { align-items: stretch; flex-direction: column; } .editor-actions ion-button { margin: 0; } }
+.assignment-warning, .point-save-error { display: flex; align-items: flex-start; gap: 9px; padding: 11px 12px; border-radius: var(--autolog-radius-sm); font-size: 11px; line-height: 1.45; }
+.assignment-warning { color: #92400e; border: 1px solid #fde68a; background: #fffbeb; }
+.point-save-error { color: #b91c1c; border: 1px solid #fecaca; background: #fef2f2; }
+.assignment-warning ion-icon, .point-save-error ion-icon { flex: 0 0 17px; margin-top: 1px; font-size: 17px; }

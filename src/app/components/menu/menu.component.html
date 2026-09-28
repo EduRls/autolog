@@ -23,7 +23,7 @@
     <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
   </button>
 
-  <nav class="sidebar-nav" aria-label="Secciones de AUTOLOG">
+  <nav #sidebarNavigation class="sidebar-nav" aria-label="Secciones de AUTOLOG" (scroll)="onNavigationScroll($event)">
     <section class="nav-group" *ngFor="let group of visibleGroups" [attr.aria-labelledby]="'nav-group-' + group.id">
       <button *ngIf="group.collapsible; else directGroupTitle" class="nav-group-toggle" type="button"
         [id]="'nav-group-' + group.id" (click)="toggleGroup(group)" [attr.aria-expanded]="isGroupOpen(group)"

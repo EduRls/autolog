@@ -206,6 +206,7 @@ export class EditarEventoComponent implements OnInit {
   async agregarArticuloNuevo(){
       const modalArticulo = await this.modalController.create({
         component: AgregarArticuloComponent,
+        cssClass: ['autolog-form-modal', 'autolog-article-modal'],
       });
   
       await modalArticulo.present();

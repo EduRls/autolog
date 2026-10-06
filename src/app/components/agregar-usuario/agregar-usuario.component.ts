@@ -13,6 +13,7 @@ interface RegistroUsuarioControls {
   password: FormControl<string>;
   usuario: FormControl<string>;
   rol: FormControl<RolAdministrativo | ''>;
+  accesoTodasPlantas: FormControl<boolean>;
   plantaIdPrincipal: FormControl<string>;
   plantasLectura: FormControl<string[]>;
   seccionesMenu: FormControl<NavigationSectionId[]>;
@@ -44,18 +45,18 @@ export class AgregarUsuarioComponent implements OnInit {
       password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6), Validators.maxLength(128)] }),
       usuario: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
       rol: new FormControl<RolAdministrativo | ''>('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(admin|capturista|planta)$/)] }),
+      accesoTodasPlantas: new FormControl(false, { nonNullable: true }),
       plantaIdPrincipal: new FormControl('', { nonNullable: true }),
       plantasLectura: new FormControl<string[]>([], { nonNullable: true }),
       seccionesMenu: new FormControl<NavigationSectionId[]>([], { nonNullable: true }),
     });
     this.plantAdminService.list().subscribe(plants => this.plants = plants.filter(plant => plant.activo));
     this.registroForm.controls.rol.valueChanges.subscribe(role => {
-      const principal = this.registroForm.controls.plantaIdPrincipal;
-      if (role === 'planta') principal.addValidators(Validators.required);
-      else { principal.clearValidators(); principal.setValue(''); this.registroForm.controls.plantasLectura.setValue([]); }
-      principal.updateValueAndValidity();
+      this.registroForm.controls.accesoTodasPlantas.setValue(role === 'admin', { emitEvent: false });
+      this.applyPlantValidators();
       this.registroForm.controls.seccionesMenu.setValue(defaultNavigationSections(role));
     });
+    this.registroForm.controls.accesoTodasPlantas.valueChanges.subscribe(() => this.applyPlantValidators());
   }
 
   get permissionGroups(): NavigationGroup[] {
@@ -102,9 +103,9 @@ export class AgregarUsuarioComponent implements OnInit {
         distribuidorId: null,
         accesoAutolog: true,
         accesoAsistencia: false,
-        plantaIdPrincipal: value.rol === 'planta' ? value.plantaIdPrincipal : null,
-        plantasLectura: value.rol === 'planta' ? value.plantasLectura.filter(id => id !== value.plantaIdPrincipal) : [],
-        accesoTodasPlantas: value.rol !== 'planta',
+        plantaIdPrincipal: value.accesoTodasPlantas ? null : value.plantaIdPrincipal,
+        plantasLectura: value.accesoTodasPlantas ? [] : value.plantasLectura.filter(id => id !== value.plantaIdPrincipal),
+        accesoTodasPlantas: value.accesoTodasPlantas,
         seccionesMenu: value.seccionesMenu,
       });
       this.registroForm.controls.password.reset('');
@@ -142,5 +143,18 @@ export class AgregarUsuarioComponent implements OnInit {
     if (permission === 'admin') return role === 'admin';
     if (permission === 'global') return ['admin', 'capturista', 'planta'].includes(role);
     return Boolean(role);
+  }
+
+  private applyPlantValidators(): void {
+    const principal = this.registroForm.controls.plantaIdPrincipal;
+    const role = this.registroForm.controls.rol.value;
+    const global = role !== 'planta' && this.registroForm.controls.accesoTodasPlantas.value;
+    principal.clearValidators();
+    if (role && !global) principal.addValidators(Validators.required);
+    if (global) {
+      principal.setValue('', { emitEvent: false });
+      this.registroForm.controls.plantasLectura.setValue([], { emitEvent: false });
+    }
+    principal.updateValueAndValidity({ emitEvent: false });
   }
 }

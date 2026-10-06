@@ -17,7 +17,7 @@ describe('ExcelService', () => {
 
   it('builds styled Resumen and one dated sales sheet with typed values', () => {
     const sale = {
-      id: 'a', folio: 'GL-1', fechaVenta: new Date('2026-08-14T12:00:00Z'), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
+      id: 'a', plantaId: 'u42LityLtz1l6HM2iCN4', folio: 'GL-1', fechaVenta: new Date('2026-08-14T12:00:00Z'), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
       formaPago: 'Contado', litros: 10.5, total: 200, origen: 'gaslink', sourceHash: 'a', duplicateIndex: 0,
       primeraSincronizacion: null, ultimaSincronizacion: null, fechaGeneracionArchivo: null
     } as GaslinkSale;
@@ -31,7 +31,7 @@ describe('ExcelService', () => {
 
   it('separates sales into chronological sheets using the Mexico City day', () => {
     const sale = (id: string, fechaVenta: string, total: number): GaslinkSale => ({
-      id, folio: `GL-${id}`, fechaVenta: new Date(fechaVenta), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
+      id, plantaId: 'u42LityLtz1l6HM2iCN4', folio: `GL-${id}`, fechaVenta: new Date(fechaVenta), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
       formaPago: 'Contado', litros: 10, total, origen: 'gaslink', sourceHash: id, duplicateIndex: 0,
       primeraSincronizacion: null, ultimaSincronizacion: null, fechaGeneracionArchivo: null
     });

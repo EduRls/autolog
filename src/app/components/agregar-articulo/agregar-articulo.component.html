@@ -47,7 +47,7 @@
       <button class="form-button primary" type="submit" [disabled]="saving || articuloNuevo.invalid">
         <ion-spinner *ngIf="saving" name="crescent" aria-hidden="true"></ion-spinner>
         <ion-icon *ngIf="!saving" name="add-circle-outline" aria-hidden="true"></ion-icon>
-        {{ saving ? 'Guardando…' : 'Agregar artículo' }}
+        {{ saving ? 'Guardando…' : 'Guardar artículo' }}
       </button>
     </div>
   </footer>

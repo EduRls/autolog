@@ -93,6 +93,14 @@ export function normalizeUsuarioAutolog(id: string, data: UsuarioAutologDocument
   const rawRole = String(data.rol || '').trim().toLowerCase();
   const administrativeRole = rawRole === 'admin' || rawRole === 'capturista' || rawRole === 'planta';
   const distributor = data.tipoPersonal === 'DISTRIBUIDOR' || Boolean(data.distribuidorId);
+  const plantaIdPrincipal = typeof data.plantaIdPrincipal === 'string' && data.plantaIdPrincipal.trim()
+    ? data.plantaIdPrincipal.trim() : null;
+  const plantasLectura = Array.isArray(data.plantasLectura)
+    ? [...new Set(data.plantasLectura.filter((plantId): plantId is string =>
+      typeof plantId === 'string' && Boolean(plantId.trim())).map(plantId => plantId.trim()))]
+    : [];
+  const legacyGlobalOperator = (rawRole === 'admin' || rawRole === 'capturista') &&
+    data.accesoTodasPlantas === undefined && !plantaIdPrincipal && !plantasLectura.length;
   return {
     ...data,
     id,
@@ -104,12 +112,9 @@ export function normalizeUsuarioAutolog(id: string, data: UsuarioAutologDocument
     accesoAutolog: data.accesoAutolog === true ||
       (data.accesoAutolog === undefined && administrativeRole && !distributor),
     accesoAsistencia: data.accesoAsistencia === true,
-    plantaIdPrincipal: typeof data.plantaIdPrincipal === 'string' && data.plantaIdPrincipal.trim()
-      ? data.plantaIdPrincipal.trim() : null,
-    plantasLectura: Array.isArray(data.plantasLectura)
-      ? [...new Set(data.plantasLectura.filter((id): id is string => typeof id === 'string' && Boolean(id.trim())).map(id => id.trim()))]
-      : [],
-    accesoTodasPlantas: data.accesoTodasPlantas === true || rawRole === 'admin' || rawRole === 'capturista',
+    plantaIdPrincipal,
+    plantasLectura,
+    accesoTodasPlantas: data.accesoTodasPlantas === true || legacyGlobalOperator,
     seccionesMenu: normalizeNavigationSections(rawRole, data.seccionesMenu),
   };
 }

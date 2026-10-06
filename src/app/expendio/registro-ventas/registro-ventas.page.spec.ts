@@ -2,7 +2,7 @@ import { GaslinkSale } from '../../services/gaslink-sales/gaslink-sales.models';
 import { RegistroVentasPage, groupSales, groupSalesByDay, summarizeSales } from './registro-ventas.page';
 
 const sale = (id: string, overrides: Partial<GaslinkSale> = {}): GaslinkSale => ({
-  id, folio: 'GL-1', fechaVenta: new Date('2026-08-14T12:00:00Z'), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
+  id, plantaId: 'u42LityLtz1l6HM2iCN4', folio: 'GL-1', fechaVenta: new Date('2026-08-14T12:00:00Z'), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
   formaPago: 'Contado', litros: 10, total: 100, origen: 'gaslink', sourceHash: id, duplicateIndex: 0,
   primeraSincronizacion: null, ultimaSincronizacion: null, fechaGeneracionArchivo: null, ...overrides
 });

@@ -141,7 +141,7 @@ export class UserAdminService {
       accesoAsistencia: request.accesoAsistencia,
       plantaIdPrincipal: request.plantaIdPrincipal ?? null,
       plantasLectura: request.plantasLectura ?? [],
-      accesoTodasPlantas: request.accesoTodasPlantas ?? ['admin', 'capturista'].includes(request.rol),
+      accesoTodasPlantas: request.accesoTodasPlantas ?? false,
       seccionesMenu: request.seccionesMenu,
     });
     return response.data;
@@ -173,7 +173,7 @@ export class UserAdminService {
       accesoAsistencia: request.accesoAsistencia,
       plantaIdPrincipal: request.plantaIdPrincipal ?? null,
       plantasLectura: request.plantasLectura ?? [],
-      accesoTodasPlantas: request.accesoTodasPlantas ?? ['admin', 'capturista'].includes(request.rol),
+      accesoTodasPlantas: request.accesoTodasPlantas ?? false,
       seccionesMenu: request.seccionesMenu,
       ...(request.password ? { password: request.password } : {}),
     });

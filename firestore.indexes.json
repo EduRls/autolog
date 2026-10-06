@@ -31,6 +31,86 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "ventas_gaslink",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "vendedor",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaVenta",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_gaslink",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "plantaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaVenta",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_gaslink",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "plantaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "folio",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaVenta",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_gaslink",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "plantaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "vendedor",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaVenta",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

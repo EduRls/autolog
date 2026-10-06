@@ -34,7 +34,7 @@ describe('Fase 1: cuentas y personal operativo', () => {
     component.registroForm.controls.rol.setValue('empleado' as never);
     expect(component.registroForm.controls.rol.invalid).toBeTrue();
     expect(Object.keys(component.registroForm.controls)).toEqual([
-      'email', 'password', 'usuario', 'rol', 'plantaIdPrincipal', 'plantasLectura', 'seccionesMenu'
+      'email', 'password', 'usuario', 'rol', 'accesoTodasPlantas', 'plantaIdPrincipal', 'plantasLectura', 'seccionesMenu'
     ]);
   });
   it('el acceso del distribuidor fija sus permisos sin selectores administrativos', async () => {

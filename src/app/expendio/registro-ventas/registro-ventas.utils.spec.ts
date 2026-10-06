@@ -4,9 +4,9 @@ import { customRange, formatLiters, formatMxn, formatSaleDate, presetRange } fro
 
 describe('RegistroVentas utilities', () => {
   it('maps Firestore documents defensively and preserves duplicate folios by id', () => {
-    const first = mapGaslinkSale('one', { folio: 'GL-1', fechaVenta: Timestamp.fromMillis(0), litros: 10, total: 20 });
+    const first = mapGaslinkSale('one', { plantaId: 'u42LityLtz1l6HM2iCN4', folio: 'GL-1', fechaVenta: Timestamp.fromMillis(0), litros: 10, total: 20 });
     const second = mapGaslinkSale('two', { folio: 'GL-1' });
-    expect(first.id).toBe('one'); expect(second.id).toBe('two'); expect(second.fechaVenta).toBeNull();
+    expect(first.id).toBe('one'); expect(first.plantaId).toBe('u42LityLtz1l6HM2iCN4'); expect(second.id).toBe('two'); expect(second.fechaVenta).toBeNull();
   });
 
   it('converts Timestamp safely', () => {

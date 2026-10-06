@@ -11,6 +11,17 @@ describe('UsuarioAutolog multiplanta compatibility', () => {
     }
   });
 
+  it('honors an explicit restricted scope for a capturista', () => {
+    const user = normalizeUsuarioAutolog('capturista', {
+      email: 'capturista@test.mx', usuario: 'Capturista', rol: 'capturista',
+      plantaIdPrincipal: 'principal', plantasLectura: ['adicional'],
+      accesoTodasPlantas: false,
+    });
+    expect(user.accesoTodasPlantas).toBeFalse();
+    expect(user.plantaIdPrincipal).toBe('principal');
+    expect(user.plantasLectura).toEqual(['adicional']);
+  });
+
   it('normalizes the principal and unique read-only plants for a plant user', () => {
     const user = normalizeUsuarioAutolog('plant-user', {
       email: 'plant@test.mx', usuario: 'Plant', rol: 'planta',

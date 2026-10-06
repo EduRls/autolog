@@ -38,7 +38,15 @@ export class PlantScopeService {
     return [...new Set([...(profile.plantaIdPrincipal ? [profile.plantaIdPrincipal] : []), ...profile.plantasLectura])];
   }
   canReadPlant(plantId: string): boolean { return this.isGlobal() || this.getReadablePlantIds().includes(plantId); }
-  canWritePlant(plantId: string): boolean { return this.isGlobal() || this.getPrincipalPlantId() === plantId; }
+  canWritePlant(plantId: string): boolean {
+    const profile = this.snapshot().profile;
+    if (!profile) return false;
+    if (this.isGlobal()) return true;
+    if (profile.rol === 'admin' || profile.rol === 'capturista') {
+      return this.getReadablePlantIds().includes(plantId);
+    }
+    return this.getPrincipalPlantId() === plantId;
+  }
   getActivePlantId(): string | null { return this.snapshot().activePlantId; }
   isReadOnly(): boolean {
     const id = this.getActivePlantId();
@@ -59,7 +67,7 @@ export class PlantScopeService {
   resolveWritePlantId(requested?: string | null): string {
     const profile = this.snapshot().profile;
     if (!profile) throw new Error('PLANT_SCOPE_NOT_READY');
-    const plantId = this.isGlobal() ? (requested || this.getActivePlantId()) : profile.plantaIdPrincipal;
+    const plantId = requested || this.getActivePlantId() || profile.plantaIdPrincipal;
     if (!plantId || !this.canWritePlant(plantId)) throw new Error('PLANT_REQUIRED');
     return plantId;
   }
@@ -84,7 +92,7 @@ export class PlantScopeService {
     const visible = plants.filter(plant => plant.activo !== false).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es-MX'));
     const saved = localStorage.getItem(this.storageKey);
     const activePlantId = saved && (profile.accesoTodasPlantas || this.idsFor(profile).includes(saved))
-      ? saved : (profile.rol === 'planta' ? profile.plantaIdPrincipal : null);
+      ? saved : (profile.accesoTodasPlantas ? null : profile.plantaIdPrincipal);
     this.stateSubject.next({ ready: true, profile, plants: visible, activePlantId });
   }
 

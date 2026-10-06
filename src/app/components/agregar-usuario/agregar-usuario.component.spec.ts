@@ -15,7 +15,8 @@ describe('AgregarUsuarioComponent', () => {
     component.ngOnInit();
     component.registroForm.setValue({
       email: 'admin@example.com', password: 'secret1', usuario: 'Admin', rol,
-      plantaIdPrincipal: '', plantasLectura: [],
+      accesoTodasPlantas: rol === 'admin',
+      plantaIdPrincipal: rol === 'capturista' ? 'p1' : '', plantasLectura: [],
       seccionesMenu: rol === 'admin'
         ? ['general', 'sales', 'fleet', 'station', 'attendance', 'administration']
         : ['general', 'sales', 'fleet', 'station', 'attendance'],
@@ -23,9 +24,30 @@ describe('AgregarUsuarioComponent', () => {
 
     await component.registerUser();
 
-    expect(users.createUser).toHaveBeenCalledOnceWith(jasmine.objectContaining({ password: 'secret1', rol, tipoPersonal: 'SISTEMA', distribuidorId: null, accesoAutolog: true, accesoAsistencia: false, seccionesMenu: jasmine.arrayContaining(['general', 'fleet']) }));
+    expect(users.createUser).toHaveBeenCalledOnceWith(jasmine.objectContaining({ password: 'secret1', rol, tipoPersonal: 'SISTEMA', distribuidorId: null, accesoAutolog: true, accesoAsistencia: false, accesoTodasPlantas: rol === 'admin', seccionesMenu: jasmine.arrayContaining(['general', 'fleet']) }));
     expect(component.registroForm.controls.password.value).toBe('');
     expect(modal.dismiss).toHaveBeenCalledWith({ changed: true, uid: 'uid-new' });
+  });
+
+  it('permite asignar al capturista una planta principal y plantas adicionales', async () => {
+    const users = jasmine.createSpyObj<UserAdminService>('UserAdminService', ['createUser']);
+    users.createUser.and.resolveTo({ uid: 'uid-cap', email: 'cap@example.com', activo: true });
+    const modal = jasmine.createSpyObj<ModalController>('ModalController', ['dismiss']);
+    modal.dismiss.and.resolveTo(true);
+    const toast = jasmine.createSpyObj<ToastController>('ToastController', ['create']);
+    toast.create.and.resolveTo({ present: async () => undefined } as HTMLIonToastElement);
+    const component = new AgregarUsuarioComponent(users, modal, toast, {list: () => of([])} as never);
+    component.ngOnInit();
+    component.registroForm.patchValue({
+      email: 'cap@example.com', password: 'secret1', usuario: 'Cap', rol: 'capturista',
+      accesoTodasPlantas: false, plantaIdPrincipal: 'p1', plantasLectura: ['p2'],
+    });
+
+    await component.registerUser();
+
+    expect(users.createUser).toHaveBeenCalledWith(jasmine.objectContaining({
+      plantaIdPrincipal: 'p1', plantasLectura: ['p2'], accesoTodasPlantas: false,
+    }));
   });
 
   it('permite configurar Expendio y Asistencia de forma independiente', () => {

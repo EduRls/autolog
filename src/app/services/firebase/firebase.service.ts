@@ -81,10 +81,10 @@ export class FirebaseService {
     const registroRef = doc(this.firestore, `eventos/${reporte.id}`);
     return updateDoc(registroRef, {
       unidad: reporte.unidad,
-      kilometraje: reporte.kilometraje,
+      kilometraje: Number(reporte.kilometraje),
       servicio: reporte.servicio,
-      articulos: reporte.articulos, // Campo actualizado para incluir el array de artículos
-      costo: reporte.costo,
+      articulos: this.normalizeEventArticles(reporte.articulos),
+      costo: Number(reporte.costo),
       fecha: reporte.fecha,
       autUser: reporte.autUser, // Usuario que autorizó la operación
       updatedAt: serverTimestamp(),
@@ -292,6 +292,11 @@ export class FirebaseService {
     await this.plantScope.initialize();
     const autoId = typeof reporte?.unidad?.id === 'string' ? reporte.unidad.id : reporte?.unidad;
     if (!autoId) throw new Error('AUTO_REQUIRED');
+    const kilometraje = Number(reporte.kilometraje);
+    const costo = Number(reporte.costo);
+    if (!Number.isFinite(kilometraje) || kilometraje < 0) throw new Error('INVALID_MILEAGE');
+    if (!Number.isFinite(costo) || costo < 0) throw new Error('INVALID_COST');
+    const articulos = this.normalizeEventArticles(reporte.articulos);
     const autoRef = doc(this.firestore, `autos/${autoId}`);
     const eventRef = doc(collection(this.firestore, 'eventos'));
     await runTransaction(this.firestore, async transaction => {
@@ -303,19 +308,31 @@ export class FirebaseService {
       const uid = this.auth.currentUser?.uid || null;
       transaction.set(eventRef, {
         ...reporte,
+        kilometraje,
+        costo,
+        articulos,
         unidad: { id: auto.id, unidad: autoData.unidad },
         plantaId,
         createdAt: serverTimestamp(), createdByUid: uid,
         updatedAt: serverTimestamp(), updatedByUid: uid
       });
       transaction.update(autoRef, {
-        km_actual: reporte.kilometraje,
-        km_proximo_servicio: Number(reporte.kilometraje) >= Number(autoData.km_proximo_servicio || 0)
-          ? Number(reporte.kilometraje) + 10000 : autoData.km_proximo_servicio,
+        km_actual: kilometraje,
+        km_proximo_servicio: kilometraje + 10000,
         updatedAt: serverTimestamp(), updatedByUid: uid
       });
     });
     return eventRef.id;
+  }
+
+  private normalizeEventArticles(articulos: unknown): any[] {
+    if (!Array.isArray(articulos)) return [];
+    return articulos.map((articulo: any) => ({
+      nombre: String(articulo?.nombre || '').trim(),
+      precio: Number(articulo?.precio),
+      cantidad: Number(articulo?.cantidad),
+      proveedor: String(articulo?.proveedor || '').trim()
+    }));
   }
 
   private scopedCollection(collectionName: string, plantField: string): Observable<any[]> {

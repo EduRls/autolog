@@ -2,6 +2,7 @@ import { DocumentSnapshot, Timestamp } from '@angular/fire/firestore';
 
 export interface GaslinkSale {
   id: string;
+  plantaId: string | null;
   folio: string | null;
   fechaVenta: Date | null;
   empresa: string | null;
@@ -46,7 +47,7 @@ const number = (value: unknown): number | null => typeof value === 'number' && N
 
 export function mapGaslinkSale(id: string, data: Record<string, unknown>): GaslinkSale {
   return {
-    id, folio: text(data['folio']), fechaVenta: safeDate(data['fechaVenta']), empresa: text(data['empresa']),
+    id, plantaId: text(data['plantaId']), folio: text(data['folio']), fechaVenta: safeDate(data['fechaVenta']), empresa: text(data['empresa']),
     vendedor: text(data['vendedor']), cliente: text(data['cliente']), formaPago: text(data['formaPago']),
     litros: number(data['litros']), total: number(data['total']), origen: text(data['origen']),
     sourceHash: text(data['sourceHash']), duplicateIndex: number(data['duplicateIndex']),

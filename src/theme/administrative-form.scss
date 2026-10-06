@@ -18,6 +18,7 @@ ion-modal.autolog-form-modal.autolog-vehicle-modal {
 ion-modal.autolog-form-modal.autolog-article-modal {
   --width: min(560px, calc(100vw - 32px));
   --height: min(650px, calc(100dvh - 48px));
+  --backdrop-opacity: .62;
 }
 ion-modal.autolog-form-modal.autolog-asistia-access-modal {
   --width: min(760px, calc(100vw - 40px));

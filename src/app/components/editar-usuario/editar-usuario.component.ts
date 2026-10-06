@@ -16,6 +16,7 @@ interface EditarUsuarioControls {
   usuario: FormControl<string>;
   rol: FormControl<RolAdministrativo>;
   activo: FormControl<boolean>;
+  accesoTodasPlantas: FormControl<boolean>;
   plantaIdPrincipal: FormControl<string>;
   plantasLectura: FormControl<string[]>;
   seccionesMenu: FormControl<NavigationSectionId[]>;
@@ -51,15 +52,22 @@ export class EditarUsuarioComponent implements OnInit {
       usuario: new FormControl(this.usuarioData.usuario, { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
       rol: new FormControl(this.usuarioData.rol as RolAdministrativo, { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(admin|capturista|planta)$/)] }),
       activo: new FormControl(this.usuarioData.activo, { nonNullable: true }),
+      accesoTodasPlantas: new FormControl(
+        this.usuarioData.rol === 'admin' || this.usuarioData.accesoTodasPlantas,
+        { nonNullable: true }
+      ),
       plantaIdPrincipal: new FormControl(this.usuarioData.plantaIdPrincipal || '', { nonNullable: true }),
       plantasLectura: new FormControl<string[]>(this.usuarioData.plantasLectura || [], { nonNullable: true }),
       seccionesMenu: new FormControl<NavigationSectionId[]>(this.usuarioData.seccionesMenu, { nonNullable: true }),
     });
     this.plantAdminService.list().subscribe(plants => this.plants = plants.filter(plant => plant.activo || this.usuarioData.plantaIdPrincipal === plant.id || this.usuarioData.plantasLectura.includes(plant.id)));
     this.editarForm.controls.rol.valueChanges.subscribe(role => {
+      this.editarForm.controls.accesoTodasPlantas.setValue(role === 'admin', { emitEvent: false });
       this.applyPlantValidators(role);
       this.editarForm.controls.seccionesMenu.setValue(defaultNavigationSections(role));
     });
+    this.editarForm.controls.accesoTodasPlantas.valueChanges.subscribe(() =>
+      this.applyPlantValidators(this.editarForm.controls.rol.value));
     this.applyPlantValidators(this.editarForm.controls.rol.value);
   }
 
@@ -107,9 +115,9 @@ export class EditarUsuarioComponent implements OnInit {
         distribuidorId: null,
         accesoAutolog: true,
         accesoAsistencia: false,
-        plantaIdPrincipal: value.rol === 'planta' ? value.plantaIdPrincipal : null,
-        plantasLectura: value.rol === 'planta' ? value.plantasLectura.filter(id => id !== value.plantaIdPrincipal) : [],
-        accesoTodasPlantas: value.rol !== 'planta',
+        plantaIdPrincipal: value.accesoTodasPlantas ? null : value.plantaIdPrincipal,
+        plantasLectura: value.accesoTodasPlantas ? [] : value.plantasLectura.filter(id => id !== value.plantaIdPrincipal),
+        accesoTodasPlantas: value.accesoTodasPlantas,
         seccionesMenu: value.seccionesMenu,
       });
       this.changed = true;
@@ -159,8 +167,13 @@ export class EditarUsuarioComponent implements OnInit {
 
   private applyPlantValidators(role: RolAdministrativo): void {
     const principal = this.editarForm.controls.plantaIdPrincipal;
-    if (role === 'planta') principal.addValidators(Validators.required);
-    else { principal.clearValidators(); principal.setValue(''); this.editarForm.controls.plantasLectura.setValue([]); }
+    const global = role !== 'planta' && this.editarForm.controls.accesoTodasPlantas.value;
+    principal.clearValidators();
+    if (!global) principal.addValidators(Validators.required);
+    if (global) {
+      principal.setValue('', { emitEvent: false });
+      this.editarForm.controls.plantasLectura.setValue([], { emitEvent: false });
+    }
     principal.updateValueAndValidity({ emitEvent: false });
   }
 

@@ -22,7 +22,7 @@ describe('EditarUsuarioComponent', () => {
     };
     component.ngOnInit();
     expect(Object.keys(component.editarForm.controls)).toEqual([
-      'email', 'usuario', 'rol', 'activo', 'plantaIdPrincipal', 'plantasLectura', 'seccionesMenu'
+      'email', 'usuario', 'rol', 'activo', 'accesoTodasPlantas', 'plantaIdPrincipal', 'plantasLectura', 'seccionesMenu'
     ]);
   });
 

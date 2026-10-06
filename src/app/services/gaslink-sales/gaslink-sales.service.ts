@@ -3,13 +3,21 @@ import { Firestore, QueryConstraint, collection, documentId, getDocs, limit, ord
 import { GaslinkSale, GaslinkSalesFilters, GaslinkSalesPage, mapGaslinkSale } from './gaslink-sales.models';
 import { DocumentSnapshot } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
+import { PlantScopeService } from '../plants/plant-scope.service';
 
 @Injectable({ providedIn: 'root' })
 export class GaslinkSalesService {
-  constructor(private readonly firestore: Firestore) {}
+  constructor(
+    private readonly firestore: Firestore,
+    private readonly plantScope: PlantScopeService
+  ) {}
 
   async getSales(filters: GaslinkSalesFilters, pageSize: number, cursor?: DocumentSnapshot): Promise<GaslinkSalesPage> {
+    await this.plantScope.initialize();
+    const plantId = this.plantScope.getActivePlantId();
+    if (!plantId && !this.plantScope.isGlobal()) throw new Error('PLANT_CONTEXT_REQUIRED');
     const constraints: QueryConstraint[] = [
+      ...(plantId ? [where('plantaId', '==', plantId)] : []),
       where('fechaVenta', '>=', filters.startDate), where('fechaVenta', '<', filters.endDate),
       ...(filters.folio ? [where('folio', '==', filters.folio)] : []),
       ...(filters.vendedor ? [where('vendedor', '==', filters.vendedor)] : []),

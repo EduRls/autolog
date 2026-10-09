@@ -41,5 +41,6 @@ apx-chart { display: block; width: 100%; max-width: 100%; overflow: hidden; }
 @media (max-width: 600px) { .metrics-grid { grid-template-columns: 1fr; }.filter-card, .table-card, .chart-card { padding: 14px; }.filter-grid { grid-template-columns: 1fr; }.filter-actions { display: grid; grid-template-columns: 1fr 1fr; }.presets { display: grid; grid-template-columns: 1fr 1fr; }.page-toolbar ion-button { width: 100%; }.table-heading { align-items: end; }.metric-card { min-height: 92px; }:host ::ng-deep .apexcharts-legend { position: relative !important; }.chart-skeleton { height: 300px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 .clave-web code { font-size: 12px; }
+.folio-temporal { display: block; margin-top: 2px; font-weight: 400; font-size: 11px; color: var(--autolog-text-secondary); }
 .pending { color: var(--autolog-text-secondary); font-size: 12px; }
 .map-link { font-weight: 600; }

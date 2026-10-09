@@ -19,6 +19,8 @@ export interface GaslinkSale {
   fechaExtraccion: Date | null;
   claveWeb: string | null;
   mapsUrl: string | null;
+  folioTemporal: string | null;
+  esTemporalApp: boolean;
 }
 
 export interface GaslinkSalesFilters {
@@ -73,6 +75,7 @@ export function mapGaslinkSale(id: string, data: Record<string, unknown>): Gasli
     litros: number(data['litros']), total: number(data['total']), origen: text(data['origen']),
     sourceHash: text(data['sourceHash']), duplicateIndex: number(data['duplicateIndex']),
     primeraSincronizacion: safeDate(data['primeraSincronizacion']), ultimaSincronizacion: safeDate(data['ultimaSincronizacion']),
-    fechaExtraccion: safeDate(data['fechaExtraccion']), claveWeb: text(data['claveWeb']), mapsUrl: hasValidLocation(data['ubicacion']) ? safeMapsUrl(data['mapsUrl']) : null
+    fechaExtraccion: safeDate(data['fechaExtraccion']), claveWeb: text(data['claveWeb']), mapsUrl: hasValidLocation(data['ubicacion']) ? safeMapsUrl(data['mapsUrl']) : null,
+    folioTemporal: text(data['folioTemporal']), esTemporalApp: data['esTemporalApp'] === true
   };
 }

@@ -16,6 +16,16 @@ describe('mapGaslinkSale enrichment fields', () => {
     expect(safeMapsUrl(undefined)).toBeNull();
   });
 
+  it('exposes the temporary folio as secondary data', () => {
+    const sale = mapGaslinkSale('a', { folio: 'GL-2026-V027-00194', folioTemporal: 'TMP-20261009-132023', esTemporalApp: true });
+    expect(sale.folio).toBe('GL-2026-V027-00194');
+    expect(sale.folioTemporal).toBe('TMP-20261009-132023');
+    expect(sale.esTemporalApp).toBeTrue();
+    const plain = mapGaslinkSale('b', { folio: 'GL-1' });
+    expect(plain.folioTemporal).toBeNull();
+    expect(plain.esTemporalApp).toBeFalse();
+  });
+
   it('no longer exposes fechaGeneracionArchivo', () => {
     expect('fechaGeneracionArchivo' in mapGaslinkSale('a', {})).toBeFalse();
   });

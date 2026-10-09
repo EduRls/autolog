@@ -67,6 +67,7 @@ export const AUTOLOG_NAVIGATION_SECTION_IDS: NavigationSectionId[] =
 export function defaultNavigationSections(role: string): NavigationSectionId[] {
   const normalizedRole = String(role || '').trim().toLowerCase();
   if (normalizedRole === 'admin') return [...AUTOLOG_NAVIGATION_SECTION_IDS];
+  if (normalizedRole === 'sgm') return ['sgm'];
   if (normalizedRole === 'capturista') return ['general', 'sales', 'fleet', 'station', 'attendance', 'sgm'];
   if (normalizedRole === 'planta') return ['general', 'fleet', 'attendance'];
   return [];
@@ -75,6 +76,7 @@ export function defaultNavigationSections(role: string): NavigationSectionId[] {
 export function availableNavigationSections(role: string): NavigationSectionId[] {
   const normalizedRole = String(role || '').trim().toLowerCase();
   if (normalizedRole === 'admin') return [...AUTOLOG_NAVIGATION_SECTION_IDS];
+  if (normalizedRole === 'sgm') return ['sgm'];
   if (normalizedRole === 'capturista' || normalizedRole === 'planta') {
     return ['general', 'sales', 'fleet', 'station', 'attendance', 'sgm'];
   }
@@ -87,7 +89,7 @@ export function normalizeNavigationSections(role: string, value: unknown): Navig
   if (!Array.isArray(value)) return defaultNavigationSections(role);
   const selected = value.filter((section): section is NavigationSectionId =>
     typeof section === 'string' && allowed.has(section as NavigationSectionId));
-  const required: NavigationSectionId[] = normalizedRole === 'planta'
+  const required: NavigationSectionId[] = normalizedRole === 'sgm' ? ['sgm'] : normalizedRole === 'planta'
     ? ['general', 'fleet', 'attendance']
     : normalizedRole === 'admin' ? ['general', 'sgm'] : ['general'];
   return [...new Set<NavigationSectionId>([...required, ...selected])];

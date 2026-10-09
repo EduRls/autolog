@@ -23,7 +23,7 @@ service cloud.firestore {
 
     function canAccessAutolog() {
       return activeUser()
-        && userProfile().rol in ['admin', 'Admin', 'ADMIN', 'capturista', 'Capturista', 'CAPTURISTA', 'planta', 'Planta', 'PLANTA']
+        && userProfile().rol in ['admin', 'Admin', 'ADMIN', 'sgm', 'Sgm', 'SGM', 'capturista', 'Capturista', 'CAPTURISTA', 'planta', 'Planta', 'PLANTA']
         && (!('tipoPersonal' in userProfile()) || userProfile().tipoPersonal != 'DISTRIBUIDOR')
         && (!('accesoAutolog' in userProfile()) || userProfile().accesoAutolog == true)
         && (!(userProfile().rol in ['planta', 'Planta', 'PLANTA'])
@@ -34,6 +34,11 @@ service cloud.firestore {
     function isAdmin() {
       return canAccessAutolog()
         && userProfile().rol in ['admin', 'Admin', 'ADMIN'];
+    }
+
+    function isSgmAdmin() {
+      return canAccessAutolog()
+        && userProfile().rol in ['sgm', 'Sgm', 'SGM'];
     }
 
     function isCapturista() {
@@ -48,6 +53,14 @@ service cloud.firestore {
 
     function isGlobalOperator() {
       return isAdmin() || isCapturista();
+    }
+
+    function canAccessSales() {
+      return canAccessAutolog()
+        && (isAdmin()
+          || !('seccionesMenu' in userProfile())
+          || (userProfile().seccionesMenu is list
+            && 'sales' in userProfile().seccionesMenu));
     }
 
     function canReadPlant(plantaId) {
@@ -116,7 +129,7 @@ service cloud.firestore {
     }
 
     match /plantas/{plantaId} {
-      allow read: if isGlobalOperator()
+      allow read: if isSgmAdmin() || isGlobalOperator()
         || (isPlantUser() && (plantaId == userProfile().plantaIdPrincipal
           || (userProfile().plantasLectura is list
             && plantaId in userProfile().plantasLectura)));
@@ -201,7 +214,7 @@ service cloud.firestore {
     }
 
     match /venta_sospechosa/{id} {
-      allow read: if canReadPlant(resource.data.plantaId);
+      allow read: if canAccessSales();
       allow create: if canWritePlant(request.resource.data.plantaId);
       allow update: if canWritePlant(resource.data.plantaId) && samePlant();
       allow delete: if canWritePlant(resource.data.plantaId);
@@ -253,19 +266,19 @@ service cloud.firestore {
     }
 
     match /sgm_registros_medidores/{registroId} {
-      allow read: if canReadPlant(resource.data.plantaId);
-      allow create: if canWritePlant(request.resource.data.plantaId)
+      allow read: if isSgmAdmin() || canReadPlant(resource.data.plantaId);
+      allow create: if (isSgmAdmin() || canWritePlant(request.resource.data.plantaId))
         && validRegistroMedidores(request.resource.data)
         && request.resource.data.createdByUid == request.auth.uid;
       allow update: if hasPlant(resource.data)
-        && canWritePlant(resource.data.plantaId)
+        && (isSgmAdmin() || canWritePlant(resource.data.plantaId))
         && samePlant()
         && validRegistroMedidores(request.resource.data)
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.createdByUid == resource.data.createdByUid
         && request.resource.data.consecutivo == resource.data.consecutivo;
       allow delete: if hasPlant(resource.data)
-        && canWritePlant(resource.data.plantaId);
+        && (isSgmAdmin() || canWritePlant(resource.data.plantaId));
     }
 
     // Compatibilidad temporal para colecciones comerciales legacy.

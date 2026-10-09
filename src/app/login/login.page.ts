@@ -71,7 +71,7 @@ export class LoginPage implements OnInit {
 
       const validPlantScope = normalizedUser.rol !== 'planta' ||
         (typeof userData['plantaIdPrincipal'] === 'string' && Boolean(userData['plantaIdPrincipal'].trim()) && userData['accesoTodasPlantas'] !== true);
-      if (userData['accesoAutolog'] === false || userData['tipoPersonal'] === 'DISTRIBUIDOR' || !['admin', 'capturista', 'planta'].includes(normalizedUser.rol) || !validPlantScope) {
+      if (userData['accesoAutolog'] === false || userData['tipoPersonal'] === 'DISTRIBUIDOR' || !['admin', 'sgm', 'capturista', 'planta'].includes(normalizedUser.rol) || !validPlantScope) {
         if (userData['accesoAsistencia'] === true) {
           await this.router.navigate(['/reloj']);
           return;
@@ -83,7 +83,7 @@ export class LoginPage implements OnInit {
 
       await this.storageService.set('currentUser', normalizedUser);
       await this.showToast('Inicio de sesión exitoso', 'success');
-      await this.router.navigate(['/home']);
+      await this.router.navigate([normalizedUser.rol === 'sgm' ? '/sgm' : '/home']);
     } catch (error) {
       console.error('Error durante el inicio de sesión:', error);
       await this.showToast('Ocurrió un error al iniciar sesión', 'danger');

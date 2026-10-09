@@ -1,9 +1,9 @@
 import { Timestamp } from '@angular/fire/firestore';
 import { NavigationSectionId, normalizeNavigationSections } from '../components/menu/navigation.config';
 
-export type RolAdministrativo = 'admin' | 'capturista' | 'planta';
+export type RolAdministrativo = 'admin' | 'sgm' | 'capturista' | 'planta';
 
-export type UsuarioRol = 'admin' | 'capturista' | 'planta' | 'empleado';
+export type UsuarioRol = 'admin' | 'sgm' | 'capturista' | 'planta' | 'empleado';
 export type TipoPersonalUsuario = 'SISTEMA' | 'DISTRIBUIDOR';
 
 export interface UsuarioAutologDocument {
@@ -84,14 +84,14 @@ export interface ManagedDistributorAccessResult extends UsuarioAutologResult {
 
 /** Values persisted by the current UI and legacy administrative profiles. */
 export const ADMINISTRATIVE_ROLE_VALUES = [
-  'admin', 'capturista', 'planta',
-  'Admin', 'Capturista', 'Planta',
-  'ADMIN', 'CAPTURISTA', 'PLANTA'
+  'admin', 'sgm', 'capturista', 'planta',
+  'Admin', 'Sgm', 'Capturista', 'Planta',
+  'ADMIN', 'SGM', 'CAPTURISTA', 'PLANTA'
 ];
 
 export function normalizeUsuarioAutolog(id: string, data: UsuarioAutologDocument): UsuarioAutolog {
   const rawRole = String(data.rol || '').trim().toLowerCase();
-  const administrativeRole = rawRole === 'admin' || rawRole === 'capturista' || rawRole === 'planta';
+  const administrativeRole = rawRole === 'admin' || rawRole === 'sgm' || rawRole === 'capturista' || rawRole === 'planta';
   const distributor = data.tipoPersonal === 'DISTRIBUIDOR' || Boolean(data.distribuidorId);
   const plantaIdPrincipal = typeof data.plantaIdPrincipal === 'string' && data.plantaIdPrincipal.trim()
     ? data.plantaIdPrincipal.trim() : null;
@@ -121,7 +121,7 @@ export function normalizeUsuarioAutolog(id: string, data: UsuarioAutologDocument
 
 /** Directory policy: legacy administrative defaults never grant a worker access. */
 export function isAdministrativeAccount(user: UsuarioAutolog): boolean {
-  return (user.rol === 'admin' || user.rol === 'capturista' || user.rol === 'planta') &&
+  return (user.rol === 'admin' || user.rol === 'sgm' || user.rol === 'capturista' || user.rol === 'planta') &&
     user.tipoPersonal === 'SISTEMA' && !user.distribuidorId &&
     user.accesoAutolog && !user.accesoAsistencia;
 }

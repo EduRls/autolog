@@ -50,10 +50,10 @@ export class EditarUsuarioComponent implements OnInit {
     this.editarForm = new FormGroup<EditarUsuarioControls>({
       email: new FormControl(this.usuarioData.email, { nonNullable: true, validators: [Validators.required, Validators.email] }),
       usuario: new FormControl(this.usuarioData.usuario, { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
-      rol: new FormControl(this.usuarioData.rol as RolAdministrativo, { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(admin|capturista|planta)$/)] }),
+      rol: new FormControl(this.usuarioData.rol as RolAdministrativo, { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(admin|sgm|capturista|planta)$/)] }),
       activo: new FormControl(this.usuarioData.activo, { nonNullable: true }),
       accesoTodasPlantas: new FormControl(
-        this.usuarioData.rol === 'admin' || this.usuarioData.accesoTodasPlantas,
+        this.usuarioData.rol === 'admin' || this.usuarioData.rol === 'sgm' || this.usuarioData.accesoTodasPlantas,
         { nonNullable: true }
       ),
       plantaIdPrincipal: new FormControl(this.usuarioData.plantaIdPrincipal || '', { nonNullable: true }),
@@ -62,7 +62,7 @@ export class EditarUsuarioComponent implements OnInit {
     });
     this.plantAdminService.list().subscribe(plants => this.plants = plants.filter(plant => plant.activo || this.usuarioData.plantaIdPrincipal === plant.id || this.usuarioData.plantasLectura.includes(plant.id)));
     this.editarForm.controls.rol.valueChanges.subscribe(role => {
-      this.editarForm.controls.accesoTodasPlantas.setValue(role === 'admin', { emitEvent: false });
+      this.editarForm.controls.accesoTodasPlantas.setValue(role === 'admin' || role === 'sgm', { emitEvent: false });
       this.applyPlantValidators(role);
       this.editarForm.controls.seccionesMenu.setValue(defaultNavigationSections(role));
     });
@@ -88,7 +88,7 @@ export class EditarUsuarioComponent implements OnInit {
   }
 
   toggleSection(section: NavigationSectionId, event: Event): void {
-    if (section === 'general') return;
+    if (section === 'general' || this.editarForm.controls.rol.value === 'sgm') return;
     const checked = (event.target as HTMLInputElement).checked;
     const current = this.editarForm.controls.seccionesMenu.value;
     const next = checked ? [...current, section] : current.filter(value => value !== section);
@@ -180,7 +180,7 @@ export class EditarUsuarioComponent implements OnInit {
   private roleAllowsItem(permission?: 'admin' | 'global'): boolean {
     const role = this.editarForm.controls.rol.value;
     if (permission === 'admin') return role === 'admin';
-    if (permission === 'global') return ['admin', 'capturista', 'planta'].includes(role);
+    if (permission === 'global') return ['admin', 'sgm', 'capturista', 'planta'].includes(role);
     return true;
   }
 }

@@ -44,7 +44,7 @@ export class AgregarUsuarioComponent implements OnInit {
       email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
       password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6), Validators.maxLength(128)] }),
       usuario: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
-      rol: new FormControl<RolAdministrativo | ''>('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(admin|capturista|planta)$/)] }),
+      rol: new FormControl<RolAdministrativo | ''>('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^(admin|sgm|capturista|planta)$/)] }),
       accesoTodasPlantas: new FormControl(false, { nonNullable: true }),
       plantaIdPrincipal: new FormControl('', { nonNullable: true }),
       plantasLectura: new FormControl<string[]>([], { nonNullable: true }),
@@ -52,7 +52,7 @@ export class AgregarUsuarioComponent implements OnInit {
     });
     this.plantAdminService.list().subscribe(plants => this.plants = plants.filter(plant => plant.activo));
     this.registroForm.controls.rol.valueChanges.subscribe(role => {
-      this.registroForm.controls.accesoTodasPlantas.setValue(role === 'admin', { emitEvent: false });
+      this.registroForm.controls.accesoTodasPlantas.setValue(role === 'admin' || role === 'sgm', { emitEvent: false });
       this.applyPlantValidators();
       this.registroForm.controls.seccionesMenu.setValue(defaultNavigationSections(role));
     });
@@ -76,7 +76,7 @@ export class AgregarUsuarioComponent implements OnInit {
   }
 
   toggleSection(section: NavigationSectionId, event: Event): void {
-    if (section === 'general') return;
+    if (section === 'general' || this.registroForm.controls.rol.value === 'sgm') return;
     const checked = (event.target as HTMLInputElement).checked;
     const current = this.registroForm.controls.seccionesMenu.value;
     const next = checked ? [...current, section] : current.filter(value => value !== section);
@@ -141,7 +141,7 @@ export class AgregarUsuarioComponent implements OnInit {
   private roleAllowsItem(permission?: 'admin' | 'global'): boolean {
     const role = this.registroForm.controls.rol.value;
     if (permission === 'admin') return role === 'admin';
-    if (permission === 'global') return ['admin', 'capturista', 'planta'].includes(role);
+    if (permission === 'global') return ['admin', 'sgm', 'capturista', 'planta'].includes(role);
     return Boolean(role);
   }
 

@@ -31,7 +31,7 @@ export class AuthorizationService {
     const role = String(profile?.['rol'] || '').trim().toLowerCase();
     const validPlantScope = role !== 'planta' ||
       (typeof profile?.['plantaIdPrincipal'] === 'string' && Boolean(profile['plantaIdPrincipal'].trim()) && profile['accesoTodasPlantas'] !== true);
-    return Boolean(profile && profile['activo'] !== false && profile['accesoAutolog'] !== false && ['admin', 'capturista', 'planta'].includes(role) && profile['tipoPersonal'] !== 'DISTRIBUIDOR' && validPlantScope);
+    return Boolean(profile && profile['activo'] !== false && profile['accesoAutolog'] !== false && ['admin', 'sgm', 'capturista', 'planta'].includes(role) && profile['tipoPersonal'] !== 'DISTRIBUIDOR' && validPlantScope);
   }
 
   async hasAuthenticatedUser(): Promise<boolean> {

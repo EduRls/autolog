@@ -97,6 +97,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   get isSearching() { return Boolean(this.normalizedSearch); }
   get roleLabel() {
     if (this.userRole === 'admin') return 'Administrador';
+    if (this.userRole === 'sgm') return 'Administrador SGM';
     if (this.userRole === 'capturista') return 'Capturista';
     if (this.userRole === 'planta') return 'Responsable de planta';
     return 'Usuario';
@@ -216,7 +217,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private canView(item: NavigationItem): boolean {
     if (item.permission === 'admin') return this.userRole === 'admin';
-    if (item.permission === 'global') return ['admin', 'capturista', 'planta'].includes(this.userRole);
+    if (item.permission === 'global') return ['admin', 'sgm', 'capturista', 'planta'].includes(this.userRole);
     return true;
   }
 

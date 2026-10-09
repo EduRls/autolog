@@ -9,9 +9,10 @@ export const navigationSectionGuard: CanActivateFn = async route => {
   const section = route.data['navigationSection'] as NavigationSectionId | undefined;
   if (!section) return router.createUrlTree(['/home']);
   try {
-    return await authorization.canCurrentUserAccessSection(section)
-      ? true
-      : router.createUrlTree(['/home']);
+    if (await authorization.canCurrentUserAccessSection(section)) return true;
+    const sgmOnly = await authorization.canCurrentUserAccessSection('sgm') &&
+      !await authorization.canCurrentUserAccessSection('general');
+    return router.createUrlTree([sgmOnly ? '/sgm' : '/home']);
   } catch {
     return router.createUrlTree(['/login']);
   }

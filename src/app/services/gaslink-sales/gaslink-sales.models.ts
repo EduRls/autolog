@@ -16,7 +16,9 @@ export interface GaslinkSale {
   duplicateIndex: number | null;
   primeraSincronizacion: Date | null;
   ultimaSincronizacion: Date | null;
-  fechaGeneracionArchivo: Date | null;
+  fechaExtraccion: Date | null;
+  claveWeb: string | null;
+  mapsUrl: string | null;
 }
 
 export interface GaslinkSalesFilters {
@@ -43,6 +45,18 @@ export function safeDate(value: unknown): Date | null {
 }
 
 const text = (value: unknown): string | null => typeof value === 'string' && value.trim() ? value.trim() : null;
+export function safeMapsUrl(value: unknown): string | null {
+  const raw = text(value);
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    const trusted = url.protocol === 'https:' && (host === 'www.google.com' || host === 'google.com' || host === 'maps.google.com') && url.pathname.startsWith('/maps');
+    return trusted ? url.href : null;
+  } catch {
+    return null;
+  }
+}
 const number = (value: unknown): number | null => typeof value === 'number' && Number.isFinite(value) ? value : null;
 
 export function mapGaslinkSale(id: string, data: Record<string, unknown>): GaslinkSale {
@@ -52,6 +66,6 @@ export function mapGaslinkSale(id: string, data: Record<string, unknown>): Gasli
     litros: number(data['litros']), total: number(data['total']), origen: text(data['origen']),
     sourceHash: text(data['sourceHash']), duplicateIndex: number(data['duplicateIndex']),
     primeraSincronizacion: safeDate(data['primeraSincronizacion']), ultimaSincronizacion: safeDate(data['ultimaSincronizacion']),
-    fechaGeneracionArchivo: safeDate(data['fechaGeneracionArchivo'])
+    fechaExtraccion: safeDate(data['fechaExtraccion']), claveWeb: text(data['claveWeb']), mapsUrl: safeMapsUrl(data['mapsUrl'])
   };
 }

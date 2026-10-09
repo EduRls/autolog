@@ -19,7 +19,7 @@ describe('ExcelService', () => {
     const sale = {
       id: 'a', plantaId: 'u42LityLtz1l6HM2iCN4', folio: 'GL-1', fechaVenta: new Date('2026-08-14T12:00:00Z'), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
       formaPago: 'Contado', litros: 10.5, total: 200, origen: 'gaslink', sourceHash: 'a', duplicateIndex: 0,
-      primeraSincronizacion: null, ultimaSincronizacion: null, fechaGeneracionArchivo: null
+      primeraSincronizacion: null, ultimaSincronizacion: null, fechaExtraccion: null, claveWeb: null, mapsUrl: null
     } as GaslinkSale;
     const workbook = service.buildSalesWorkbook({ sales: [sale], summary: { count: 1, liters: 10.5, total: 200, average: 200 }, startDate: '2026-08-14', endDate: '2026-08-14', vendedor: 'R 39', folio: 'Todos' });
     expect(workbook.SheetNames).toEqual(['Resumen', '14-08-2026']);
@@ -33,7 +33,7 @@ describe('ExcelService', () => {
     const sale = (id: string, fechaVenta: string, total: number): GaslinkSale => ({
       id, plantaId: 'u42LityLtz1l6HM2iCN4', folio: `GL-${id}`, fechaVenta: new Date(fechaVenta), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
       formaPago: 'Contado', litros: 10, total, origen: 'gaslink', sourceHash: id, duplicateIndex: 0,
-      primeraSincronizacion: null, ultimaSincronizacion: null, fechaGeneracionArchivo: null
+      primeraSincronizacion: null, ultimaSincronizacion: null, fechaExtraccion: null, claveWeb: null, mapsUrl: null
     });
     const workbook = service.buildSalesWorkbook({
       sales: [sale('2', '2026-08-15T06:30:00Z', 300), sale('1', '2026-08-14T18:00:00Z', 200)],

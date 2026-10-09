@@ -22,6 +22,10 @@ const ALT = 'F8FAFC';
 const WHITE = 'FFFFFF';
 const CURRENCY = '$#,##0.00';
 const LITERS = '#,##0.00';
+const MUTED = '667085';
+const CLAVE_PENDIENTE = 'Pendiente';
+const MAPA_LABEL = 'Mapa';
+const SIN_UBICACION = 'Sin ubicación';
 
 @Injectable({ providedIn: 'root' })
 export class ExcelService {
@@ -73,35 +77,48 @@ export class ExcelService {
   }
 
   private buildSalesSheet(report: SalesExcelReport, sales: GaslinkSale[], dayLabel: string): XLSX.WorkSheet {
-    const headers = ['Folio', 'Fecha', 'Empresa', 'Vendedor', 'Cliente', 'Forma de pago', 'Litros', 'Total (MXN)'];
+    const headers = ['Folio', 'Clave web', 'Fecha', 'Empresa', 'Vendedor', 'Cliente', 'Forma de pago', 'Litros', 'Total (MXN)', 'Mapa'];
     const filterDescription = `Fecha: ${dayLabel} · Vendedor: ${report.vendedor} · Folio: ${report.folio}`;
-    const rows: unknown[][] = [['Reporte de ventas', '', '', '', '', '', '', ''], [filterDescription, '', '', '', '', '', '', ''], headers];
-    sales.forEach(sale => rows.push([sale.folio ?? '', sale.fechaVenta ?? '', sale.empresa ?? '', sale.vendedor ?? '', sale.cliente ?? '', sale.formaPago ?? '', sale.litros ?? '', sale.total ?? '']));
+    const blank = (text: string): unknown[] => [text, ...Array(9).fill('')];
+    const rows: unknown[][] = [blank('Reporte de ventas'), blank(filterDescription), headers];
+    sales.forEach(sale => rows.push([
+      sale.folio ?? '', sale.claveWeb ?? CLAVE_PENDIENTE, sale.fechaVenta ?? '', sale.empresa ?? '', sale.vendedor ?? '', sale.cliente ?? '',
+      sale.formaPago ?? '', sale.litros ?? '', sale.total ?? '', sale.mapsUrl ? MAPA_LABEL : SIN_UBICACION
+    ]));
     const dailyTotal = sales.reduce((total, sale) => total + (sale.total ?? 0), 0);
     const dailyAverage = sales.length ? dailyTotal / sales.length : 0;
     const totalRow = rows.length + 1;
-    rows.push(['Totales', '', '', '', 'Ticket promedio', dailyAverage, { f: `SUM(G4:G${totalRow - 1})` }, { f: `SUM(H4:H${totalRow - 1})` }]);
+    rows.push(['Totales', '', '', '', '', 'Ticket promedio', dailyAverage, { f: `SUM(H4:H${totalRow - 1})` }, { f: `SUM(I4:I${totalRow - 1})` }, '']);
     const sheet = XLSX.utils.aoa_to_sheet(rows, { cellDates: true });
-    sheet['!merges'] = [XLSX.utils.decode_range('A1:H1'), XLSX.utils.decode_range('A2:H2')];
-    sheet['!cols'] = [{ wch: 24 }, { wch: 20 }, { wch: 24 }, { wch: 24 }, { wch: 36 }, { wch: 20 }, { wch: 15 }, { wch: 18 }];
+    sheet['!merges'] = [XLSX.utils.decode_range('A1:J1'), XLSX.utils.decode_range('A2:J2')];
+    sheet['!cols'] = [{ wch: 24 }, { wch: 18 }, { wch: 20 }, { wch: 24 }, { wch: 24 }, { wch: 36 }, { wch: 20 }, { wch: 15 }, { wch: 18 }, { wch: 16 }];
     sheet['!rows'] = [{ hpt: 30 }, { hpt: 24 }, { hpt: 26 }, ...sales.map(() => ({ hpt: 20 })), { hpt: 24 }];
-    sheet['!autofilter'] = { ref: `A3:H${Math.max(3, totalRow - 1)}` };
+    sheet['!autofilter'] = { ref: `A3:J${Math.max(3, totalRow - 1)}` };
     sheet['!freeze'] = { xSplit: 0, ySplit: 3, topLeftCell: 'A4', activePane: 'bottomLeft', state: 'frozen' };
     sheet['!pageSetup'] = { orientation: 'landscape', fitToWidth: 1, fitToHeight: 0 };
-    this.styleRange(sheet, 'A1:H1', { fill: { fgColor: { rgb: NAVY } }, font: { color: { rgb: WHITE }, bold: true, sz: 18 }, alignment: { vertical: 'center' } });
-    this.styleRange(sheet, 'A2:H2', { fill: { fgColor: { rgb: BLUE_SOFT } }, font: { color: { rgb: NAVY }, italic: true }, alignment: { vertical: 'center' } });
-    this.styleRange(sheet, 'A3:H3', { fill: { fgColor: { rgb: NAVY } }, font: { color: { rgb: WHITE }, bold: true }, alignment: { horizontal: 'center', vertical: 'center' }, border: this.borders() });
+    this.styleRange(sheet, 'A1:J1', { fill: { fgColor: { rgb: NAVY } }, font: { color: { rgb: WHITE }, bold: true, sz: 18 }, alignment: { vertical: 'center' } });
+    this.styleRange(sheet, 'A2:J2', { fill: { fgColor: { rgb: BLUE_SOFT } }, font: { color: { rgb: NAVY }, italic: true }, alignment: { vertical: 'center' } });
+    this.styleRange(sheet, 'A3:J3', { fill: { fgColor: { rgb: NAVY } }, font: { color: { rgb: WHITE }, bold: true }, alignment: { horizontal: 'center', vertical: 'center' }, border: this.borders() });
     for (let row = 4; row < totalRow; row++) {
-      this.styleRange(sheet, `A${row}:H${row}`, { fill: { fgColor: { rgb: row % 2 === 0 ? WHITE : ALT } }, border: this.borders(), alignment: { vertical: 'center' } });
+      this.styleRange(sheet, `A${row}:J${row}`, { fill: { fgColor: { rgb: row % 2 === 0 ? WHITE : ALT } }, border: this.borders(), alignment: { vertical: 'center' } });
       if (sheet[`A${row}`]) sheet[`A${row}`].t = 's';
-      if (sheet[`B${row}`] && sheet[`B${row}`].v !== '') { sheet[`B${row}`].t = 'd'; sheet[`B${row}`].z = 'dd/mm/yyyy hh:mm'; }
-      if (sheet[`G${row}`] && sheet[`G${row}`].v !== '') sheet[`G${row}`].z = LITERS;
-      if (sheet[`H${row}`] && sheet[`H${row}`].v !== '') sheet[`H${row}`].z = CURRENCY;
+      if (sheet[`B${row}`]) sheet[`B${row}`].t = 's';
+      if (sheet[`C${row}`] && sheet[`C${row}`].v !== '') { sheet[`C${row}`].t = 'd'; sheet[`C${row}`].z = 'dd/mm/yyyy hh:mm'; }
+      if (sheet[`H${row}`] && sheet[`H${row}`].v !== '') sheet[`H${row}`].z = LITERS;
+      if (sheet[`I${row}`] && sheet[`I${row}`].v !== '') sheet[`I${row}`].z = CURRENCY;
+      if (sales[row - 4]?.claveWeb === null) sheet[`B${row}`].s = { ...sheet[`B${row}`].s, font: { italic: true, color: { rgb: MUTED } } };
+      const mapsUrl = sales[row - 4]?.mapsUrl;
+      if (mapsUrl) {
+        sheet[`J${row}`].l = { Target: mapsUrl, Tooltip: 'Abrir ubicación en Google Maps' };
+        sheet[`J${row}`].s = { ...sheet[`J${row}`].s, font: { color: { rgb: BLUE }, underline: true } };
+      } else {
+        sheet[`J${row}`].s = { ...sheet[`J${row}`].s, font: { italic: true, color: { rgb: MUTED } } };
+      }
     }
-    this.styleRange(sheet, `A${totalRow}:H${totalRow}`, { fill: { fgColor: { rgb: BLUE_SOFT } }, font: { bold: true, color: { rgb: NAVY } }, border: this.borders(), alignment: { vertical: 'center' } });
-    if (sheet[`G${totalRow}`]) sheet[`G${totalRow}`].z = LITERS;
-    if (sheet[`H${totalRow}`]) sheet[`H${totalRow}`].z = CURRENCY;
-    if (sheet[`F${totalRow}`]) sheet[`F${totalRow}`].z = CURRENCY;
+    this.styleRange(sheet, `A${totalRow}:J${totalRow}`, { fill: { fgColor: { rgb: BLUE_SOFT } }, font: { bold: true, color: { rgb: NAVY } }, border: this.borders(), alignment: { vertical: 'center' } });
+    if (sheet[`H${totalRow}`]) sheet[`H${totalRow}`].z = LITERS;
+    if (sheet[`I${totalRow}`]) sheet[`I${totalRow}`].z = CURRENCY;
+    if (sheet[`G${totalRow}`]) sheet[`G${totalRow}`].z = CURRENCY;
     return sheet;
   }
 

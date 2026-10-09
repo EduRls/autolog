@@ -45,6 +45,13 @@ export function safeDate(value: unknown): Date | null {
 }
 
 const text = (value: unknown): string | null => typeof value === 'string' && value.trim() ? value.trim() : null;
+// GeoPoint de Firestore ({ latitude, longitude }); null/ausente o 0,0 = sin GPS.
+export function hasValidLocation(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const { latitude, longitude } = value as { latitude?: unknown; longitude?: unknown };
+  return typeof latitude === 'number' && typeof longitude === 'number' && Number.isFinite(latitude) && Number.isFinite(longitude) &&
+    Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180 && !(latitude === 0 && longitude === 0);
+}
 export function safeMapsUrl(value: unknown): string | null {
   const raw = text(value);
   if (!raw) return null;
@@ -66,6 +73,6 @@ export function mapGaslinkSale(id: string, data: Record<string, unknown>): Gasli
     litros: number(data['litros']), total: number(data['total']), origen: text(data['origen']),
     sourceHash: text(data['sourceHash']), duplicateIndex: number(data['duplicateIndex']),
     primeraSincronizacion: safeDate(data['primeraSincronizacion']), ultimaSincronizacion: safeDate(data['ultimaSincronizacion']),
-    fechaExtraccion: safeDate(data['fechaExtraccion']), claveWeb: text(data['claveWeb']), mapsUrl: safeMapsUrl(data['mapsUrl'])
+    fechaExtraccion: safeDate(data['fechaExtraccion']), claveWeb: text(data['claveWeb']), mapsUrl: hasValidLocation(data['ubicacion']) ? safeMapsUrl(data['mapsUrl']) : null
   };
 }

@@ -39,6 +39,14 @@ describe('mapGaslinkSale enrichment fields', () => {
     expect('fechaGeneracionArchivo' in mapGaslinkSale('a', {})).toBeFalse();
   });
 
+  it('exposes the coordinates only when they are a valid GPS fix', () => {
+    const point = { latitude: 22.7709, longitude: -102.5832 };
+    expect(mapGaslinkSale('a', { ubicacion: point }).ubicacion).toEqual(point);
+    expect(mapGaslinkSale('a', { ubicacion: { latitude: 0, longitude: 0 } }).ubicacion).toBeNull();
+    expect(mapGaslinkSale('a', { ubicacion: null }).ubicacion).toBeNull();
+    expect(mapGaslinkSale('a', {}).ubicacion).toBeNull();
+  });
+
   it('only exposes the map link when the location is a valid GPS fix', () => {
     const url = 'https://www.google.com/maps?q=0,0';
     expect(mapGaslinkSale('a', { mapsUrl: url, ubicacion: null }).mapsUrl).toBeNull();

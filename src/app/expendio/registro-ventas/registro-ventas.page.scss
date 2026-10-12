@@ -82,7 +82,7 @@ apx-chart { display: block; width: 100%; max-width: 100%; overflow: hidden; }
 /* Mapa */
 .col-map { white-space: nowrap; text-align: center; }
 .sales-table th.col-map { text-align: center; }
-.map-link { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid var(--autolog-border); border-radius: 999px; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--autolog-primary); background: #fff; transition: background-color .12s ease, border-color .12s ease; }
+.map-link { cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid var(--autolog-border); border-radius: 999px; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--autolog-primary); background: #fff; transition: background-color .12s ease, border-color .12s ease; }
 .map-link ion-icon { font-size: 14px; }
 .map-link:hover, .map-link:focus-visible { border-color: var(--autolog-primary); background: var(--autolog-primary-soft); outline: none; }
 

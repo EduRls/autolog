@@ -1,0 +1,40 @@
+<ion-header class="sale-map-header">
+  <ion-toolbar>
+    <div class="modal-heading">
+      <span class="heading-icon" aria-hidden="true"><ion-icon name="location-outline"></ion-icon></span>
+      <div>
+        <ion-title>Ubicación de la venta</ion-title>
+        <p>{{ sale.folio || '—' }}</p>
+      </div>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button type="button" (click)="close()" aria-label="Cerrar" title="Cerrar"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="sale-map-content">
+  <div class="sale-map" #mapContainer role="img" [attr.aria-label]="'Mapa de la venta ' + (sale.folio || '')"></div>
+  <p class="no-location" *ngIf="!sale.ubicacion">Esta venta no tiene coordenadas válidas.</p>
+
+  <dl class="sale-details">
+    <div><dt>Fecha</dt><dd>{{ formatDay(sale.fechaVenta) }} <span class="muted">{{ formatTime(sale.fechaVenta, sale.fechaTicket) }}</span></dd></div>
+    <div><dt>Forma de pago</dt><dd>{{ sale.formaPago || '—' }}</dd></div>
+    <div><dt>Vendedor</dt><dd>{{ sale.vendedor || '—' }}</dd></div>
+    <div><dt>Cliente</dt><dd>{{ sale.cliente || '—' }}</dd></div>
+    <div><dt>Litros</dt><dd>{{ formatLiters(sale.litros) }}</dd></div>
+    <div><dt>Total</dt><dd class="amount">{{ formatMxn(sale.total) }}</dd></div>
+    <div><dt>Clave web</dt><dd><code *ngIf="sale.claveWeb; else pendiente">{{ sale.claveWeb }}</code><ng-template #pendiente><span class="muted">Pendiente</span></ng-template></dd></div>
+    <div><dt>Clave ticket</dt><dd><code *ngIf="sale.claveWebTicket; else sinDato">{{ sale.claveWebTicket }}</code><ng-template #sinDato><span class="muted">Sin dato</span></ng-template></dd></div>
+    <div class="wide" *ngIf="coordinates"><dt>Coordenadas</dt><dd><code>{{ coordinates }}</code></dd></div>
+  </dl>
+</ion-content>
+
+<ion-footer class="sale-map-footer">
+  <ion-button type="button" fill="outline" color="medium" (click)="copyCoordinates()" [disabled]="!coordinates">
+    <ion-icon slot="start" [name]="copied ? 'checkmark-outline' : 'copy-outline'"></ion-icon>{{ copied ? 'Copiado' : 'Copiar coordenadas' }}
+  </ion-button>
+  <ion-button *ngIf="sale.mapsUrl" [href]="sale.mapsUrl" target="_blank" rel="noopener noreferrer" color="primary">
+    <ion-icon slot="start" name="open-outline"></ion-icon>Abrir en Google Maps
+  </ion-button>
+</ion-footer>

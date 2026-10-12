@@ -1,8 +1,10 @@
 import { Component, OnInit, isDevMode } from '@angular/core';
+import { ModalController } from '@ionic/angular';
 import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexGrid, ApexLegend, ApexPlotOptions, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis } from 'ng-apexcharts';
 import { ExcelService, SalesExcelReport } from '../../services/excel/excel.service';
 import { GaslinkSale, GaslinkSalesFilters, GaslinkSalesSummary } from '../../services/gaslink-sales/gaslink-sales.models';
 import { GaslinkSalesService } from '../../services/gaslink-sales/gaslink-sales.service';
+import { VentaMapaModalComponent } from './venta-mapa-modal/venta-mapa-modal.component';
 import { PeriodPreset, SALES_TIME_ZONE, customRange, formatLiters, formatMxn, formatSaleDate, formatSaleDay, formatSaleTime, paymentTone, presetRange } from './registro-ventas.utils';
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error';
@@ -79,7 +81,23 @@ export class RegistroVentasPage implements OnInit {
   readonly formatMxn = formatMxn;
   readonly integer = new Intl.NumberFormat('es-MX');
 
-  constructor(private readonly salesService: GaslinkSalesService, private readonly excelService: ExcelService) {}
+  constructor(
+    private readonly salesService: GaslinkSalesService,
+    private readonly excelService: ExcelService,
+    private readonly modalController: ModalController
+  ) {}
+
+  /** Abre el modal pequeño con el mapa y los datos de la venta. */
+  async openMap(sale: GaslinkSale): Promise<void> {
+    if (!sale.ubicacion) return;
+    const modal = await this.modalController.create({
+      component: VentaMapaModalComponent,
+      componentProps: { sale },
+      cssClass: ['autolog-form-modal', 'autolog-sale-map-modal']
+    });
+    await modal.present();
+  }
+
   ngOnInit(): void { this.selectPreset('all', false); void this.applyFilters(); }
 
   selectPreset(preset: PeriodPreset, apply = true): void {

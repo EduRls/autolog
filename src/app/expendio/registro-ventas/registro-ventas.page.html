@@ -102,8 +102,8 @@
                 <small class="clave-ticket" *ngIf="sale.claveWebTicket" title="Clave del ticket impreso en el punto de venta (día-hora)">Ticket <code>{{ sale.claveWebTicket }}</code></small>
               </td>
               <td class="col-map">
-                <a *ngIf="sale.mapsUrl" class="map-link" [href]="sale.mapsUrl" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Ver ubicación de ' + (sale.folio || 'la venta')"><ion-icon name="location-outline" aria-hidden="true"></ion-icon>Mapa</a>
-                <span *ngIf="!sale.mapsUrl" class="pending">—</span>
+                <button *ngIf="sale.ubicacion" type="button" class="map-link" (click)="openMap(sale)" [attr.aria-label]="'Ver ubicación de ' + (sale.folio || 'la venta')"><ion-icon name="location-outline" aria-hidden="true"></ion-icon>Mapa</button>
+                <span *ngIf="!sale.ubicacion" class="pending">—</span>
               </td>
             </tr>
           </tbody>

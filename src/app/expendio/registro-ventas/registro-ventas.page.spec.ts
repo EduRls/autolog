@@ -4,7 +4,7 @@ import { RegistroVentasPage, groupSales, groupSalesByDay, summarizeSales } from 
 const sale = (id: string, overrides: Partial<GaslinkSale> = {}): GaslinkSale => ({
   id, plantaId: 'u42LityLtz1l6HM2iCN4', folio: 'GL-1', fechaVenta: new Date('2026-08-14T12:00:00Z'), empresa: 'Empresa', vendedor: 'R 39', cliente: 'Cliente',
   formaPago: 'Contado', litros: 10, total: 100, origen: 'gaslink', sourceHash: id, duplicateIndex: 0,
-  primeraSincronizacion: null, ultimaSincronizacion: null, fechaExtraccion: null, claveWeb: null, mapsUrl: null, folioTemporal: null, esTemporalApp: false, claveWebTicket: null, fechaTicket: null, ...overrides
+  primeraSincronizacion: null, ultimaSincronizacion: null, fechaExtraccion: null, claveWeb: null, mapsUrl: null, ubicacion: null, folioTemporal: null, esTemporalApp: false, claveWebTicket: null, fechaTicket: null, ...overrides
 });
 
 describe('RegistroVentasPage analytics', () => {
@@ -33,6 +33,7 @@ describe('RegistroVentasPage analytics', () => {
 describe('RegistroVentasPage filters and export', () => {
   let service: jasmine.SpyObj<any>;
   let excel: jasmine.SpyObj<any>;
+  let modal: jasmine.SpyObj<any>;
   let page: RegistroVentasPage;
   const rows = [sale('a'), sale('b', { folio: 'GL-1', vendedor: 'EC BUTANO', litros: 20, total: 300 })];
 
@@ -41,7 +42,9 @@ describe('RegistroVentasPage filters and export', () => {
     excel = jasmine.createSpyObj('ExcelService', ['exportSalesReport']);
     service.getAnalytics.and.resolveTo(rows);
     excel.exportSalesReport.and.resolveTo({ message: 'Descargado' });
-    page = new RegistroVentasPage(service, excel);
+    modal = jasmine.createSpyObj('ModalController', ['create']);
+    modal.create.and.resolveTo({ present: jasmine.createSpy('present').and.resolveTo() });
+    page = new RegistroVentasPage(service, excel, modal);
     page.selectPreset('today', false);
   });
 
@@ -97,5 +100,16 @@ describe('RegistroVentasPage filters and export', () => {
   it('disables export during generation and recovers after failure', async () => {
     await page.applyFilters(); excel.exportSalesReport.and.callFake(async () => { expect(page.exporting).toBeTrue(); expect(page.canExport).toBeFalse(); throw new Error('failure'); });
     await page.exportSales(); expect(page.exporting).toBeFalse(); expect(page.canExport).toBeTrue(); expect(page.exportMessage).toContain('No fue posible');
+  });
+
+  it('opens the map modal only for sales with a valid location', async () => {
+    const withGps = sale('gps', { ubicacion: { latitude: 22.77, longitude: -102.58 }, mapsUrl: 'https://www.google.com/maps?q=22.77,-102.58' });
+    await page.openMap(withGps);
+    expect(modal.create).toHaveBeenCalledTimes(1);
+    const options = modal.create.calls.mostRecent().args[0];
+    expect(options.componentProps.sale).toBe(withGps);
+    expect(options.cssClass).toContain('autolog-sale-map-modal');
+    await page.openMap(sale('nogps'));
+    expect(modal.create).toHaveBeenCalledTimes(1);
   });
 });

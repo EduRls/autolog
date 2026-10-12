@@ -19,6 +19,8 @@ export interface GaslinkSale {
   fechaExtraccion: Date | null;
   claveWeb: string | null;
   mapsUrl: string | null;
+  /** GPS válido de la venta (null si no hay o es 0,0). */
+  ubicacion: { latitude: number; longitude: number } | null;
   folioTemporal: string | null;
   esTemporalApp: boolean;
   /** Clave del ticket impreso en el punto de venta (`día-HHMMSS`), derivada del folio temporal. */
@@ -58,6 +60,12 @@ export function hasValidLocation(value: unknown): boolean {
   return typeof latitude === 'number' && typeof longitude === 'number' && Number.isFinite(latitude) && Number.isFinite(longitude) &&
     Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180 && !(latitude === 0 && longitude === 0);
 }
+/** Coordenadas {latitude, longitude} si son un GPS válido; null en otro caso. */
+export function validLocation(value: unknown): { latitude: number; longitude: number } | null {
+  if (!hasValidLocation(value)) return null;
+  const { latitude, longitude } = value as { latitude: number; longitude: number };
+  return { latitude, longitude };
+}
 export function safeMapsUrl(value: unknown): string | null {
   const raw = text(value);
   if (!raw) return null;
@@ -80,6 +88,7 @@ export function mapGaslinkSale(id: string, data: Record<string, unknown>): Gasli
     sourceHash: text(data['sourceHash']), duplicateIndex: number(data['duplicateIndex']),
     primeraSincronizacion: safeDate(data['primeraSincronizacion']), ultimaSincronizacion: safeDate(data['ultimaSincronizacion']),
     fechaExtraccion: safeDate(data['fechaExtraccion']), claveWeb: text(data['claveWeb']), mapsUrl: hasValidLocation(data['ubicacion']) ? safeMapsUrl(data['mapsUrl']) : null,
+    ubicacion: validLocation(data['ubicacion']),
     folioTemporal: text(data['folioTemporal']), esTemporalApp: data['esTemporalApp'] === true,
     claveWebTicket: text(data['claveWebTicket']), fechaTicket: safeDate(data['fechaTicket'])
   };

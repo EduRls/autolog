@@ -106,7 +106,7 @@ export class AgregarEventoComponent implements OnInit, OnDestroy {
         this.autos = [...data].sort((a, b) =>
           String(a.unidad ?? '').localeCompare(String(b.unidad ?? ''), 'es-MX', { numeric: true }));
         this.autosEstado = this.autos.length ? 'listo' : 'vacio';
-        this.autosMensaje = this.autos.length ? '' : 'No hay unidades registradas en tu planta.';
+        this.autosMensaje = this.autos.length ? '' : this.mensajeSinUnidades();
         void this.ocultarCargaUnidades();
       },
       error: (error) => {
@@ -119,6 +119,24 @@ export class AgregarEventoComponent implements OnInit, OnDestroy {
         void this.ocultarCargaUnidades();
       }
     });
+  }
+
+  /** Texto del estado vacío: indica la planta del contexto activo, que es lo que casi siempre explica la lista vacía. */
+  private mensajeSinUnidades(): string {
+    const activeId = this.plantScope.getActivePlantId();
+    if (!activeId) return 'No hay unidades registradas.';
+    const nombre = this.plantScope.snapshot().plants.find(plant => plant.id === activeId)?.nombre;
+    return `No hay unidades registradas en ${nombre || 'la planta seleccionada'}. Cambia el contexto del encabezado.`;
+  }
+
+  /** Solo operadores globales: quita el filtro de planta para volver a listar todas las unidades. */
+  get puedeVerTodas(): boolean {
+    return this.plantScope.isGlobal() && this.plantScope.getActivePlantId() !== null;
+  }
+
+  verTodasLasPlantas(): void {
+    this.plantScope.setActivePlant(null);
+    this.cargarAutos();
   }
 
   get placeholderUnidad(): string {

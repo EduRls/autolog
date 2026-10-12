@@ -13,17 +13,27 @@ describe('AgregarEventoComponent', () => {
   let fixture: ComponentFixture<AgregarEventoComponent>;
   let autos$: Subject<any[]>;
   let initialize: jasmine.Spy;
+  let plantScope: any;
+  let activePlantId: string | null = null;
   let loading: { present: jasmine.Spy; dismiss: jasmine.Spy };
 
   async function create(getAutos: () => any) {
     initialize = jasmine.createSpy('initialize').and.resolveTo();
+    const plants = [{ id: 'planta-z', nombre: 'Planta Zacatecas' }];
+    plantScope = {
+      initialize,
+      getActivePlantId: jasmine.createSpy('getActivePlantId').and.returnValue(activePlantId),
+      snapshot: () => ({ plants }),
+      isGlobal: () => true,
+      setActivePlant: jasmine.createSpy('setActivePlant'),
+    };
     loading = { present: jasmine.createSpy('present').and.resolveTo(), dismiss: jasmine.createSpy('dismiss').and.resolveTo(true) };
     await TestBed.configureTestingModule({
       imports: [IonicModule.forRoot(), AgregarEventoComponent],
       providers: [
         provideRouter([]),
         ...componentTestProviders(),
-        { provide: PlantScopeService, useValue: { initialize } },
+        { provide: PlantScopeService, useValue: plantScope },
         { provide: FirebaseService, useValue: { getAutos: jasmine.createSpy('getAutos').and.callFake(getAutos), getArticulos: () => of([]) } },
         { provide: LoadingController, useValue: { create: jasmine.createSpy('create').and.resolveTo(loading) } },
       ],
@@ -79,5 +89,15 @@ describe('AgregarEventoComponent', () => {
     await fixture.whenStable();
     expect(component.autosEstado).toBe('vacio');
     expect(component.autosMensaje).toContain('No hay unidades');
+  });
+  it('names the active plant when it has no units and lets a global user see all plants', async () => {
+    activePlantId = 'planta-z';
+    await create(() => of([]));
+    expect(component.autosEstado).toBe('vacio');
+    expect(component.autosMensaje).toContain('Planta Zacatecas');
+    expect(component.puedeVerTodas).toBeTrue();
+    component.verTodasLasPlantas();
+    expect(plantScope.setActivePlant).toHaveBeenCalledWith(null);
+    activePlantId = null;
   });
 });

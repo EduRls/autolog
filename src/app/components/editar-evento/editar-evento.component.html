@@ -27,6 +27,7 @@
           <ion-note *ngIf="autosMensaje" color="danger" class="units-status" role="alert">
             {{ autosMensaje }}
             <a href="javascript:void(0)" *ngIf="autosEstado === 'error'" (click)="cargarAutos()">Reintentar</a>
+            <a href="javascript:void(0)" *ngIf="autosEstado === 'vacio' && puedeVerTodas" (click)="verTodasLasPlantas()">Ver todas las plantas</a>
           </ion-note>
           <ion-note *ngIf="editarEventoRegistro.get('unidad')?.invalid && editarEventoRegistro.get('unidad')?.touched">Selecciona una unidad.</ion-note>
         </div>

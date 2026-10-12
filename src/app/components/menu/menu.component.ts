@@ -65,7 +65,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
     this.restoreOpenGroups();
     this.openActiveGroup();
     void this.getRole();
-    void this.plantScope.initialize(true);
+    void this.plantScope.initialize();
     this.plantSubscription = this.plantScope.state$.subscribe(state => {
       this.plantState = state;
       if (state.profile) this.applyUserProfile(state.profile);

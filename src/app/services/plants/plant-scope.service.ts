@@ -12,6 +12,23 @@ export interface PlantScopeState {
   activePlantId: string | null;
 }
 
+/**
+ * Planta activa inicial: la guardada solo si sigue siendo una planta visible y
+ * permitida para el usuario; si no, "todas" (null) para operadores globales o
+ * su planta principal. Evita quedar en un contexto viejo e invisible.
+ */
+export function resolveActivePlantId(
+  profile: Pick<UsuarioAutolog, 'accesoTodasPlantas' | 'plantaIdPrincipal' | 'plantasLectura'>,
+  visiblePlants: Array<{ id: string }>,
+  saved: string | null
+): { activePlantId: string | null; savedIsValid: boolean } {
+  const allowed = new Set([...(profile.plantaIdPrincipal ? [profile.plantaIdPrincipal] : []), ...profile.plantasLectura]);
+  const visible = new Set(visiblePlants.map(plant => plant.id));
+  const savedIsValid = !!saved && visible.has(saved) && (profile.accesoTodasPlantas || allowed.has(saved));
+  const activePlantId = savedIsValid ? saved : (profile.accesoTodasPlantas ? null : profile.plantaIdPrincipal);
+  return { activePlantId, savedIsValid };
+}
+
 @Injectable({ providedIn: 'root' })
 export class PlantScopeService {
   private readonly stateSubject = new BehaviorSubject<PlantScopeState>({
@@ -24,7 +41,13 @@ export class PlantScopeService {
   constructor(private readonly auth: Auth, private readonly firestore: Firestore) {}
 
   initialize(force = false): Promise<void> {
-    if (!force && this.loading) return this.loading;
+    // Una resolución previa a iniciar sesión (o de otro usuario) no debe reutilizarse.
+    const uid = this.auth.currentUser?.uid ?? null;
+    const state = this.snapshot();
+    const stale = state.ready && ((uid !== null && !state.profile) ||
+      (uid !== null && state.profile !== null && state.profile.uid !== uid) ||
+      (uid === null && state.profile !== null));
+    if (!force && !stale && this.loading) return this.loading;
     this.loading = this.load();
     return this.loading;
   }
@@ -91,8 +114,8 @@ export class PlantScopeService {
         .map(snapshot => ({ id: snapshot.id, ...snapshot.data() } as Planta));
     const visible = plants.filter(plant => plant.activo !== false).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es-MX'));
     const saved = localStorage.getItem(this.storageKey);
-    const activePlantId = saved && (profile.accesoTodasPlantas || this.idsFor(profile).includes(saved))
-      ? saved : (profile.accesoTodasPlantas ? null : profile.plantaIdPrincipal);
+    const { activePlantId, savedIsValid } = resolveActivePlantId(profile, visible, saved);
+    if (saved && !savedIsValid) localStorage.removeItem(this.storageKey);
     this.stateSubject.next({ ready: true, profile, plants: visible, activePlantId });
   }
 

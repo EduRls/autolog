@@ -73,9 +73,9 @@
   </div>
   <label class="plant-context" *ngIf="plantState.ready && plantState.plants.length">
     <span>Contexto</span>
-    <select [value]="plantState.activePlantId || ''" (change)="onPlantChange($event)">
-      <option *ngIf="plantScope.isGlobal()" value="">Todas las plantas</option>
-      <option *ngFor="let plant of plantState.plants" [value]="plant.id">{{ plantOptionLabel(plant.id) }}</option>
+    <select (change)="onPlantChange($event)" aria-label="Contexto de planta">
+      <option *ngIf="plantScope.isGlobal()" value="" [selected]="!plantState.activePlantId">Todas las plantas</option>
+      <option *ngFor="let plant of plantState.plants" [value]="plant.id" [selected]="plant.id === plantState.activePlantId">{{ plantOptionLabel(plant.id) }}</option>
     </select>
   </label>
   <button class="topbar-profile" type="button" (click)="rToMiPerfil()" title="Mi perfil">

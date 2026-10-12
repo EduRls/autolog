@@ -12,17 +12,27 @@ describe('EditarEventoComponent', () => {
   let component: EditarEventoComponent;
   let fixture: ComponentFixture<EditarEventoComponent>;
   let initialize: jasmine.Spy;
+  let plantScope: any;
+  let activePlantId: string | null = null;
   let loading: { present: jasmine.Spy; dismiss: jasmine.Spy };
 
   async function create(getAutos: () => any = () => of([])) {
     initialize = jasmine.createSpy('initialize').and.resolveTo();
+    const plants = [{ id: 'planta-z', nombre: 'Planta Zacatecas' }];
+    plantScope = {
+      initialize,
+      getActivePlantId: jasmine.createSpy('getActivePlantId').and.returnValue(activePlantId),
+      snapshot: () => ({ plants }),
+      isGlobal: () => true,
+      setActivePlant: jasmine.createSpy('setActivePlant'),
+    };
     loading = { present: jasmine.createSpy('present').and.resolveTo(), dismiss: jasmine.createSpy('dismiss').and.resolveTo(true) };
     await TestBed.configureTestingModule({
       imports: [IonicModule.forRoot(), EditarEventoComponent],
       providers: [
         provideRouter([]),
         ...componentTestProviders(),
-        { provide: PlantScopeService, useValue: { initialize } },
+        { provide: PlantScopeService, useValue: plantScope },
         { provide: FirebaseService, useValue: { getAutos: jasmine.createSpy('getAutos').and.callFake(getAutos), getArticulos: () => of([]) } },
         { provide: LoadingController, useValue: { create: jasmine.createSpy('create').and.resolveTo(loading) } },
       ],
@@ -86,5 +96,15 @@ describe('EditarEventoComponent', () => {
     await create(() => throwError(() => new Error('PLANT_CONTEXT_REQUIRED')));
     expect(component.autosEstado).toBe('error');
     expect(component.autosMensaje).toContain('planta asignada');
+  });
+  it('keeps only the service unit when the active plant has no units and can switch to all plants', async () => {
+    activePlantId = 'planta-z';
+    await create(() => of([]));
+    expect(component.autosEstado).toBe('listo');
+    expect(component.autos.map(auto => auto.id)).toEqual(['u1']);
+    expect(component.puedeVerTodas).toBeTrue();
+    component.verTodasLasPlantas();
+    expect(plantScope.setActivePlant).toHaveBeenCalledWith(null);
+    activePlantId = null;
   });
 });

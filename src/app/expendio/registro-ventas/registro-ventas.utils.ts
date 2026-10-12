@@ -47,3 +47,36 @@ export const formatSaleDate = (value: Date | null): string => value ? new Intl.D
 }).format(value).replace(',', '') : '—';
 export const formatLiters = (value: number | null): string => value === null ? '—' : `${new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} L`;
 export const formatMxn = (value: number | null): string => value === null ? '—' : new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
+
+/** Día (dd/mm/aaaa) en hora de México. */
+export const formatSaleDay = (value: Date | null): string => value ? new Intl.DateTimeFormat('es-MX', {
+  timeZone: SALES_TIME_ZONE, day: '2-digit', month: '2-digit', year: 'numeric'
+}).format(value) : '—';
+
+const timeFormat = (withSeconds: boolean) => new Intl.DateTimeFormat('es-MX', {
+  timeZone: SALES_TIME_ZONE, hour: '2-digit', minute: '2-digit', ...(withSeconds ? { second: '2-digit' } : {}), hour12: false
+});
+
+/**
+ * Hora de la venta (HH:mm). Si el ticket trae la hora con segundos y coincide
+ * en el minuto con la fecha de la venta, se muestra con segundos.
+ */
+export const formatSaleTime = (sale: Date | null, ticket: Date | null = null): string => {
+  if (!sale) return '';
+  const minute = timeFormat(false);
+  if (ticket && minute.format(ticket) === minute.format(sale) && formatSaleDay(ticket) === formatSaleDay(sale)) {
+    return timeFormat(true).format(ticket);
+  }
+  return minute.format(sale);
+};
+
+export type PaymentTone = 'cash' | 'transfer' | 'credit' | 'other';
+
+/** Color de la etiqueta de forma de pago (sin acentos ni mayúsculas). */
+export function paymentTone(label: string | null): PaymentTone {
+  const key = (label ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  if (key.startsWith('efectivo') || key === 'contado') return 'cash';
+  if (key.startsWith('transfer')) return 'transfer';
+  if (key.startsWith('credit') || key.includes('tarjeta')) return 'credit';
+  return 'other';
+}

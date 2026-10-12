@@ -32,16 +32,63 @@ apx-chart { display: block; width: 100%; max-width: 100%; overflow: hidden; }
 :host ::ng-deep .chart-tooltip strong { margin-bottom: 3px; }
 .table-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .table-heading h3 { margin: 0; font-size: 15px; }.table-heading p { margin: 3px 0 0; color: var(--autolog-text-secondary); font-size: 11px; }
-.table-heading select { min-width: 76px; }.table-container { max-height: min(62vh, 720px); }table { min-width: 1050px; }
-.folio { max-width: 180px; font-weight: 600; }.truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.numeric { text-align: right; white-space: nowrap; }
 .table-skeleton { display: grid; gap: 12px; }.table-skeleton ion-skeleton-text { height: 42px; margin: 0; }
 .state-panel { display: grid; place-items: center; min-height: 240px; padding: 28px; color: var(--autolog-text-secondary); text-align: center; }
 .state-panel ion-icon { font-size: 34px; }.state-panel h3 { margin: 10px 0 4px; color: var(--autolog-text); font-size: 15px; }.state-panel p { margin: 0; font-size: 12px; }
 @media (max-width: 1100px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); }.filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.filter-actions { justify-content: flex-end; }.charts-section { grid-template-columns: 1fr; }.charts-grid { display: contents; } }
 @media (max-width: 600px) { .metrics-grid { grid-template-columns: 1fr; }.filter-card, .table-card, .chart-card { padding: 14px; }.filter-grid { grid-template-columns: 1fr; }.filter-actions { display: grid; grid-template-columns: 1fr 1fr; }.presets { display: grid; grid-template-columns: 1fr 1fr; }.page-toolbar ion-button { width: 100%; }.table-heading { align-items: end; }.metric-card { min-height: 92px; }:host ::ng-deep .apexcharts-legend { position: relative !important; }.chart-skeleton { height: 300px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
-.clave-web code { font-size: 12px; }
-.clave-ticket { display: block; margin-top: 2px; font-size: 11px; color: var(--autolog-text-secondary); }
-.folio-temporal { display: block; margin-top: 2px; font-weight: 400; font-size: 11px; color: var(--autolog-text-secondary); }
-.pending { color: var(--autolog-text-secondary); font-size: 12px; }
-.map-link { font-weight: 600; }
+
+/* ───────────── Tabla de resultados ───────────── */
+.table-heading select { min-width: 76px; }
+.sales-table-wrap { max-height: min(66vh, 760px); border-radius: 12px; box-shadow: 0 1px 2px rgba(16, 24, 40, .04); }
+.sales-table { min-width: 1020px; font-size: 13px; }
+.sales-table th { position: sticky; top: 0; z-index: 2; padding: 12px 14px; background: #f4f7fb; border-bottom: 1px solid var(--autolog-border); box-shadow: 0 1px 0 var(--autolog-border); }
+.sales-table td { padding: 11px 14px; background: #fff; border-bottom: 1px solid #edf1f5; transition: background-color .12s ease; }
+.sales-table tbody tr:nth-child(even) td { background: #fafbfd; }
+.sales-table tbody tr:hover td { background: var(--autolog-primary-soft); }
+.sales-table small { display: block; margin-top: 2px; font-size: 11px; line-height: 1.3; color: var(--autolog-text-secondary); }
+.numeric { text-align: right; white-space: nowrap; }
+.truncate { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Folio fijo al desplazar horizontalmente */
+.col-folio { position: sticky; left: 0; z-index: 1; min-width: 170px; box-shadow: 1px 0 0 var(--autolog-border); }
+.sales-table th.col-folio { z-index: 3; }
+.folio-main { font-weight: 700; color: var(--autolog-text); letter-spacing: .01em; }
+.folio-temporal { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-weight: 400; }
+
+.col-date { white-space: nowrap; }
+.date-main { font-weight: 600; }
+.date-time { font-variant-numeric: tabular-nums; }
+.col-client { max-width: 230px; }
+.client-main { display: block; font-weight: 500; max-width: 220px; }
+.client-company { max-width: 220px; }
+.amount { font-weight: 700; color: var(--autolog-text); }
+
+/* Etiquetas de forma de pago y estados */
+.chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1.4; white-space: nowrap; color: #475467; background: #eef1f6; }
+.chip-cash { color: #0b7a4b; background: var(--autolog-success-soft); }
+.chip-transfer { color: #1d4ed8; background: var(--autolog-primary-soft); }
+.chip-credit { color: #9a6700; background: var(--autolog-warning-soft); }
+.chip-warn { padding: 1px 8px; font-size: 10px; color: #9a6700; background: var(--autolog-warning-soft); }
+
+/* Claves */
+.clave-web { white-space: nowrap; }
+.key-chip { display: inline-block; padding: 3px 8px; border: 1px solid var(--autolog-border); border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--autolog-text); background: #f8fafc; }
+.key-pending { border-style: dashed; font-family: inherit; font-weight: 500; letter-spacing: 0; color: var(--autolog-text-secondary); background: transparent; }
+.clave-ticket code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--autolog-text); }
+.pending { color: var(--autolog-text-muted); font-size: 12px; }
+
+/* Mapa */
+.col-map { white-space: nowrap; text-align: center; }
+.sales-table th.col-map { text-align: center; }
+.map-link { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid var(--autolog-border); border-radius: 999px; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--autolog-primary); background: #fff; transition: background-color .12s ease, border-color .12s ease; }
+.map-link ion-icon { font-size: 14px; }
+.map-link:hover, .map-link:focus-visible { border-color: var(--autolog-primary); background: var(--autolog-primary-soft); outline: none; }
+
+@media (max-width: 600px) {
+  .sales-table-wrap { max-height: 70vh; }
+  .sales-table td, .sales-table th { padding: 10px 11px; }
+  .col-folio { min-width: 150px; }
+}
+@media (prefers-reduced-motion: reduce) { .sales-table td, .map-link { transition: none; } }

@@ -1,6 +1,6 @@
 import { Timestamp } from '@angular/fire/firestore';
 import { mapGaslinkSale, safeDate } from '../../services/gaslink-sales/gaslink-sales.models';
-import { customRange, formatLiters, formatMxn, formatSaleDate, presetRange } from './registro-ventas.utils';
+import { customRange, formatLiters, formatMxn, formatSaleDate, formatSaleDay, formatSaleTime, paymentTone, presetRange } from './registro-ventas.utils';
 
 describe('RegistroVentas utilities', () => {
   it('maps Firestore documents defensively and preserves duplicate folios by id', () => {
@@ -51,5 +51,29 @@ describe('RegistroVentas utilities', () => {
     expect(range?.start.toISOString()).toBe('2026-08-01T06:00:00.000Z');
     expect(range?.end.toISOString()).toBe('2026-08-15T06:00:00.000Z');
     expect(customRange('2026-08-15', '2026-08-14')).toBeNull();
+  });
+
+  it('splits the sale date in day and time in Mexico City', () => {
+    const sale = new Date('2026-10-09T00:36:00Z');
+    expect(formatSaleDay(sale)).toBe('08/10/2026');
+    expect(formatSaleTime(sale)).toBe('18:36');
+    expect(formatSaleDay(null)).toBe('—');
+    expect(formatSaleTime(null)).toBe('');
+  });
+
+  it('shows seconds only when the ticket time matches the sale minute', () => {
+    const sale = new Date('2026-10-08T23:51:00Z');
+    expect(formatSaleTime(sale, new Date('2026-10-08T23:51:47Z'))).toBe('17:51:47');
+    expect(formatSaleTime(sale, new Date('2026-10-08T23:20:23Z'))).toBe('17:51');
+    expect(formatSaleTime(sale, null)).toBe('17:51');
+  });
+
+  it('classifies the payment label ignoring accents and case', () => {
+    expect(paymentTone('Efectivo')).toBe('cash');
+    expect(paymentTone('Transferencia')).toBe('transfer');
+    expect(paymentTone('Crédito')).toBe('credit');
+    expect(paymentTone('CREDITO / Tarjeta')).toBe('credit');
+    expect(paymentTone('Otro')).toBe('other');
+    expect(paymentTone(null)).toBe('other');
   });
 });

@@ -3,7 +3,7 @@ import { ApexAxisChartSeries, ApexChart, ApexDataLabels, ApexGrid, ApexLegend, A
 import { ExcelService, SalesExcelReport } from '../../services/excel/excel.service';
 import { GaslinkSale, GaslinkSalesFilters, GaslinkSalesSummary } from '../../services/gaslink-sales/gaslink-sales.models';
 import { GaslinkSalesService } from '../../services/gaslink-sales/gaslink-sales.service';
-import { PeriodPreset, SALES_TIME_ZONE, customRange, formatLiters, formatMxn, formatSaleDate, presetRange } from './registro-ventas.utils';
+import { PeriodPreset, SALES_TIME_ZONE, customRange, formatLiters, formatMxn, formatSaleDate, formatSaleDay, formatSaleTime, paymentTone, presetRange } from './registro-ventas.utils';
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error';
 type DraftFilters = { startDate: string; endDate: string; folio: string; vendedor: string };
@@ -72,6 +72,9 @@ export class RegistroVentasPage implements OnInit {
   paymentPointCount = 0;
   appliedDateRange = { startDate: '', endDate: '' };
   readonly formatDate = formatSaleDate;
+  readonly formatDay = formatSaleDay;
+  readonly formatTime = formatSaleTime;
+  readonly paymentTone = paymentTone;
   readonly formatLiters = formatLiters;
   readonly formatMxn = formatMxn;
   readonly integer = new Intl.NumberFormat('es-MX');

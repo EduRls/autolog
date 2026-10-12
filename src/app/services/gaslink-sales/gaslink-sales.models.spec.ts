@@ -26,6 +26,15 @@ describe('mapGaslinkSale enrichment fields', () => {
     expect(plain.esTemporalApp).toBeFalse();
   });
 
+  it('exposes the printed-ticket key and the capture time with seconds', () => {
+    const sale = mapGaslinkSale('a', { folio: 'GL-2026-V025-04266', claveWebTicket: '8-175147', fechaTicket: new Date('2026-10-08T23:51:47Z') });
+    expect(sale.claveWebTicket).toBe('8-175147');
+    expect(sale.fechaTicket?.toISOString()).toBe('2026-10-08T23:51:47.000Z');
+    const plain = mapGaslinkSale('b', { folio: 'GL-1' });
+    expect(plain.claveWebTicket).toBeNull();
+    expect(plain.fechaTicket).toBeNull();
+  });
+
   it('no longer exposes fechaGeneracionArchivo', () => {
     expect('fechaGeneracionArchivo' in mapGaslinkSale('a', {})).toBeFalse();
   });

@@ -21,6 +21,10 @@ export interface GaslinkSale {
   mapsUrl: string | null;
   folioTemporal: string | null;
   esTemporalApp: boolean;
+  /** Clave del ticket impreso en el punto de venta (`día-HHMMSS`), derivada del folio temporal. */
+  claveWebTicket: string | null;
+  /** Hora de captura con segundos (del folio temporal). */
+  fechaTicket: Date | null;
 }
 
 export interface GaslinkSalesFilters {
@@ -76,6 +80,7 @@ export function mapGaslinkSale(id: string, data: Record<string, unknown>): Gasli
     sourceHash: text(data['sourceHash']), duplicateIndex: number(data['duplicateIndex']),
     primeraSincronizacion: safeDate(data['primeraSincronizacion']), ultimaSincronizacion: safeDate(data['ultimaSincronizacion']),
     fechaExtraccion: safeDate(data['fechaExtraccion']), claveWeb: text(data['claveWeb']), mapsUrl: hasValidLocation(data['ubicacion']) ? safeMapsUrl(data['mapsUrl']) : null,
-    folioTemporal: text(data['folioTemporal']), esTemporalApp: data['esTemporalApp'] === true
+    folioTemporal: text(data['folioTemporal']), esTemporalApp: data['esTemporalApp'] === true,
+    claveWebTicket: text(data['claveWebTicket']), fechaTicket: safeDate(data['fechaTicket'])
   };
 }

@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
+import { Subscription, from, switchMap } from 'rxjs';
+import { PlantScopeService } from 'src/app/services/plants/plant-scope.service';
 import { FirebaseService } from 'src/app/services/firebase/firebase.service';
 import { AgregarArticuloComponent } from '../agregar-articulo/agregar-articulo.component';
 
@@ -12,9 +14,14 @@ import { AgregarArticuloComponent } from '../agregar-articulo/agregar-articulo.c
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, ReactiveFormsModule]
 })
-export class AgregarEventoComponent implements OnInit {
+export class AgregarEventoComponent implements OnInit, OnDestroy {
   eventoNuevo: FormGroup;
   autos: any[] = [];
+  /** Estado de la lista de unidades: el selector no se habilita hasta que los permisos y las unidades estén listos. */
+  autosEstado: 'cargando' | 'listo' | 'vacio' | 'error' = 'cargando';
+  autosMensaje = '';
+  private autosSubscription?: Subscription;
+  private cargaUnidades?: HTMLIonLoadingElement;
   buscarArticulo: string = ''; // Texto ingresado en el input
   articulos: any[] = []; // Lista de artículos obtenidos del backend
   articulosFiltrados: any[] = []; // Artículos que coinciden con la búsqueda
@@ -29,12 +36,11 @@ export class AgregarEventoComponent implements OnInit {
     private loadcontroller: LoadingController,
     private toastController: ToastController,
     private fb: FormBuilder,
-    private firebaseService: FirebaseService
+    private firebaseService: FirebaseService,
+    private plantScope: PlantScopeService
   ) { }
 
   ngOnInit() {
-    this.getAutos();
-    this.getArticulos();
     this.eventoNuevo = this.fb.group({
       unidad: ['', Validators.required],
       kilometraje: ['', [Validators.required, Validators.min(1)]],
@@ -44,6 +50,30 @@ export class AgregarEventoComponent implements OnInit {
       fecha: [new Date().toISOString().split('T')[0], Validators.required],
       articulos: this.fb.array([])
     });
+    this.cargarAutos();
+    void this.mostrarCargaUnidades();
+    this.getArticulos();
+  }
+
+  ngOnDestroy() {
+    this.autosSubscription?.unsubscribe();
+    void this.ocultarCargaUnidades();
+  }
+
+  /** Indicador de carga (máx. 4 s): se cierra en cuanto llegan las unidades o hay error. */
+  private async mostrarCargaUnidades() {
+    const loading = await this.loadcontroller.create({
+      message: 'Cargando unidades…', duration: 4000, backdropDismiss: false
+    });
+    if (this.autosEstado !== 'cargando') return;
+    this.cargaUnidades = loading;
+    await loading.present();
+  }
+
+  private async ocultarCargaUnidades() {
+    const loading = this.cargaUnidades;
+    this.cargaUnidades = undefined;
+    if (loading) await loading.dismiss().catch(() => undefined);
   }
 
   get articulosFormArray(): FormArray {
@@ -60,11 +90,41 @@ export class AgregarEventoComponent implements OnInit {
     });
   }
 
-  async getAutos() {
-    this.firebaseService.getAutos().subscribe({
-      next: (data) => { this.autos = data; },
-      error: (error) => { console.log('Error getting documents', error); }
+  /**
+   * Carga las unidades de la planta del usuario. Primero espera a que se
+   * resuelva el perfil/permisos (PlantScopeService) y solo entonces consulta,
+   * así el selector nunca se abre vacío por llegar antes que los permisos.
+   */
+  cargarAutos() {
+    this.autosEstado = 'cargando';
+    this.autosMensaje = '';
+    this.autosSubscription?.unsubscribe();
+    this.autosSubscription = from(this.plantScope.initialize()).pipe(
+      switchMap(() => this.firebaseService.getAutos())
+    ).subscribe({
+      next: (data) => {
+        this.autos = [...data].sort((a, b) =>
+          String(a.unidad ?? '').localeCompare(String(b.unidad ?? ''), 'es-MX', { numeric: true }));
+        this.autosEstado = this.autos.length ? 'listo' : 'vacio';
+        this.autosMensaje = this.autos.length ? '' : 'No hay unidades registradas en tu planta.';
+        void this.ocultarCargaUnidades();
+      },
+      error: (error) => {
+        console.error('Error getting documents', error);
+        this.autos = [];
+        this.autosEstado = 'error';
+        this.autosMensaje = error?.message === 'PLANT_CONTEXT_REQUIRED'
+          ? 'Tu usuario no tiene una planta asignada. Contacta al administrador.'
+          : 'No fue posible cargar las unidades.';
+        void this.ocultarCargaUnidades();
+      }
     });
+  }
+
+  get placeholderUnidad(): string {
+    if (this.autosEstado === 'cargando') return 'Cargando unidades…';
+    if (this.autosEstado === 'listo') return 'Selecciona una unidad';
+    return 'Sin unidades disponibles';
   }
 
   async cancel() {
@@ -152,6 +212,10 @@ export class AgregarEventoComponent implements OnInit {
         const unidadSeleccionada = this.autos.find(
           (d: any) => d.id === this.eventoNuevo.get('unidad')?.value
         );
+        if (!unidadSeleccionada) {
+          this.presentToast('La unidad seleccionada ya no está disponible. Vuelve a elegirla.', 'bottom', 'warning');
+          return;
+        }
         const unidad = {
           id: unidadSeleccionada.id,
           unidad: unidadSeleccionada.unidad

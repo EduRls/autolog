@@ -34,7 +34,7 @@ export type ChartOptions = {
 export class HomePage implements OnInit {
 
   public userRole: string = ''
-  canWrite = true;
+  canWrite = false;
   canDelete = false;
   public autos: any = [];
   estadoSeleccionado: string = '';
@@ -77,7 +77,8 @@ export class HomePage implements OnInit {
   ngOnInit() {
     void this.plantScope.initialize();
     this.plantScope.state$.subscribe(state => {
-      this.canWrite = !this.plantScope.isReadOnly();
+      // Sin perfil resuelto no se permite escribir (antes quedaba habilitado por defecto).
+      this.canWrite = state.ready && Boolean(state.profile) && !this.plantScope.isReadOnly();
       this.userRole = String(state.profile?.rol || '').toLowerCase();
       this.canDelete = this.canWrite && ['admin', 'planta'].includes(this.userRole);
     });
@@ -341,6 +342,9 @@ export class HomePage implements OnInit {
   // EVENTOS
   // Agregar evento
   async agregarEvento() {
+    // Asegura que el perfil y la planta estén resueltos antes de abrir el formulario.
+    await this.plantScope.initialize();
+    this.canWrite = Boolean(this.plantScope.snapshot().profile) && !this.plantScope.isReadOnly();
     if (!this.canWrite) return;
     const modalAddEvento = await this.modalController.create({
       component: AgregarEventoComponent,

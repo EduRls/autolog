@@ -396,6 +396,8 @@ export class HomePage implements OnInit {
 
   // Editar un evento
   async editarEvento(item: any) {
+    await this.plantScope.initialize();
+    this.canWrite = Boolean(this.plantScope.snapshot().profile) && !this.plantScope.isReadOnly();
     if (!this.canWrite) return;
     const modalEditEvento = await this.modalController.create({
       component: EditarEventoComponent,

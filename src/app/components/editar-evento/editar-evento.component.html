@@ -20,9 +20,14 @@
 
         <div class="field-group">
           <label>Unidad <span aria-hidden="true">*</span></label>
-          <ion-select placeholder="Selecciona una unidad" fill="outline" formControlName="unidad" aria-label="Unidad">
+          <ion-select [placeholder]="placeholderUnidad" fill="outline" formControlName="unidad" aria-label="Unidad" [attr.aria-busy]="autosEstado === 'cargando'">
             <ion-select-option *ngFor="let item of autos" [value]="item.id">{{ item.unidad }}</ion-select-option>
           </ion-select>
+          <ion-note *ngIf="autosEstado === 'cargando'" class="units-status">Validando permisos y cargando unidades…</ion-note>
+          <ion-note *ngIf="autosMensaje" color="danger" class="units-status" role="alert">
+            {{ autosMensaje }}
+            <a href="javascript:void(0)" *ngIf="autosEstado === 'error'" (click)="cargarAutos()">Reintentar</a>
+          </ion-note>
           <ion-note *ngIf="editarEventoRegistro.get('unidad')?.invalid && editarEventoRegistro.get('unidad')?.touched">Selecciona una unidad.</ion-note>
         </div>
 
@@ -107,7 +112,7 @@
     </div>
     <div class="footer-actions">
       <ion-button type="button" fill="outline" color="medium" (click)="cancel()">Cancelar</ion-button>
-      <ion-button type="submit" color="primary"><ion-icon slot="start" name="checkmark-outline"></ion-icon>Guardar cambios</ion-button>
+      <ion-button type="submit" color="primary" [disabled]="autosEstado === 'cargando'"><ion-icon slot="start" name="checkmark-outline"></ion-icon>Guardar cambios</ion-button>
     </div>
   </ion-footer>
 </form>

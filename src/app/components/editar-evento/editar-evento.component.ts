@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
+import { Subscription, from, switchMap } from 'rxjs';
+import { PlantScopeService } from 'src/app/services/plants/plant-scope.service';
 import { FirebaseService } from 'src/app/services/firebase/firebase.service';
 import { AgregarArticuloComponent } from '../agregar-articulo/agregar-articulo.component';
 
@@ -12,11 +14,16 @@ import { AgregarArticuloComponent } from '../agregar-articulo/agregar-articulo.c
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, ReactiveFormsModule]
 })
-export class EditarEventoComponent implements OnInit {
+export class EditarEventoComponent implements OnInit, OnDestroy {
   @Input() evento: any;
 
   editarEventoRegistro: FormGroup;
   autos: any[] = [];
+  /** El selector no se habilita hasta que los permisos y las unidades estén listos. */
+  autosEstado: 'cargando' | 'listo' | 'vacio' | 'error' = 'cargando';
+  autosMensaje = '';
+  private autosSubscription?: Subscription;
+  private cargaUnidades?: HTMLIonLoadingElement;
   buscarArticulo = '';
   articulos: any[] = [];
   articulosFiltrados: any[] = [];
@@ -28,12 +35,11 @@ export class EditarEventoComponent implements OnInit {
     private loadcontroller: LoadingController,
     private toastController: ToastController,
     private fb: FormBuilder,
-    private firebaseService: FirebaseService
+    private firebaseService: FirebaseService,
+    private plantScope: PlantScopeService
   ) { }
 
   ngOnInit() {
-    this.getAutos();
-    this.getArticulos();
     this.editarEventoRegistro = this.fb.group({
       id: [this.evento.id, Validators.required],
       unidad: [this.evento.unidad.id, Validators.required],
@@ -53,17 +59,77 @@ export class EditarEventoComponent implements OnInit {
     });
 
     this.calcularTotales();
+    this.cargarAutos();
+    void this.mostrarCargaUnidades();
+    this.getArticulos();
+  }
+
+  ngOnDestroy() {
+    this.autosSubscription?.unsubscribe();
+    void this.ocultarCargaUnidades();
+  }
+
+  /** Indicador de carga (máx. 4 s): se cierra en cuanto llegan las unidades o hay error. */
+  private async mostrarCargaUnidades() {
+    const loading = await this.loadcontroller.create({
+      message: 'Cargando unidades…', duration: 4000, backdropDismiss: false
+    });
+    if (this.autosEstado !== 'cargando') return;
+    this.cargaUnidades = loading;
+    await loading.present();
+  }
+
+  private async ocultarCargaUnidades() {
+    const loading = this.cargaUnidades;
+    this.cargaUnidades = undefined;
+    if (loading) await loading.dismiss().catch(() => undefined);
   }
 
   get articulosFormArray(): FormArray {
     return this.editarEventoRegistro.get('articulos') as FormArray;
   }
 
-  async getAutos() {
-    this.firebaseService.getAutos().subscribe({
-      next: (data) => { this.autos = data; },
-      error: (error) => { console.error('Error getting documents', error); }
+  /**
+   * Espera a que se resuelvan perfil y planta antes de consultar las unidades,
+   * para que el selector no quede vacío. Conserva la unidad del propio servicio
+   * aunque ya no aparezca en la lista (p. ej. unidad dada de baja).
+   */
+  cargarAutos() {
+    this.autosEstado = 'cargando';
+    this.autosMensaje = '';
+    this.autosSubscription?.unsubscribe();
+    this.autosSubscription = from(this.plantScope.initialize()).pipe(
+      switchMap(() => this.firebaseService.getAutos())
+    ).subscribe({
+      next: (data) => {
+        const lista = [...data];
+        const actual = this.evento?.unidad;
+        if (actual?.id && !lista.some(auto => auto.id === actual.id)) {
+          // Entrada solo para mostrarla: no tiene datos completos del auto.
+          lista.push({ id: actual.id, unidad: actual.unidad, sinDatos: true });
+        }
+        this.autos = lista.sort((a, b) =>
+          String(a.unidad ?? '').localeCompare(String(b.unidad ?? ''), 'es-MX', { numeric: true }));
+        this.autosEstado = this.autos.length ? 'listo' : 'vacio';
+        this.autosMensaje = this.autos.length ? '' : 'No hay unidades registradas en tu planta.';
+        void this.ocultarCargaUnidades();
+      },
+      error: (error) => {
+        console.error('Error getting documents', error);
+        this.autos = [];
+        this.autosEstado = 'error';
+        this.autosMensaje = error?.message === 'PLANT_CONTEXT_REQUIRED'
+          ? 'Tu usuario no tiene una planta asignada. Contacta al administrador.'
+          : 'No fue posible cargar las unidades.';
+        void this.ocultarCargaUnidades();
+      }
     });
+  }
+
+  get placeholderUnidad(): string {
+    if (this.autosEstado === 'cargando') return 'Cargando unidades…';
+    if (this.autosEstado === 'listo') return 'Selecciona una unidad';
+    return 'Sin unidades disponibles';
   }
 
   async getArticulos() {
@@ -131,6 +197,10 @@ export class EditarEventoComponent implements OnInit {
       try {
         const unidadSeleccionadaId = this.editarEventoRegistro.get('unidad')?.value;
         const unidadSeleccionada = this.autos.find((auto: any) => auto.id === unidadSeleccionadaId);
+        if (!unidadSeleccionada) {
+          this.presentToast('La unidad seleccionada ya no está disponible. Vuelve a elegirla.', 'bottom', 'warning');
+          return;
+        }
   
         const updatedEvento = {
           ...this.editarEventoRegistro.value,
@@ -142,6 +212,8 @@ export class EditarEventoComponent implements OnInit {
         };
   
         await this.firebaseService.updateEvento(updatedEvento).then(() => {
+          // Si la unidad ya no está en la lista solo se muestra; no se actualiza el auto.
+          if (unidadSeleccionada.sinDatos) return;
           unidadSeleccionada.km_actual = this.editarEventoRegistro.get('kilometraje').value;
           const unidadActualizada = this.verificarDatosIniciales(unidadSeleccionada);
   

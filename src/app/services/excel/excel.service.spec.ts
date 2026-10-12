@@ -24,9 +24,9 @@ describe('ExcelService', () => {
     const workbook = service.buildSalesWorkbook({ sales: [sale], summary: { count: 1, liters: 10.5, total: 200, average: 200 }, startDate: '2026-08-14', endDate: '2026-08-14', vendedor: 'R 39', folio: 'Todos' });
     expect(workbook.SheetNames).toEqual(['Resumen', '14-08-2026']);
     const sheet = workbook.Sheets['14-08-2026'];
-    expect(sheet['C4'].t).toBe('d'); expect(sheet['H4'].t).toBe('n'); expect(sheet['I4'].t).toBe('n');
+    expect(sheet['D4'].t).toBe('d'); expect(sheet['J4'].t).toBe('n'); expect(sheet['K4'].t).toBe('n');
     expect(sheet['A3'].s.fill.fgColor.rgb).toBe('101828'); expect(sheet['A3'].s.font.color.rgb).toBe('FFFFFF');
-    expect(sheet['!autofilter'].ref).toBe('A3:J4'); expect(sheet['H5'].f).toBe('SUM(H4:H4)'); expect(sheet['I5'].f).toBe('SUM(I4:I4)');
+    expect(sheet['!autofilter'].ref).toBe('A3:L4'); expect(sheet['J5'].f).toBe('SUM(J4:J4)'); expect(sheet['K5'].f).toBe('SUM(K4:K4)');
   });
 
   it('separates sales into chronological sheets using the Mexico City day', () => {
@@ -43,8 +43,8 @@ describe('ExcelService', () => {
     expect(workbook.SheetNames).toEqual(['Resumen', '14-08-2026', '15-08-2026']);
     expect(workbook.Sheets['14-08-2026']['A4'].v).toBe('GL-1');
     expect(workbook.Sheets['15-08-2026']['A4'].v).toBe('GL-2');
-    expect(workbook.Sheets['14-08-2026']['G5'].v).toBe(200);
-    expect(workbook.Sheets['15-08-2026']['G5'].v).toBe(300);
+    expect(workbook.Sheets['14-08-2026']['I5'].v).toBe(200);
+    expect(workbook.Sheets['15-08-2026']['I5'].v).toBe(300);
   });
   describe('clave web and map columns', () => {
     const sale = (id: string, overrides: Partial<GaslinkSale>): GaslinkSale => ({
@@ -59,8 +59,8 @@ describe('ExcelService', () => {
 
     it('lists the headers with Clave web next to Folio and Mapa last', () => {
       const sheet = build([sale('1', {})]);
-      const headers = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map(column => sheet[`${column}3`].v);
-      expect(headers).toEqual(['Folio', 'Clave web', 'Fecha', 'Empresa', 'Vendedor', 'Cliente', 'Forma de pago', 'Litros', 'Total (MXN)', 'Mapa']);
+      const headers = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].map(column => sheet[`${column}3`].v);
+      expect(headers).toEqual(['Folio', 'Clave web', 'Clave ticket', 'Fecha', 'Hora (con segundos)', 'Empresa', 'Vendedor', 'Cliente', 'Forma de pago', 'Litros', 'Total (MXN)', 'Mapa']);
     });
 
     it('writes the clave web when present and Pendiente when missing', () => {
@@ -73,17 +73,27 @@ describe('ExcelService', () => {
     it('links the map when there is a location and says Sin ubicación otherwise', () => {
       const url = 'https://www.google.com/maps?q=22.7709,-102.5832';
       const sheet = build([sale('1', { mapsUrl: url }), sale('2', { mapsUrl: null })]);
-      expect(sheet['J4'].v).toBe('Mapa');
-      expect(sheet['J4'].l.Target).toBe(url);
-      expect(sheet['J5'].v).toBe('Sin ubicación');
-      expect(sheet['J5'].l).toBeUndefined();
+      expect(sheet['L4'].v).toBe('Mapa');
+      expect(sheet['L4'].l.Target).toBe(url);
+      expect(sheet['L5'].v).toBe('Sin ubicación');
+      expect(sheet['L5'].l).toBeUndefined();
     });
 
     it('keeps the totals formulas aligned with the new Litros and Total columns', () => {
       const sheet = build([sale('1', {}), sale('2', {})]);
-      expect(sheet['H6'].f).toBe('SUM(H4:H5)');
-      expect(sheet['I6'].f).toBe('SUM(I4:I5)');
-      expect(sheet['G6'].v).toBe(100);
+      expect(sheet['J6'].f).toBe('SUM(J4:J5)');
+      expect(sheet['K6'].f).toBe('SUM(K4:K5)');
+      expect(sheet['I6'].v).toBe(100);
+    });
+    it('writes the printed-ticket key and the time with seconds, or Sin dato', () => {
+      const sheet = build([
+        sale('1', { claveWebTicket: '8-175147', fechaTicket: new Date('2026-10-08T23:51:47Z') }),
+        sale('2', { claveWebTicket: null, fechaTicket: null })
+      ]);
+      expect(sheet['C4'].v).toBe('8-175147');
+      expect(sheet['E4'].v).toBe('17:51:47');
+      expect(sheet['C5'].v).toBe('Sin dato');
+      expect(sheet['E5'].v).toBe('Sin dato');
     });
   });
 });
